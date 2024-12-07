@@ -16,7 +16,7 @@ namespace FastNoise2.Authoring
 		R32,
 	}
 
-	[CreateAssetMenu]
+	[CreateAssetMenu(fileName = "Noise Asset", menuName = "FastNoise2/Baked Noise")]
 	public class NoiseAsset : ScriptableObject
 	{
 		public FastNoiseGraph graph;

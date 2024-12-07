@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -21,7 +20,7 @@ namespace FastNoise2.Editor.NoiseToolProxy
 	///
 	public static class NoiseToolProxy
 	{
-		static async void ReadProcessNotifyNode()
+		static async Task ReadProcessNotifyNode()
 		{
 			while (NoiseToolProcess is { HasExited: false })
 			{
@@ -71,7 +70,7 @@ namespace FastNoise2.Editor.NoiseToolProxy
 				}
 			);
 
-			ReadProcessNotifyNode();
+			ReadProcessNotifyNode().Start();
 
 			return NoiseToolProcess;
 		}

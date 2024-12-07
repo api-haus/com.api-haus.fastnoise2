@@ -2,19 +2,20 @@
 
 Platform support:
 
-* Linux, Android
-* macos Universal
-* Windows
+* Linux x64, Android x64
+* macos Universal, macos Intel
+* Windows x64
 
 Feature support:
 
 * `NativeTextureXD<T>`
-* Burst/Jobs/IL2CPP compatible FN2 bindings
-* EditorProperty for FastNoiseGraph
-* Invoke NoiseTool from Unity
+* Burst/Jobs/IL2CPP compatible FastNoise2 bindings
+* Noise Graphs Editor support
+* Baked Noise Assets
 
 TODO:
 
-* Complete NoiseTool noise graphs Unity editor integration.
-* Complete FastNoise2 JobSystem preset API
+* Complete Noise Editor integration
+* All Texture dimensions, All Job types
 * Documentation, examples. See [Tests](./Tests) for usage examples.
+* NewSIMD branch migration
