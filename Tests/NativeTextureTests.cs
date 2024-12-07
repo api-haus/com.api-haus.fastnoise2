@@ -13,7 +13,7 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture2D()
 		{
-			using var nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+			using var nodeTree = FastNoise.FromEncodedNodeTree("Bg@AJZD/w==");
 
 			var texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
 			using var noiseTexture2D = new NativeTexture2D<float>(new int2(512, 512), Allocator.TempJob);

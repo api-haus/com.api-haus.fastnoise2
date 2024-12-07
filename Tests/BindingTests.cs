@@ -35,7 +35,7 @@ namespace FastNoise2.Tests
 			GenerateBitmap(maxSmooth, "testMetadata");
 
 			// Dunes
-			using var nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+			using var nodeTree = FastNoise.FromEncodedNodeTree("Bg@AJZD/w==");
 
 			// Encoded node trees can be invalid and return null
 			if (nodeTree != FastNoise.Invalid)

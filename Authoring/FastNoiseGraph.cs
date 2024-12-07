@@ -17,7 +17,7 @@ namespace FastNoise2.Authoring
 		public FixedString512Bytes Fixed512 => new(encodedGraph);
 		public FixedString4096Bytes Fixed4096 => new(encodedGraph);
 
-		[SerializeField] string encodedGraph = "DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==";
+		[SerializeField] string encodedGraph = "Bg@AJZD/w==";
 
 		public string EncodedValue => encodedGraph;
 
