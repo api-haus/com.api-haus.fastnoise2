@@ -70,7 +70,7 @@ namespace FastNoise2.Editor.NoiseToolProxy
 				}
 			);
 
-			ReadProcessNotifyNode().Start();
+			ReadProcessNotifyNode();
 
 			return NoiseToolProcess;
 		}
