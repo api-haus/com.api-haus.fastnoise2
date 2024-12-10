@@ -1,77 +1,35 @@
-using System;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using Unity.Burst;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Jobs;
-using Unity.Mathematics;
-using UnityEngine;
-
-namespace FastNoise2.Runtime.NativeTexture
+namespace FastNoise2.NativeTexture
 {
+	using System;
+	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
+	using Unity.Burst;
+	using Unity.Collections;
+	using Unity.Collections.LowLevel.Unsafe;
+	using Unity.Jobs;
+	using Unity.Mathematics;
+	using UnityEngine;
+
 	/// <summary>
 	/// Native Texture2D Wrapper.
 	/// </summary>
 	[DebuggerDisplay("Length = {RawTextureData.m_Length}")]
-	public struct NativeTexture2D<T> : INativeDisposable where T : unmanaged
+	public struct NativeTexture2D<T> : INativeTexture<int2, T>, INativeDisposable where T : unmanaged
 	{
-		#region Fields
+		#region Properties
 
-		[ReadOnly] [NativeDisableUnsafePtrRestriction]
-		readonly IntPtr TexturePtr;
-
-		[NativeDisableContainerSafetyRestriction]
-		internal NativeReference<float2> BoundsRef;
+		[field: NativeDisableContainerSafetyRestriction]
+		public NativeReference<ValueBounds<T>> BoundsRef { get; }
 
 		internal NativeArray<T> RawTextureData;
 
-		#endregion
-
-		#region AutoProperties
-
-		public readonly int2 Resolution;
+		[ReadOnly] [NativeDisableUnsafePtrRestriction]
+		readonly IntPtr texturePtr;
 
 		public readonly int Width => Resolution.x;
 		public readonly int Height => Resolution.y;
-
-		public readonly int Row1 => Width;
-
 		public readonly bool IsCreated => RawTextureData.IsCreated;
-
-		#endregion
-
-		#region Array Accessors
-
-		public int Length
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => RawTextureData.Length;
-		}
-
-		public T this[int x, int y]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => RawTextureData[y * Row1 + x];
-			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set => RawTextureData[y * Row1 + x] = value;
-		}
-
-		public T this[int2 coord]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => this[coord.x, coord.y];
-			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set => this[coord.x, coord.y] = value;
-		}
-
-		public T this[int index]
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => ReadPixel(index);
-			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set => RawTextureData[index] = value;
-		}
+		public readonly bool IsUnityTexture2DPointer => texturePtr == IntPtr.Zero;
 
 		#endregion
 
@@ -80,14 +38,14 @@ namespace FastNoise2.Runtime.NativeTexture
 		/// <summary>
 		/// Create NativeTexture2D From Texture2D.
 		/// </summary>
-		public NativeTexture2D(int2 resolution, Texture2D texture, Allocator allocator)
+		public NativeTexture2D(Texture2D texture, Allocator boundsAllocator)
 		{
-			Resolution = resolution;
-			TexturePtr = texture.GetNativeTexturePtr();
+			Resolution = new int2(texture.width, texture.height);
+			texturePtr = texture.GetNativeTexturePtr();
 			RawTextureData = texture.GetRawTextureData<T>();
-			BoundsRef = new NativeReference<float2>(
-				new float2(float.PositiveInfinity, float.NegativeInfinity),
-				allocator
+			BoundsRef = new NativeReference<ValueBounds<T>>(
+				new ValueBounds<T>(),
+				boundsAllocator
 			);
 		}
 
@@ -97,32 +55,55 @@ namespace FastNoise2.Runtime.NativeTexture
 		public NativeTexture2D(int2 resolution, Allocator allocator)
 		{
 			Resolution = resolution;
-			TexturePtr = IntPtr.Zero;
+			texturePtr = IntPtr.Zero;
 			RawTextureData = new NativeArray<T>(resolution.x * resolution.y, allocator);
-			BoundsRef = new NativeReference<float2>(
-				new float2(float.PositiveInfinity, float.NegativeInfinity),
+			BoundsRef = new NativeReference<ValueBounds<T>>(
+				new ValueBounds<T>(),
 				allocator
 			);
 		}
 
 		#endregion
 
-		#region NativeTexture API
+		#region INativeTexture API
 
-		public NativeArray<T> GetRawTextureData()
+		public int2 Resolution { get; }
+		public ValueBounds<T> Bounds => BoundsRef.Value;
+
+		public int Length
 		{
-			return RawTextureData;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => RawTextureData.Length;
 		}
 
-		public NativeReference<float2> GetBounds()
+		public T this[int index]
 		{
-			return BoundsRef;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => RawTextureData[index];
+			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set => RawTextureData[index] = value;
 		}
+
+		public T this[int2 coord]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => this[coord.ToIndex(Width)];
+			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set => this[coord.ToIndex(Width)] = value;
+		}
+
+		public T ReadPixel(int2 pixelCoord) =>
+			this[pixelCoord.ToIndex(Width)];
+
+		public T ReadPixel(int pixelIndex, out int2 coord) =>
+			this[coord = pixelIndex.ToCoord(Width)];
+
+		public NativeArray<T> AsNativeArray() => RawTextureData;
 
 		[BurstDiscard]
 		public Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
 		{
-			if (texture.GetNativeTexturePtr() != TexturePtr)
+			if (texture.GetNativeTexturePtr() != texturePtr)
 			{
 				var textureData = RawTextureData;
 				var writeableTextureMemory = texture.GetRawTextureData<T>();
@@ -134,36 +115,7 @@ namespace FastNoise2.Runtime.NativeTexture
 			return texture;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T ReadPixel(int pixelIndex)
-		{
-			return this[pixelIndex];
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public T ReadPixel(int pixelIndex, out int2 coord)
-		{
-			coord = new int2(
-				pixelIndex % Width,
-				pixelIndex / Width
-			);
-
-			return this[pixelIndex];
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryReadPixel(int pixelIndex, out int2 coord, out T pixel)
-		{
-			if (!(pixelIndex >= 0 && pixelIndex < Length))
-			{
-				pixel = default;
-				coord = default;
-				return false;
-			}
-
-			pixel = ReadPixel(pixelIndex, out coord);
-			return true;
-		}
+		public unsafe void* GetUnsafePtr() => RawTextureData.GetUnsafePtr();
 
 		#endregion
 
@@ -171,7 +123,7 @@ namespace FastNoise2.Runtime.NativeTexture
 
 		public void Dispose()
 		{
-			if (RawTextureData.IsCreated)
+			if (!IsUnityTexture2DPointer && RawTextureData.IsCreated)
 				RawTextureData.Dispose();
 			if (BoundsRef.IsCreated)
 				BoundsRef.Dispose();
@@ -182,19 +134,13 @@ namespace FastNoise2.Runtime.NativeTexture
 		{
 			public NativeTexture2D<T> Texture;
 
-			public void Execute()
-			{
-				Texture.Dispose();
-			}
+			public void Execute() => Texture.Dispose();
 		}
 
-		public JobHandle Dispose(JobHandle inputDeps)
+		public JobHandle Dispose(JobHandle inputDeps) => new DisposeJob
 		{
-			return new DisposeJob
-			{
-				Texture = this,
-			}.Schedule(inputDeps);
-		}
+			Texture = this, //
+		}.Schedule(inputDeps);
 
 		#endregion
 	}

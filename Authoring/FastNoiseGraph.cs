@@ -1,10 +1,11 @@
 using System;
-using FastNoise2.Runtime.Bindings;
 using Unity.Collections;
 using UnityEngine;
 
 namespace FastNoise2.Authoring
 {
+	using Bindings;
+
 	/// <summary>
 	/// Serialized as base64 String in Editor.
 	/// Launches NoiseTool and hunts for Copied Values.

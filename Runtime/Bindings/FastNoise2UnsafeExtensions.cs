@@ -1,6 +1,6 @@
-using static FastNoise2.Runtime.Bindings.FastNoise;
+using static FastNoise2.Bindings.FastNoise;
 
-namespace FastNoise2.Runtime.Bindings
+namespace FastNoise2.Bindings
 {
     public static class FastNoise2UnsafeExtensions
     {
@@ -11,8 +11,7 @@ namespace FastNoise2.Runtime.Bindings
             int xStart, int yStart,
             int xSize, int ySize,
             float frequency,
-            int seed)
-        {
+            int seed) =>
             fnGenUniformGrid2D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -20,7 +19,6 @@ namespace FastNoise2.Runtime.Bindings
                 xSize, ySize,
                 frequency, seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenUniformGrid3D(
             this FastNoise fn,
@@ -28,8 +26,7 @@ namespace FastNoise2.Runtime.Bindings
             void* outputMinMax,
             int xStart, int yStart, int zStart,
             int xSize, int ySize, int zSize,
-            float frequency, int seed)
-        {
+            float frequency, int seed) =>
             fnGenUniformGrid3D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -37,7 +34,6 @@ namespace FastNoise2.Runtime.Bindings
                 xSize, ySize, zSize,
                 frequency, seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenUniformGrid4D(
             this FastNoise fn,
@@ -45,8 +41,7 @@ namespace FastNoise2.Runtime.Bindings
             void* outputMinMax,
             int xStart, int yStart, int zStart, int wStart,
             int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed)
-        {
+            float frequency, int seed) =>
             fnGenUniformGrid4D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -55,22 +50,19 @@ namespace FastNoise2.Runtime.Bindings
                 frequency,
                 seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenTileable2D(
             this FastNoise fn,
             void* noiseOut,
             void* outputMinMax,
             int xSize, int ySize,
-            float frequency, int seed)
-        {
+            float frequency, int seed) =>
             fnGenTileable2D(
                 fn.mNodeHandle,
                 noiseOut,
                 xSize, ySize,
                 frequency, seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenPositionArray2D(
             this FastNoise fn,
@@ -80,8 +72,7 @@ namespace FastNoise2.Runtime.Bindings
             void* xPosArray,
             void* yPosArray,
             float xOffset, float yOffset,
-            int seed)
-        {
+            int seed) =>
             fnGenPositionArray2D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -91,7 +82,6 @@ namespace FastNoise2.Runtime.Bindings
                 xOffset, yOffset,
                 seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenPositionArray3D(
             this FastNoise fn,
@@ -102,8 +92,7 @@ namespace FastNoise2.Runtime.Bindings
             void* yPosArray,
             void* zPosArray,
             float xOffset, float yOffset, float zOffset,
-            int seed)
-        {
+            int seed) =>
             fnGenPositionArray3D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -114,7 +103,6 @@ namespace FastNoise2.Runtime.Bindings
                 xOffset, yOffset, zOffset,
                 seed,
                 outputMinMax);
-        }
 
         public static unsafe void GenPositionArray4D(
             this FastNoise fn,
@@ -126,8 +114,7 @@ namespace FastNoise2.Runtime.Bindings
             void* zPosArray,
             void* wPosArray,
             float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed)
-        {
+            int seed) =>
             fnGenPositionArray4D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -139,6 +126,5 @@ namespace FastNoise2.Runtime.Bindings
                 xOffset, yOffset, zOffset, wOffset,
                 seed,
                 outputMinMax);
-        }
     }
 }

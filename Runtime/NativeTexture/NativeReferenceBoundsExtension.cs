@@ -1,35 +1,21 @@
-using System.Runtime.CompilerServices;
-using Unity.Collections;
-using Unity.Mathematics;
-
-namespace FastNoise2.Runtime.NativeTexture
+namespace FastNoise2.NativeTexture
 {
+	using System.Runtime.CompilerServices;
+	using Unity.Collections;
+	using Unity.Mathematics;
+
 	/// <summary>
-	/// This extension adds usage of NativeReference of float2 as MinMax Bounds.
+	/// This extension adds usage of NativeReference of ValueBounds&lt;float&gt; as MinMax Bounds.
 	/// </summary>
 	public static class NativeReferenceBoundsExtension
 	{
 		/// <summary>
-		/// Not called at all. Just an example of unoptimised call.
-		///
-		/// We bake Scale into [1] parameter of bounds during Optimise().
-		/// </summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float NormalizeToBoundsUnoptimised(this NativeReference<float2> bounds, float value)
-		{
-			var (min, max) = (bounds.Value[0], bounds.Value[1]);
-			var scale = max - min;
-
-			return (value - min) * scale;
-		}
-
-		/// <summary>
 		/// Called during normalization.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float NormalizeToBounds(this NativeReference<float2> bounds, float value)
+		public static float NormalizeValue(this NativeReference<ValueBounds<float>> bounds, float value)
 		{
-			var (min, scale) = (bounds.Value[0], bounds.Value[1]);
+			var (min, scale) = (bounds.Value.Min, bounds.Value.Scale);
 
 			return (value - min) * scale;
 		}
@@ -38,21 +24,19 @@ namespace FastNoise2.Runtime.NativeTexture
 		/// Called before normalization.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Optimise(this NativeReference<float2> bounds)
+		public static void PrecalculateScale(this NativeReference<ValueBounds<float>> bounds)
 		{
-			var (min, max) = (bounds.Value[0], bounds.Value[1]);
+			var (min, max) = (bounds.Value.Min, bounds.Value.Max);
 			float scale = math.rcp(max - min);
 
-			bounds.Value = new float2(min, scale);
+			bounds.Value = new ValueBounds<float>(min, max, scale);
 		}
 
 		/// <summary>
 		/// Called before noise generation.
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static void Reset(this NativeReference<float2> bounds)
-		{
+		public static void Reset(this NativeReference<ValueBounds<float>> bounds) =>
 			bounds.Value = new(float.PositiveInfinity, float.NegativeInfinity);
-		}
 	}
 }

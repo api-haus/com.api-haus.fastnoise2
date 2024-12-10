@@ -1,6 +1,5 @@
 using System;
 using FastNoise2.Authoring;
-using FastNoise2.Runtime.Bindings;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -10,6 +9,8 @@ using UnityEngine.Rendering;
 
 namespace FastNoise2.Editor.NoiseAssets
 {
+	using Bindings;
+
 	public static class NoiseAssetBaking
 	{
 		public static void BakeIntoAsset(this NoiseAsset noiseAsset, string assetPath)

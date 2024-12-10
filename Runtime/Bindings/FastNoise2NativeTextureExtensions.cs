@@ -1,10 +1,10 @@
-using FastNoise2.Runtime.NativeTexture;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
-using static FastNoise2.Runtime.Bindings.FastNoise;
-
-namespace FastNoise2.Runtime.Bindings
+namespace FastNoise2.Bindings
 {
+    using NativeTexture;
+    using Unity.Collections;
+    using Unity.Collections.LowLevel.Unsafe;
+    using static FastNoise;
+
     public static class FastNoise2NativeTextureExtensions
     {
         public static unsafe void GenUniformGrid2D(
@@ -18,7 +18,7 @@ namespace FastNoise2.Runtime.Bindings
             nativeTexture.BoundsRef.Reset();
             fnGenUniformGrid2D(
                 fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
+                nativeTexture.GetUnsafePtr(),
                 xStart, yStart,
                 xSize, ySize,
                 frequency, seed,
@@ -36,29 +36,10 @@ namespace FastNoise2.Runtime.Bindings
             nativeTexture.BoundsRef.Reset();
             fnGenUniformGrid3D(
                 fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
+                nativeTexture.GetUnsafePtr(),
                 xStart, yStart, zStart,
                 xSize, ySize, zSize,
                 frequency, seed,
-                nativeTexture.BoundsRef.GetUnsafePtr()
-            );
-        }
-
-        public static unsafe void GenUniformGrid4D(
-            this FastNoise fn,
-            NativeTexture4D<float> nativeTexture,
-            int xStart, int yStart, int zStart, int wStart,
-            int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed)
-        {
-            nativeTexture.BoundsRef.Reset();
-            fnGenUniformGrid4D(
-                fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
-                xStart, yStart, zStart, wStart,
-                xSize, ySize, zSize, wSize,
-                frequency,
-                seed,
                 nativeTexture.BoundsRef.GetUnsafePtr()
             );
         }
@@ -72,7 +53,7 @@ namespace FastNoise2.Runtime.Bindings
             nativeTexture.BoundsRef.Reset();
             fnGenTileable2D(
                 fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
+                nativeTexture.GetUnsafePtr(),
                 xSize, ySize,
                 frequency, seed,
                 nativeTexture.BoundsRef.GetUnsafePtr()
@@ -91,7 +72,7 @@ namespace FastNoise2.Runtime.Bindings
             nativeTexture.BoundsRef.Reset();
             fnGenPositionArray2D(
                 fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
+                nativeTexture.GetUnsafePtr(),
                 positionCount,
                 xPosArray.GetUnsafePtr(),
                 yPosArray.GetUnsafePtr(),
@@ -114,38 +95,12 @@ namespace FastNoise2.Runtime.Bindings
             nativeTexture.BoundsRef.Reset();
             fnGenPositionArray3D(
                 fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
+                nativeTexture.GetUnsafePtr(),
                 positionCount,
                 xPosArray.GetUnsafePtr(),
                 yPosArray.GetUnsafePtr(),
                 zPosArray.GetUnsafePtr(),
                 xOffset, yOffset, zOffset,
-                seed,
-                nativeTexture.BoundsRef.GetUnsafePtr()
-            );
-        }
-
-        public static unsafe void GenPositionArray4D(
-            this FastNoise fn,
-            NativeTexture4D<float> nativeTexture,
-            int positionCount,
-            NativeArray<float> xPosArray,
-            NativeArray<float> yPosArray,
-            NativeArray<float> zPosArray,
-            NativeArray<float> wPosArray,
-            float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed)
-        {
-            nativeTexture.BoundsRef.Reset();
-            fnGenPositionArray4D(
-                fn.mNodeHandle,
-                nativeTexture.GetRawTextureData().GetUnsafePtr(),
-                positionCount,
-                xPosArray.GetUnsafePtr(),
-                yPosArray.GetUnsafePtr(),
-                zPosArray.GetUnsafePtr(),
-                wPosArray.GetUnsafePtr(),
-                xOffset, yOffset, zOffset, wOffset,
                 seed,
                 nativeTexture.BoundsRef.GetUnsafePtr()
             );

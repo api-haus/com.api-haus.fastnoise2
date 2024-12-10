@@ -1,11 +1,12 @@
 using System.IO;
-using FastNoise2.Runtime.Bindings;
 using NUnit.Framework;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace FastNoise2.Tests
 {
+	using Bindings;
+
 	public class BindingTests
 	{
 		[Test]

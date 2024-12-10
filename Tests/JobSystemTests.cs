@@ -1,7 +1,4 @@
 using System.IO;
-using FastNoise2.Runtime.Bindings;
-using FastNoise2.Runtime.Jobs._2D;
-using FastNoise2.Runtime.NativeTexture;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Jobs;
@@ -10,6 +7,10 @@ using UnityEngine;
 
 namespace FastNoise2.Tests
 {
+	using Bindings;
+	using Jobs;
+	using NativeTexture;
+
 	public class JobSystemTests
 	{
 		[Test]
@@ -18,7 +19,7 @@ namespace FastNoise2.Tests
 			var nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			var texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			var nt = new NativeTexture2D<float>(new int2(texture.width, texture.height), texture, Allocator.Persistent);
+			var nt = new NativeTexture2D<float>(texture, Allocator.TempJob);
 
 			JobHandle dependency = default;
 
@@ -31,7 +32,7 @@ namespace FastNoise2.Tests
 				Seed = 1337,
 			}.Schedule(dependency);
 
-			dependency = NormalizeTexture2DJob.Schedule(nt, dependency);
+			dependency = nt.ScheduleNormalize(dependency);
 
 			dependency.Complete();
 

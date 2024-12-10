@@ -1,49 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using Unity.Collections.LowLevel.Unsafe;
-using Unity.Mathematics;
-
-namespace FastNoise2.Runtime.Bindings
+﻿namespace FastNoise2.Bindings
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
+    using System.Runtime.InteropServices;
+    using Unity.Collections.LowLevel.Unsafe;
+    using Unity.Mathematics;
+
     public struct FastNoise : IDisposable, IEquatable<FastNoise>
     {
         #region IEquatable
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(mNodeHandle, mMetadataId);
-        }
+        public override int GetHashCode() => HashCode.Combine(mNodeHandle, mMetadataId);
 
-        public bool Equals(FastNoise other)
-        {
-            return mNodeHandle == other.mNodeHandle && mMetadataId == other.mMetadataId;
-        }
+        public bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && mMetadataId == other.mMetadataId;
 
-        public override bool Equals(object obj)
-        {
-            return obj != null && obj is FastNoise other && Equals(other);
-        }
+        public override bool Equals(object obj) => obj != null && obj is FastNoise other && Equals(other);
 
-        public static bool operator ==(FastNoise left, FastNoise right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(FastNoise left, FastNoise right) => left.Equals(right);
 
-        public static bool operator !=(FastNoise left, FastNoise right)
-        {
-            return !left.Equals(right);
-        }
+        public static bool operator !=(FastNoise left, FastNoise right) => !left.Equals(right);
 
         #endregion
 
-        public static FastNoise Invalid = new()
-        {
-            mNodeHandle = IntPtr.Zero,
-            mMetadataId = -1,
-        };
+        public static FastNoise Invalid = new() { mNodeHandle = IntPtr.Zero, mMetadataId = -1, };
 
+        [StructLayout(LayoutKind.Sequential)]
         public struct OutputMinMax
         {
             public OutputMinMax(float minValue = float.PositiveInfinity, float maxValue = float.NegativeInfinity)
@@ -85,10 +67,7 @@ namespace FastNoise2.Runtime.Bindings
             mMetadataId = fnGetMetadataID(nodeHandle);
         }
 
-        public void Dispose()
-        {
-            fnDeleteNodeRef(mNodeHandle);
-        }
+        public void Dispose() => fnDeleteNodeRef(mNodeHandle);
 
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
@@ -102,10 +81,7 @@ namespace FastNoise2.Runtime.Bindings
             return new FastNoise(nodeHandle);
         }
 
-        public uint GetSIMDLevel()
-        {
-            return fnGetSIMDLevel(mNodeHandle);
-        }
+        public uint GetSIMDLevel() => fnGetSIMDLevel(mNodeHandle);
 
         public void Set(string memberName, float value)
         {
@@ -290,20 +266,11 @@ namespace FastNoise2.Runtime.Bindings
         }
 
 
-        public float GenSingle2D(float x, float y, int seed)
-        {
-            return fnGenSingle2D(mNodeHandle, x, y, seed);
-        }
+        public float GenSingle2D(float x, float y, int seed) => fnGenSingle2D(mNodeHandle, x, y, seed);
 
-        public float GenSingle3D(float x, float y, float z, int seed)
-        {
-            return fnGenSingle3D(mNodeHandle, x, y, z, seed);
-        }
+        public float GenSingle3D(float x, float y, float z, int seed) => fnGenSingle3D(mNodeHandle, x, y, z, seed);
 
-        public float GenSingle4D(float x, float y, float z, float w, int seed)
-        {
-            return fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
-        }
+        public float GenSingle4D(float x, float y, float z, float w, int seed) => fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
 
         [NativeDisableUnsafePtrRestriction] internal IntPtr mNodeHandle;
         private int mMetadataId;
@@ -430,10 +397,7 @@ namespace FastNoise2.Runtime.Bindings
         }
 
         // Ignores spaces and caps, harder to mistype strings
-        private static string FormatLookup(string s)
-        {
-            return s.Replace(" ", "").ToLower();
-        }
+        private static string FormatLookup(string s) => s.Replace(" ", "").ToLower();
 
         private static Dictionary<string, int> metadataNameLookup;
         private static Metadata[] nodeMetadata;
