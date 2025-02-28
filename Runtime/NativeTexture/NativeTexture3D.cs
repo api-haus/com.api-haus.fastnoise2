@@ -11,14 +11,17 @@ namespace FastNoise2.NativeTexture
 	using UnityEngine;
 
 	/// <summary>
-	/// Native Texture2D Wrapper as 3D.
+	/// A native wrapper for Unity's Texture2D that provides 3D texture functionality with efficient memory management and direct data access.
+	/// Implements INativeTexture for 3D textures and IDisposable for proper resource cleanup.
 	/// </summary>
+	/// <typeparam name="T">The unmanaged type of the texture data (e.g., float).</typeparam>
 	[DebuggerDisplay("Length = {RawTextureData.m_Length}")]
 	public struct NativeTexture3D<T> : INativeTexture<int3, T>, IDisposable where T : unmanaged
 	{
-		#region Properties
-
-		[field: NativeDisableContainerSafetyRestriction]
+		/// <summary>
+		/// Gets a reference to the bounds containing minimum, maximum, and scale values of the texture data.
+		/// This reference is used for normalization operations.
+		/// </summary>
 		public NativeReference<ValueBounds<T>> BoundsRef { get; }
 
 		internal NativeArray<T> RawTextureData;
@@ -26,20 +29,45 @@ namespace FastNoise2.NativeTexture
 		[ReadOnly] [NativeDisableUnsafePtrRestriction]
 		readonly IntPtr texturePtr;
 
+		/// <summary>
+		/// Gets the width (X dimension) of the 3D texture in pixels.
+		/// </summary>
 		public readonly int Width => Resolution.x;
-		public readonly int Height => Resolution.y;
-		public readonly int Depth => Resolution.z;
-		public readonly int WidthXHeight;
-		public readonly bool IsCreated => RawTextureData.IsCreated;
-		public readonly bool IsUnityTexture2DPointer => texturePtr == IntPtr.Zero;
 
-		#endregion
+		/// <summary>
+		/// Gets the height (Y dimension) of the 3D texture in pixels.
+		/// </summary>
+		public readonly int Height => Resolution.y;
+
+		/// <summary>
+		/// Gets the depth (Z dimension) of the 3D texture in pixels.
+		/// </summary>
+		public readonly int Depth => Resolution.z;
+
+		/// <summary>
+		/// Gets the product of width and height dimensions, used for coordinate calculations.
+		/// </summary>
+		public readonly int WidthXHeight;
+
+		/// <summary>
+		/// Gets whether the native texture has been created and initialized.
+		/// </summary>
+		public readonly bool IsCreated => RawTextureData.IsCreated;
+
+		/// <summary>
+		/// Gets whether the texture data points directly to a Unity Texture2D native pointer.
+		/// Returns true if the texture is not using a Unity native pointer.
+		/// </summary>
+		public readonly bool IsUnityTexture2DPointer => texturePtr == IntPtr.Zero;
 
 		#region Constructors
 
 		/// <summary>
-		/// Create NativeTexture2D From Texture2D.
+		/// Creates a NativeTexture3D from an existing Unity Texture2D, treating it as a 3D texture with specified resolution.
 		/// </summary>
+		/// <param name="texture">The source Unity Texture2D to wrap.</param>
+		/// <param name="resolution">The 3D dimensions (width, height, depth) of the texture.</param>
+		/// <param name="boundsAllocator">The allocator to use for the bounds data.</param>
 		public NativeTexture3D(Texture2D texture, int3 resolution, Allocator boundsAllocator)
 		{
 			Resolution = resolution;
@@ -53,8 +81,10 @@ namespace FastNoise2.NativeTexture
 		}
 
 		/// <summary>
-		/// Create NativeTexture3D With Allocator.
+		/// Creates a new NativeTexture3D with the specified 3D resolution.
 		/// </summary>
+		/// <param name="resolution">The 3D dimensions (width, height, depth) of the texture.</param>
+		/// <param name="allocator">The allocator to use for the texture and bounds data.</param>
 		public NativeTexture3D(int3 resolution, Allocator allocator)
 		{
 			Resolution = resolution;
@@ -71,15 +101,30 @@ namespace FastNoise2.NativeTexture
 
 		#region INativeTexture API
 
+		/// <summary>
+		/// Gets the 3D resolution (width, height, depth) of the texture.
+		/// </summary>
 		public int3 Resolution { get; }
+
+		/// <summary>
+		/// Gets the bounds containing minimum, maximum, and scale values of the texture data.
+		/// </summary>
 		public ValueBounds<T> Bounds => BoundsRef.Value;
 
+		/// <summary>
+		/// Gets the total number of voxels in the 3D texture.
+		/// </summary>
 		public int Length
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			get => RawTextureData.Length;
 		}
 
+		/// <summary>
+		/// Gets or sets the texture value at the specified linear voxel index.
+		/// </summary>
+		/// <param name="index">The linear index of the voxel.</param>
+		/// <returns>The value at the specified index.</returns>
 		public T this[int index]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -88,6 +133,11 @@ namespace FastNoise2.NativeTexture
 			set => RawTextureData[index] = value;
 		}
 
+		/// <summary>
+		/// Gets or sets the texture value at the specified 3D coordinate.
+		/// </summary>
+		/// <param name="coord">The 3D coordinate (x, y, z) of the voxel.</param>
+		/// <returns>The value at the specified coordinate.</returns>
 		public T this[int3 coord]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -96,14 +146,36 @@ namespace FastNoise2.NativeTexture
 			set => this[coord.ToIndex(WidthXHeight, Width)] = value;
 		}
 
+		/// <summary>
+		/// Reads the texture value at the specified 3D coordinate.
+		/// </summary>
+		/// <param name="pixelCoord">The 3D coordinate of the voxel.</param>
+		/// <returns>The value at the specified coordinate.</returns>
 		public T ReadPixel(int3 pixelCoord) =>
 			this[pixelCoord];
 
+		/// <summary>
+		/// Reads the texture value at the specified linear index and outputs the corresponding 3D coordinate.
+		/// </summary>
+		/// <param name="index">The linear index of the voxel.</param>
+		/// <param name="coord">Outputs the 3D coordinate corresponding to the linear index.</param>
+		/// <returns>The value at the specified index.</returns>
 		public T ReadPixel(int index, out int3 coord) =>
 			this[coord = index.ToCoord(WidthXHeight, Width)];
 
+		/// <summary>
+		/// Returns the underlying texture data as a NativeArray.
+		/// </summary>
+		/// <returns>A NativeArray containing the texture data.</returns>
 		public NativeArray<T> AsNativeArray() => RawTextureData;
 
+		/// <summary>
+		/// Applies the native 3D texture data to a Unity Texture2D object.
+		/// If the texture pointers don't match, copies the data to the target texture.
+		/// </summary>
+		/// <param name="texture">The Texture2D object to apply data to.</param>
+		/// <param name="updateMipmaps">Whether to update mipmaps after applying data.</param>
+		/// <returns>The updated Texture2D object.</returns>
 		[BurstDiscard]
 		public Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
 		{
@@ -119,12 +191,19 @@ namespace FastNoise2.NativeTexture
 			return texture;
 		}
 
+		/// <summary>
+		/// Gets an unsafe pointer to the underlying texture data.
+		/// </summary>
+		/// <returns>An unsafe pointer to the texture data.</returns>
 		public unsafe void* GetUnsafePtr() => RawTextureData.GetUnsafePtr();
 
 		#endregion
 
 		#region IDisposable
 
+		/// <summary>
+		/// Disposes of the native texture resources, including the raw texture data and bounds reference if they were created.
+		/// </summary>
 		public void Dispose()
 		{
 			if (!IsUnityTexture2DPointer && RawTextureData.IsCreated)
@@ -141,6 +220,11 @@ namespace FastNoise2.NativeTexture
 			public void Execute() => Texture.Dispose();
 		}
 
+		/// <summary>
+		/// Schedules the disposal of native texture resources as a job.
+		/// </summary>
+		/// <param name="inputDeps">The JobHandle for any dependent jobs.</param>
+		/// <returns>A JobHandle for the scheduled dispose job.</returns>
 		public JobHandle Dispose(JobHandle inputDeps) => new DisposeJob
 		{
 			Texture = this, //

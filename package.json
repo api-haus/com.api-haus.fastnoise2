@@ -2,5 +2,8 @@
   "displayName": "FastNoise2",
   "name": "com.auburn.fastnoise2",
   "version": "0.1.0",
-  "description": "FastNoise2 in UPM"
+  "description": "FastNoise2 in UPM",
+	"dependencies": {
+		"com.unity.editorcoroutines": "1.0.0"
+	}
 }

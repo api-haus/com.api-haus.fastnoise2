@@ -3,8 +3,18 @@ namespace FastNoise2.NativeTexture
 	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
+	/// <summary>
+	/// Provides utility methods for converting between linear pixel indices and multi-dimensional coordinates.
+	/// </summary>
 	public static class IndexCoordUtils
 	{
+		/// <summary>
+		/// Converts a linear pixel index to a 3-dimensional coordinate.
+		/// </summary>
+		/// <param name="pixelIndex">The linear index of the pixel.</param>
+		/// <param name="widthXHeight">The product of width and height dimensions.</param>
+		/// <param name="width">The width dimension of the texture.</param>
+		/// <returns>The corresponding 3-dimensional coordinate (x, y, z).</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int3 ToCoord(this int pixelIndex, int widthXHeight, int width)
 		{
@@ -18,6 +28,12 @@ namespace FastNoise2.NativeTexture
 			);
 		}
 
+		/// <summary>
+		/// Converts a linear pixel index to a 2-dimensional coordinate.
+		/// </summary>
+		/// <param name="pixelIndex">The linear index of the pixel.</param>
+		/// <param name="width">The width dimension of the texture.</param>
+		/// <returns>The corresponding 2-dimensional coordinate (x, y).</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int2 ToCoord(this int pixelIndex, int width)
 		{
@@ -29,10 +45,23 @@ namespace FastNoise2.NativeTexture
 			);
 		}
 
+		/// <summary>
+		/// Converts a 3-dimensional coordinate to a linear pixel index.
+		/// </summary>
+		/// <param name="id">The 3-dimensional coordinate (x, y, z).</param>
+		/// <param name="widthXHeight">The product of width and height dimensions.</param>
+		/// <param name="width">The width dimension of the texture.</param>
+		/// <returns>The corresponding linear pixel index.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int ToIndex(this int3 id, int widthXHeight, int width) =>
 			(id.z * widthXHeight) + (id.y * width) + id.x;
 
+		/// <summary>
+		/// Converts a 2-dimensional coordinate to a linear pixel index.
+		/// </summary>
+		/// <param name="id">The 2-dimensional coordinate (x, y).</param>
+		/// <param name="width">The width dimension of the texture.</param>
+		/// <returns>The corresponding linear pixel index.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int ToIndex(this int2 id, int width) =>
 			(id.y * width) + id.x;
