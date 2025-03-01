@@ -11,11 +11,11 @@
     {
         #region IEquatable
 
-        public override int GetHashCode() => HashCode.Combine(mNodeHandle, mMetadataId);
+        public override readonly int GetHashCode() => HashCode.Combine(mNodeHandle, mMetadataId);
 
-        public bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && mMetadataId == other.mMetadataId;
+        public readonly bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && mMetadataId == other.mMetadataId;
 
-        public override bool Equals(object obj) => obj != null && obj is FastNoise other && Equals(other);
+        public override readonly bool Equals(object obj) => obj != null && obj is FastNoise other && Equals(other);
 
         public static bool operator ==(FastNoise left, FastNoise right) => left.Equals(right);
 
@@ -67,7 +67,7 @@
             mMetadataId = fnGetMetadataID(nodeHandle);
         }
 
-        public void Dispose() => fnDeleteNodeRef(mNodeHandle);
+        public readonly void Dispose() => fnDeleteNodeRef(mNodeHandle);
 
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
@@ -81,9 +81,9 @@
             return new FastNoise(nodeHandle);
         }
 
-        public uint GetSIMDLevel() => fnGetSIMDLevel(mNodeHandle);
+        public readonly uint GetSIMDLevel() => fnGetSIMDLevel(mNodeHandle);
 
-        public void Set(string memberName, float value)
+        public readonly void Set(string memberName, float value)
         {
             Metadata.Member member;
             if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
@@ -114,7 +114,7 @@
             }
         }
 
-        public void Set(string memberName, int value)
+        public readonly void Set(string memberName, int value)
         {
             Metadata.Member member;
             if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
@@ -133,7 +133,7 @@
             }
         }
 
-        public void Set(string memberName, string enumValue)
+        public readonly void Set(string memberName, string enumValue)
         {
             Metadata.Member member;
             if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
@@ -158,7 +158,7 @@
             }
         }
 
-        public void Set(string memberName, FastNoise nodeLookup)
+        public readonly void Set(string memberName, FastNoise nodeLookup)
         {
             Metadata.Member member;
             if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
@@ -189,7 +189,7 @@
             }
         }
 
-        public OutputMinMax GenUniformGrid2D(float[] noiseOut,
+        public readonly OutputMinMax GenUniformGrid2D(float[] noiseOut,
             int xStart, int yStart,
             int xSize, int ySize,
             float frequency, int seed)
@@ -199,7 +199,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenUniformGrid3D(float[] noiseOut,
+        public readonly OutputMinMax GenUniformGrid3D(float[] noiseOut,
             int xStart, int yStart, int zStart,
             int xSize, int ySize, int zSize,
             float frequency, int seed)
@@ -210,7 +210,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenUniformGrid4D(float[] noiseOut,
+        public readonly OutputMinMax GenUniformGrid4D(float[] noiseOut,
             int xStart, int yStart, int zStart, int wStart,
             int xSize, int ySize, int zSize, int wSize,
             float frequency, int seed)
@@ -222,7 +222,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenTileable2D(float[] noiseOut,
+        public readonly OutputMinMax GenTileable2D(float[] noiseOut,
             int xSize, int ySize,
             float frequency, int seed)
         {
@@ -231,7 +231,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenPositionArray2D(float[] noiseOut,
+        public readonly OutputMinMax GenPositionArray2D(float[] noiseOut,
             float[] xPosArray, float[] yPosArray,
             float xOffset, float yOffset,
             int seed)
@@ -242,7 +242,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenPositionArray3D(float[] noiseOut,
+        public readonly OutputMinMax GenPositionArray3D(float[] noiseOut,
             float[] xPosArray, float[] yPosArray, float[] zPosArray,
             float xOffset, float yOffset, float zOffset,
             int seed)
@@ -254,7 +254,7 @@
             return new OutputMinMax(minMax);
         }
 
-        public OutputMinMax GenPositionArray4D(float[] noiseOut,
+        public readonly OutputMinMax GenPositionArray4D(float[] noiseOut,
             float[] xPosArray, float[] yPosArray, float[] zPosArray, float[] wPosArray,
             float xOffset, float yOffset, float zOffset, float wOffset,
             int seed)
@@ -266,11 +266,11 @@
         }
 
 
-        public float GenSingle2D(float x, float y, int seed) => fnGenSingle2D(mNodeHandle, x, y, seed);
+        public readonly float GenSingle2D(float x, float y, int seed) => fnGenSingle2D(mNodeHandle, x, y, seed);
 
-        public float GenSingle3D(float x, float y, float z, int seed) => fnGenSingle3D(mNodeHandle, x, y, z, seed);
+        public readonly float GenSingle3D(float x, float y, float z, int seed) => fnGenSingle3D(mNodeHandle, x, y, z, seed);
 
-        public float GenSingle4D(float x, float y, float z, float w, int seed) => fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
+        public readonly float GenSingle4D(float x, float y, float z, float w, int seed) => fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
 
         [NativeDisableUnsafePtrRestriction] internal IntPtr mNodeHandle;
         private int mMetadataId;
@@ -309,7 +309,7 @@
             // Collect metadata for all FastNoise node classes
             for (int id = 0; id < metadataCount; id++)
             {
-                Metadata metadata = new Metadata();
+                Metadata metadata = new();
 
                 metadata.id = id;
                 metadata.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataName(id)));
@@ -325,7 +325,7 @@
                 // Init variables
                 for (int variableIdx = 0; variableIdx < variableCount; variableIdx++)
                 {
-                    Metadata.Member member = new Metadata.Member();
+                    Metadata.Member member = new();
 
                     member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataVariableName(id, variableIdx)));
                     member.type = (Metadata.Member.Type)fnGetMetadataVariableType(id, variableIdx);
@@ -354,7 +354,7 @@
                 // Init node lookups
                 for (int nodeLookupIdx = 0; nodeLookupIdx < nodeLookupCount; nodeLookupIdx++)
                 {
-                    Metadata.Member member = new Metadata.Member();
+                    Metadata.Member member = new();
 
                     member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataNodeLookupName(id, nodeLookupIdx)));
                     member.type = Metadata.Member.Type.NodeLookup;
@@ -369,7 +369,7 @@
                 // Init hybrids
                 for (int hybridIdx = 0; hybridIdx < hybridCount; hybridIdx++)
                 {
-                    Metadata.Member member = new Metadata.Member();
+                    Metadata.Member member = new();
 
                     member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataHybridName(id, hybridIdx)));
                     member.type = Metadata.Member.Type.Hybrid;
@@ -584,6 +584,6 @@
         [DllImport(NATIVE_LIB)]
         internal static extern bool fnSetHybridFloat(IntPtr nodeHandle, int nodeLookupIndex, float value);
 
-        public bool IsCreated => Invalid != this;
+        public readonly bool IsCreated => Invalid != this;
     }
 }
