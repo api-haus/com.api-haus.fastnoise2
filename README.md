@@ -6,11 +6,37 @@
 
 ## Features
 
-- **NativeTextureXD<T>**: Efficient native texture wrappers for 2D and 3D textures.
-- **Burst/Jobs/IL2CPP Compatible**: Optimized for Unity's high-performance systems.
-- **Zero-Copy Texture Operations**: Directly operate on Unity's texture memory without additional copying overhead.
-- **Noise Graph Editor Integration**: Visual editing and serialization of noise graphs within Unity.
-- **Baked Noise Assets**: Precompute and store noise textures for quick previewing and runtime usage.
+- **Native Texture Support**:
+  - `NativeTexture2D<T>` and `NativeTexture3D<T>`: Efficient native texture wrappers for 2D and 3D textures
+  - Zero-copy operations with Unity textures for maximum performance
+  - Support for multiple texture formats (byte2/3/4, ushort2/3/4, float)
+  - Value bounds and normalization utilities
+
+- **Comprehensive Sampling Extensions**:
+  - Bilinear sampling for smooth interpolation
+  - Read pixel functionality for precise texture access
+  - Normalized sampling with configurable value ranges
+
+- **Job System Integration**:
+  - Full Burst/Jobs/IL2CPP compatibility
+  - Specialized noise generation jobs:
+    - Uniform grid generation (2D/3D)
+    - Tileable noise generation
+    - Texture normalization jobs
+  
+- **Authoring Tools**:
+  - `BakedNoiseTextureAsset` for creating and configuring baked noise textures
+  - `FastNoiseGraph` for storing and serializing noise node configurations
+  - Integration with FastNoise Tool for visual noise design
+
+- **Editor Extensions**:
+  - Property drawers for noise graph assets
+  - Menu items for launching the FastNoise Tool
+  - Custom editors for noise assets
+
+- **Cross-Platform Native Support**:
+  - Optimized native libraries for Windows, macOS, and Linux
+  - Universal architecture support (x64, arm64)
 
 ---
 
@@ -83,7 +109,37 @@ public class Noise3DExample : MonoBehaviour
         using var nativeTexture3D = new NativeTexture3D<float>(resolution, Allocator.TempJob);
 
         noise.GenUniformGrid3D(nativeTexture3D, 0, int3.zero, 0.02f);
-        // Apply your 3D texture data as needed
+        nativeTexture3D.ApplyTo(texture3D);
+    }
+}
+```
+
+### Using Jobs for Noise Generation
+
+```csharp
+using UnityEngine;
+using Unity.Collections;
+using Unity.Jobs;
+using FastNoise2;
+using FastNoise2.NativeTexture;
+
+public class NoiseWithJobsExample : MonoBehaviour
+{
+    public Texture2D texture;
+
+    void Start()
+    {
+        var noise = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+        using var nativeTexture = new NativeTexture2D<float>(texture, Allocator.TempJob);
+        
+        // Schedule the noise generation job
+        var job = noise.GenUniformGrid2DJob(nativeTexture, 0, 0, texture.width, texture.height, 0.02f, 1337);
+        job.Schedule().Complete();
+        
+        // Optionally normalize the results
+        nativeTexture.NormalizeJob(new ValueBounds(0, 1)).Schedule().Complete();
+        
+        nativeTexture.ApplyTo(texture);
     }
 }
 ```
@@ -121,7 +177,7 @@ Replace `path/to/library` with the actual path to the native library file.
 
 - [ ] Update to NewFastSIMD branch
 - [ ] Complete Noise Editor integration (serialization to/from Noise Tool)
-- [ ] Support for all texture dimensions and job types
+- [ ] Support for all texture dimensions (4D) and job types
 - [ ] Comprehensive documentation and additional examples
 - [ ] macOS CodeSigning
 - [ ] Continuous Integration (CI), Semantic Versioning (SemVer), and OpenUPM support

@@ -5,7 +5,7 @@ using FastNoise2.Authoring;
 
 namespace FastNoise2.Editor.NoiseAssets
 {
-	[CustomEditor(typeof(NoiseAsset))]
+	[CustomEditor(typeof(BakedNoiseTextureAsset))]
 	public class NoiseAssetEditor : UnityEditor.Editor
 	{
 		public override void OnInspectorGUI()
@@ -14,9 +14,9 @@ namespace FastNoise2.Editor.NoiseAssets
 
 			if (GUILayout.Button("Bake"))
 			{
-				var targetAssets = targets.OfType<NoiseAsset>();
+				System.Collections.Generic.IEnumerable<BakedNoiseTextureAsset> targetAssets = targets.OfType<BakedNoiseTextureAsset>();
 
-				foreach (var noiseAsset in targetAssets)
+				foreach (BakedNoiseTextureAsset noiseAsset in targetAssets)
 				{
 					string assetPath = AssetDatabase.GetAssetPath(noiseAsset);
 					noiseAsset.BakeIntoAsset(assetPath);
