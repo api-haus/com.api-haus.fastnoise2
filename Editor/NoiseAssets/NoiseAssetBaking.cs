@@ -13,7 +13,7 @@ namespace FastNoise2.Editor.NoiseAssets
 
 	public static class NoiseAssetBaking
 	{
-		public static void BakeIntoAsset(this NoiseAsset noiseAsset, string assetPath)
+		public static void BakeIntoAsset(this BakedNoiseTextureAsset noiseAsset, string assetPath)
 		{
 			Texture texture = AssetDatabase.LoadAssetAtPath<Texture>(assetPath);
 			if (!Validate(noiseAsset, texture))
@@ -31,7 +31,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			EditorUtility.SetDirty(texture);
 		}
 
-		static void GenerateNoiseTexture(NoiseAsset noiseAsset, Texture texture)
+		static void GenerateNoiseTexture(BakedNoiseTextureAsset noiseAsset, Texture texture)
 		{
 			switch (noiseAsset.textureOutput)
 			{
@@ -46,7 +46,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture2D(NoiseAsset noiseAsset, Texture2D texture)
+		static unsafe void GenerateNoiseTexture2D(BakedNoiseTextureAsset noiseAsset, Texture2D texture)
 		{
 			using FastNoise graph = noiseAsset.graph.Instantiate();
 
@@ -67,7 +67,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			texture.Apply(false);
 		}
 
-		static NativeArray<float> AllocateNative(NoiseAsset noiseAsset, Texture3D texture,
+		static NativeArray<float> AllocateNative(BakedNoiseTextureAsset noiseAsset, Texture3D texture,
 			out NativeReference<float2> minMax)
 		{
 			minMax = default;
@@ -89,7 +89,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static NativeArray<float> AllocateNative(NoiseAsset noiseAsset, Texture2D texture,
+		static NativeArray<float> AllocateNative(BakedNoiseTextureAsset noiseAsset, Texture2D texture,
 			out NativeReference<float2> minMax)
 		{
 			minMax = default;
@@ -111,7 +111,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture3D(NoiseAsset noiseAsset, Texture3D texture)
+		static unsafe void GenerateNoiseTexture3D(BakedNoiseTextureAsset noiseAsset, Texture3D texture)
 		{
 			using FastNoise graph = noiseAsset.graph.Instantiate();
 
@@ -134,7 +134,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			texture.Apply(false);
 		}
 
-		static bool Validate(NoiseAsset noiseAsset, Texture existingTexture)
+		static bool Validate(BakedNoiseTextureAsset noiseAsset, Texture existingTexture)
 		{
 			if (existingTexture == null || !existingTexture)
 				return false;
@@ -151,7 +151,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			return true;
 		}
 
-		public static TextureDimension Dimension(this NoiseAsset noiseAsset)
+		public static TextureDimension Dimension(this BakedNoiseTextureAsset noiseAsset)
 		{
 			switch (noiseAsset.textureOutput)
 			{
@@ -164,7 +164,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		public static Texture MakeTexture(NoiseAsset noiseAsset)
+		public static Texture MakeTexture(BakedNoiseTextureAsset noiseAsset)
 		{
 			switch (noiseAsset.textureOutput)
 			{
@@ -188,7 +188,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		public static TextureFormat GetTextureFormat(NoiseAsset noiseAsset)
+		public static TextureFormat GetTextureFormat(BakedNoiseTextureAsset noiseAsset)
 		{
 			switch (noiseAsset.textureFormat)
 			{
