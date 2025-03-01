@@ -1,5 +1,5 @@
 using System;
-using FastNoise2.Authoring;
+using FastNoise2.Authoring.NoiseGraph;
 using UnityEditor;
 using UnityEngine;
 
@@ -8,18 +8,18 @@ namespace FastNoise2.Editor
 	[CustomPropertyDrawer(typeof(FastNoiseGraph))]
 	public class FastNoiseGraphPropertyDrawer : PropertyDrawer
 	{
-		const int EditButtonWidth = 60;
-		const int Padding = 5;
-		const string EncodedGraphPropertyPath = "encodedGraph";
+		const int EDIT_BUTTON_WIDTH = 60;
+		const int PADDING = 5;
+		const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
 
-		static Action<FastNoiseGraphPropertyDrawer, bool> EditorWasActivatedAction;
+		static Action<FastNoiseGraphPropertyDrawer, bool> s_editorWasActivatedAction;
 
-		bool IsEditing;
-		SerializedProperty Property;
+		bool m_IsEditing;
+		SerializedProperty m_Property;
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
-			Property = property;
+			m_Property = property;
 
 			// Using BeginProperty / EndProperty on the parent property means that
 			// prefab override logic works on the entire property.
@@ -33,12 +33,12 @@ namespace FastNoise2.Editor
 			EditorGUI.indentLevel = 0;
 
 			// Calculate rects
-			Rect encodedValueRect = new Rect(position.x, position.y, position.width - EditButtonWidth - Padding, position.height);
-			Rect buttonRect = new Rect(position.x + (position.width - EditButtonWidth), position.y, EditButtonWidth,
+			Rect encodedValueRect = new Rect(position.x, position.y, position.width - EDIT_BUTTON_WIDTH - PADDING, position.height);
+			Rect buttonRect = new Rect(position.x + (position.width - EDIT_BUTTON_WIDTH), position.y, EDIT_BUTTON_WIDTH,
 				position.height);
 
 			// Draw fields - pass GUIContent.none to each so they are drawn without labels
-			EditorGUI.PropertyField(encodedValueRect, property.FindPropertyRelative(EncodedGraphPropertyPath),
+			EditorGUI.PropertyField(encodedValueRect, property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH),
 				GUIContent.none);
 			bool isButtonClicked = EditorGUI.LinkButton(buttonRect, "Edit Noise");
 
@@ -50,8 +50,8 @@ namespace FastNoise2.Editor
 			// Set indent back to what it was
 			EditorGUI.indentLevel = indent;
 
-			EditorWasActivatedAction -= OnEditorWasActivated;
-			EditorWasActivatedAction += OnEditorWasActivated;
+			s_editorWasActivatedAction -= OnEditorWasActivated;
+			s_editorWasActivatedAction += OnEditorWasActivated;
 
 			EditorGUI.EndProperty();
 		}
@@ -64,7 +64,7 @@ namespace FastNoise2.Editor
 
 		void OnEditButtonClicked()
 		{
-			if (IsEditing)
+			if (m_IsEditing)
 				OnDeactivate();
 			else
 				OnActivate();
@@ -72,10 +72,10 @@ namespace FastNoise2.Editor
 
 		void OnActivate()
 		{
-			if (IsEditing) return;
-			IsEditing = true;
+			if (m_IsEditing) return;
+			m_IsEditing = true;
 
-			EditorWasActivatedAction?.Invoke(this, true);
+			s_editorWasActivatedAction?.Invoke(this, true);
 
 			System.Diagnostics.Process myProcess = NoiseToolProxy.NoiseToolProxy.LaunchNoiseTool();
 			myProcess.Exited += (_, _) =>
@@ -88,18 +88,18 @@ namespace FastNoise2.Editor
 
 		void OnCopiedNodeSettings(string encodedNode)
 		{
-			Property.FindPropertyRelative(EncodedGraphPropertyPath).stringValue = encodedNode;
-			Property.serializedObject.ApplyModifiedProperties();
+			m_Property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH).stringValue = encodedNode;
+			m_Property.serializedObject.ApplyModifiedProperties();
 		}
 
 		void OnDeactivate(bool force = false)
 		{
 			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings -= OnCopiedNodeSettings;
 
-			if (!IsEditing && !force) return;
-			IsEditing = false;
+			if (!m_IsEditing && !force) return;
+			m_IsEditing = false;
 
-			EditorWasActivatedAction?.Invoke(this, false);
+			s_editorWasActivatedAction?.Invoke(this, false);
 		}
 	}
 }

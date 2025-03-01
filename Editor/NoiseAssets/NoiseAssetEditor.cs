@@ -1,7 +1,7 @@
 using System.Linq;
+using FastNoise2.Authoring.NoiseAsset;
 using UnityEditor;
 using UnityEngine;
-using FastNoise2.Authoring;
 
 namespace FastNoise2.Editor.NoiseAssets
 {
