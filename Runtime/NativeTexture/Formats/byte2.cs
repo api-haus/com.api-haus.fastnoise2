@@ -2,8 +2,8 @@
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
 	// ReSharper disable once InconsistentNaming
@@ -15,6 +15,7 @@ namespace FastNoise2.NativeTexture.Formats
 	{
 		/// <summary>x component of the vector.</summary>
 		public byte x;
+
 		/// <summary>y component of the vector.</summary>
 		public byte y;
 
@@ -104,21 +105,20 @@ namespace FastNoise2.NativeTexture.Formats
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 FromNormalized(float2 v) => new()
-		{
-			x = (byte)(((v.x * 0.5f) + 0.5f) * byte.MaxValue),
-			y = (byte)(((v.y * 0.5f) + 0.5f) * byte.MaxValue)
-		};
+		public static byte2 FromNormalized(float2 v) =>
+			new()
+			{
+				x = (byte)(((v.x * 0.5f) + 0.5f) * byte.MaxValue),
+				y = (byte)(((v.y * 0.5f) + 0.5f) * byte.MaxValue),
+			};
 
 		/// <summary>
 		/// Converts a byte2 value (0..255) back to normalized float2 (-1..1)
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly float2 ToNormalized() => new(
-			((float)x / byte.MaxValue * 2f) - 1f,
-			((float)y / byte.MaxValue * 2f) - 1f
-		 );
+		public readonly float2 ToNormalized() =>
+			new(((float)x / byte.MaxValue * 2f) - 1f, ((float)y / byte.MaxValue * 2f) - 1f);
 
 		// Implicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,7 +134,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float2(byte2 v) => ToFloat2(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 ToFloat2(byte2 b2) => new((float)b2.x / byte.MaxValue, (float)b2.y / byte.MaxValue);
+		static float2 ToFloat2(byte2 b2) =>
+			new((float)b2.x / byte.MaxValue, (float)b2.y / byte.MaxValue);
 
 		// Explicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -152,221 +153,148 @@ namespace FastNoise2.NativeTexture.Formats
 		// Operators
 		// Multiplication
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator *(byte2 lhs, byte2 rhs) => new(
-		 (byte)(lhs.x * rhs.x),
-		 (byte)(lhs.y * rhs.y)
-		);
+		public static byte2 operator *(byte2 lhs, byte2 rhs) =>
+			new((byte)(lhs.x * rhs.x), (byte)(lhs.y * rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator *(byte2 lhs, byte rhs) => new(
-		 (byte)(lhs.x * rhs),
-		 (byte)(lhs.y * rhs)
-		);
+		public static byte2 operator *(byte2 lhs, byte rhs) =>
+			new((byte)(lhs.x * rhs), (byte)(lhs.y * rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator *(byte lhs, byte2 rhs) => new(
-		 (byte)(lhs * rhs.x),
-		 (byte)(lhs * rhs.y)
-		);
+		public static byte2 operator *(byte lhs, byte2 rhs) =>
+			new((byte)(lhs * rhs.x), (byte)(lhs * rhs.y));
 
 		// Addition
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator +(byte2 lhs, byte2 rhs) => new(
-		 (byte)(lhs.x + rhs.x),
-		 (byte)(lhs.y + rhs.y)
-		);
+		public static byte2 operator +(byte2 lhs, byte2 rhs) =>
+			new((byte)(lhs.x + rhs.x), (byte)(lhs.y + rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator +(byte2 lhs, byte rhs) => new(
-		 (byte)(lhs.x + rhs),
-		 (byte)(lhs.y + rhs)
-		);
+		public static byte2 operator +(byte2 lhs, byte rhs) =>
+			new((byte)(lhs.x + rhs), (byte)(lhs.y + rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator +(byte lhs, byte2 rhs) => new(
-		 (byte)(lhs + rhs.x),
-		 (byte)(lhs + rhs.y)
-		);
+		public static byte2 operator +(byte lhs, byte2 rhs) =>
+			new((byte)(lhs + rhs.x), (byte)(lhs + rhs.y));
 
 		// Subtraction (with clamping to zero)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator -(byte2 lhs, byte2 rhs) => new(
-		 (byte)Math.Max(0, lhs.x - rhs.x),
-		 (byte)Math.Max(0, lhs.y - rhs.y)
-		);
+		public static byte2 operator -(byte2 lhs, byte2 rhs) =>
+			new((byte)Math.Max(0, lhs.x - rhs.x), (byte)Math.Max(0, lhs.y - rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator -(byte2 lhs, byte rhs) => new(
-		 (byte)Math.Max(0, lhs.x - rhs),
-		 (byte)Math.Max(0, lhs.y - rhs)
-		);
+		public static byte2 operator -(byte2 lhs, byte rhs) =>
+			new((byte)Math.Max(0, lhs.x - rhs), (byte)Math.Max(0, lhs.y - rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator -(byte lhs, byte2 rhs) => new(
-		 (byte)Math.Max(0, lhs - rhs.x),
-		 (byte)Math.Max(0, lhs - rhs.y)
-		);
+		public static byte2 operator -(byte lhs, byte2 rhs) =>
+			new((byte)Math.Max(0, lhs - rhs.x), (byte)Math.Max(0, lhs - rhs.y));
 
 		// Division
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator /(byte2 lhs, byte2 rhs) => new(
-		 rhs.x == 0 ? (byte)0 : (byte)(lhs.x / rhs.x),
-		 rhs.y == 0 ? (byte)0 : (byte)(lhs.y / rhs.y)
-		);
+		public static byte2 operator /(byte2 lhs, byte2 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs.x / rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs.y / rhs.y)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator /(byte2 lhs, byte rhs) => rhs == 0 ? zero : new byte2(
-		 (byte)(lhs.x / rhs),
-		 (byte)(lhs.y / rhs)
-		);
+		public static byte2 operator /(byte2 lhs, byte rhs) =>
+			rhs == 0 ? zero : new byte2((byte)(lhs.x / rhs), (byte)(lhs.y / rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator /(byte lhs, byte2 rhs) => new(
-		 rhs.x == 0 ? (byte)0 : (byte)(lhs / rhs.x),
-		 rhs.y == 0 ? (byte)0 : (byte)(lhs / rhs.y)
-		);
+		public static byte2 operator /(byte lhs, byte2 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs / rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs / rhs.y)
+			);
 
 		// Modulo
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator %(byte2 lhs, byte2 rhs) => new(
-		 rhs.x == 0 ? (byte)0 : (byte)(lhs.x % rhs.x),
-		 rhs.y == 0 ? (byte)0 : (byte)(lhs.y % rhs.y)
-		);
+		public static byte2 operator %(byte2 lhs, byte2 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs.x % rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs.y % rhs.y)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator %(byte2 lhs, byte rhs) => rhs == 0 ? zero : new byte2(
-		 (byte)(lhs.x % rhs),
-		 (byte)(lhs.y % rhs)
-		);
+		public static byte2 operator %(byte2 lhs, byte rhs) =>
+			rhs == 0 ? zero : new byte2((byte)(lhs.x % rhs), (byte)(lhs.y % rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator %(byte lhs, byte2 rhs) => new(
-		 rhs.x == 0 ? (byte)0 : (byte)(lhs % rhs.x),
-		 rhs.y == 0 ? (byte)0 : (byte)(lhs % rhs.y)
-		);
+		public static byte2 operator %(byte lhs, byte2 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs % rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs % rhs.y)
+			);
 
 		// Increment and decrement
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator ++(byte2 val) => new(
-		 (byte)(val.x + 1),
-		 (byte)(val.y + 1)
-		);
+		public static byte2 operator ++(byte2 val) => new((byte)(val.x + 1), (byte)(val.y + 1));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte2 operator --(byte2 val) => new(
-		 (byte)Math.Max(0, val.x - 1),
-		 (byte)Math.Max(0, val.y - 1)
-		);
+		public static byte2 operator --(byte2 val) =>
+			new((byte)Math.Max(0, val.x - 1), (byte)Math.Max(0, val.y - 1));
 
 		// Comparison operators - these return bool2 from Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <(byte2 lhs, byte2 rhs) => new(
-		 lhs.x < rhs.x,
-		 lhs.y < rhs.y
-		);
+		public static bool2 operator <(byte2 lhs, byte2 rhs) => new(lhs.x < rhs.x, lhs.y < rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <(byte2 lhs, byte rhs) => new(
-		 lhs.x < rhs,
-		 lhs.y < rhs
-		);
+		public static bool2 operator <(byte2 lhs, byte rhs) => new(lhs.x < rhs, lhs.y < rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <(byte lhs, byte2 rhs) => new(
-		 lhs < rhs.x,
-		 lhs < rhs.y
-		);
+		public static bool2 operator <(byte lhs, byte2 rhs) => new(lhs < rhs.x, lhs < rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <=(byte2 lhs, byte2 rhs) => new(
-		 lhs.x <= rhs.x,
-		 lhs.y <= rhs.y
-		);
+		public static bool2 operator <=(byte2 lhs, byte2 rhs) =>
+			new(lhs.x <= rhs.x, lhs.y <= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <=(byte2 lhs, byte rhs) => new(
-		 lhs.x <= rhs,
-		 lhs.y <= rhs
-		);
+		public static bool2 operator <=(byte2 lhs, byte rhs) => new(lhs.x <= rhs, lhs.y <= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <=(byte lhs, byte2 rhs) => new(
-		 lhs <= rhs.x,
-		 lhs <= rhs.y
-		);
+		public static bool2 operator <=(byte lhs, byte2 rhs) => new(lhs <= rhs.x, lhs <= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >(byte2 lhs, byte2 rhs) => new(
-		 lhs.x > rhs.x,
-		 lhs.y > rhs.y
-		);
+		public static bool2 operator >(byte2 lhs, byte2 rhs) => new(lhs.x > rhs.x, lhs.y > rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >(byte2 lhs, byte rhs) => new(
-		 lhs.x > rhs,
-		 lhs.y > rhs
-		);
+		public static bool2 operator >(byte2 lhs, byte rhs) => new(lhs.x > rhs, lhs.y > rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >(byte lhs, byte2 rhs) => new(
-		 lhs > rhs.x,
-		 lhs > rhs.y
-		);
+		public static bool2 operator >(byte lhs, byte2 rhs) => new(lhs > rhs.x, lhs > rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >=(byte2 lhs, byte2 rhs) => new(
-		 lhs.x >= rhs.x,
-		 lhs.y >= rhs.y
-		);
+		public static bool2 operator >=(byte2 lhs, byte2 rhs) =>
+			new(lhs.x >= rhs.x, lhs.y >= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >=(byte2 lhs, byte rhs) => new(
-		 lhs.x >= rhs,
-		 lhs.y >= rhs
-		);
+		public static bool2 operator >=(byte2 lhs, byte rhs) => new(lhs.x >= rhs, lhs.y >= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >=(byte lhs, byte2 rhs) => new(
-		 lhs >= rhs.x,
-		 lhs >= rhs.y
-		);
+		public static bool2 operator >=(byte lhs, byte2 rhs) => new(lhs >= rhs.x, lhs >= rhs.y);
 
 		// Equality operators
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator ==(byte2 lhs, byte2 rhs) => new(
-		 lhs.x == rhs.x,
-		 lhs.y == rhs.y
-		);
+		public static bool2 operator ==(byte2 lhs, byte2 rhs) =>
+			new(lhs.x == rhs.x, lhs.y == rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator ==(byte2 lhs, byte rhs) => new(
-		 lhs.x == rhs,
-		 lhs.y == rhs
-		);
+		public static bool2 operator ==(byte2 lhs, byte rhs) => new(lhs.x == rhs, lhs.y == rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator ==(byte lhs, byte2 rhs) => new(
-		 lhs == rhs.x,
-		 lhs == rhs.y
-		);
+		public static bool2 operator ==(byte lhs, byte2 rhs) => new(lhs == rhs.x, lhs == rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator !=(byte2 lhs, byte2 rhs) => new(
-		 lhs.x != rhs.x,
-		 lhs.y != rhs.y
-		);
+		public static bool2 operator !=(byte2 lhs, byte2 rhs) =>
+			new(lhs.x != rhs.x, lhs.y != rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator !=(byte2 lhs, byte rhs) => new(
-		 lhs.x != rhs,
-		 lhs.y != rhs
-		);
+		public static bool2 operator !=(byte2 lhs, byte rhs) => new(lhs.x != rhs, lhs.y != rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator !=(byte lhs, byte2 rhs) => new(
-		 lhs != rhs.x,
-		 lhs != rhs.y
-		);
+		public static bool2 operator !=(byte lhs, byte2 rhs) => new(lhs != rhs.x, lhs != rhs.y);
 
 		// Swizzling properties
 		public readonly byte2 xx => new(x, x);
@@ -384,7 +312,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...1]");
 #endif
 				fixed (byte2* array = &this)
-				{ return ((byte*)array)[index]; }
+				{
+					return ((byte*)array)[index];
+				}
 			}
 			set
 			{
@@ -393,7 +323,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...1]");
 #endif
 				fixed (byte* array = &x)
-				{ array[index] = value; }
+				{
+					array[index] = value;
+				}
 			}
 		}
 
@@ -415,12 +347,13 @@ namespace FastNoise2.NativeTexture.Formats
 		/// <summary>Returns a string representation of the byte2 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public readonly string ToString(string format, IFormatProvider formatProvider) =>
-		 $"byte2({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)})";
+			$"byte2({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)})";
 
 		internal sealed class DebuggerProxy
 		{
 			public byte x;
 			public byte y;
+
 			public DebuggerProxy(byte2 v)
 			{
 				x = v.x;

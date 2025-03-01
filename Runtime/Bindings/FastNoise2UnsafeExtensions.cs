@@ -8,61 +8,92 @@ namespace FastNoise2.Bindings
             this FastNoise fn,
             void* noiseOut,
             void* outputMinMax,
-            int xStart, int yStart,
-            int xSize, int ySize,
+            int xStart,
+            int yStart,
+            int xSize,
+            int ySize,
             float frequency,
-            int seed) =>
+            int seed
+        ) =>
             fnGenUniformGrid2D(
                 fn.mNodeHandle,
                 noiseOut,
-                xStart, yStart,
-                xSize, ySize,
-                frequency, seed,
-                outputMinMax);
+                xStart,
+                yStart,
+                xSize,
+                ySize,
+                frequency,
+                seed,
+                outputMinMax
+            );
 
         public static unsafe void GenUniformGrid3D(
             this FastNoise fn,
             void* noiseOut,
             void* outputMinMax,
-            int xStart, int yStart, int zStart,
-            int xSize, int ySize, int zSize,
-            float frequency, int seed) =>
+            int xStart,
+            int yStart,
+            int zStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            float frequency,
+            int seed
+        ) =>
             fnGenUniformGrid3D(
                 fn.mNodeHandle,
                 noiseOut,
-                xStart, yStart, zStart,
-                xSize, ySize, zSize,
-                frequency, seed,
-                outputMinMax);
+                xStart,
+                yStart,
+                zStart,
+                xSize,
+                ySize,
+                zSize,
+                frequency,
+                seed,
+                outputMinMax
+            );
 
         public static unsafe void GenUniformGrid4D(
             this FastNoise fn,
             void* noiseOut,
             void* outputMinMax,
-            int xStart, int yStart, int zStart, int wStart,
-            int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed) =>
+            int xStart,
+            int yStart,
+            int zStart,
+            int wStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            int wSize,
+            float frequency,
+            int seed
+        ) =>
             fnGenUniformGrid4D(
                 fn.mNodeHandle,
                 noiseOut,
-                xStart, yStart, zStart, wStart,
-                xSize, ySize, zSize, wSize,
+                xStart,
+                yStart,
+                zStart,
+                wStart,
+                xSize,
+                ySize,
+                zSize,
+                wSize,
                 frequency,
                 seed,
-                outputMinMax);
+                outputMinMax
+            );
 
         public static unsafe void GenTileable2D(
             this FastNoise fn,
             void* noiseOut,
             void* outputMinMax,
-            int xSize, int ySize,
-            float frequency, int seed) =>
-            fnGenTileable2D(
-                fn.mNodeHandle,
-                noiseOut,
-                xSize, ySize,
-                frequency, seed,
-                outputMinMax);
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed
+        ) => fnGenTileable2D(fn.mNodeHandle, noiseOut, xSize, ySize, frequency, seed, outputMinMax);
 
         public static unsafe void GenPositionArray2D(
             this FastNoise fn,
@@ -71,17 +102,21 @@ namespace FastNoise2.Bindings
             int positionCount,
             void* xPosArray,
             void* yPosArray,
-            float xOffset, float yOffset,
-            int seed) =>
+            float xOffset,
+            float yOffset,
+            int seed
+        ) =>
             fnGenPositionArray2D(
                 fn.mNodeHandle,
                 noiseOut,
                 positionCount,
                 xPosArray,
                 yPosArray,
-                xOffset, yOffset,
+                xOffset,
+                yOffset,
                 seed,
-                outputMinMax);
+                outputMinMax
+            );
 
         public static unsafe void GenPositionArray3D(
             this FastNoise fn,
@@ -91,8 +126,11 @@ namespace FastNoise2.Bindings
             void* xPosArray,
             void* yPosArray,
             void* zPosArray,
-            float xOffset, float yOffset, float zOffset,
-            int seed) =>
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int seed
+        ) =>
             fnGenPositionArray3D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -100,9 +138,12 @@ namespace FastNoise2.Bindings
                 xPosArray,
                 yPosArray,
                 zPosArray,
-                xOffset, yOffset, zOffset,
+                xOffset,
+                yOffset,
+                zOffset,
                 seed,
-                outputMinMax);
+                outputMinMax
+            );
 
         public static unsafe void GenPositionArray4D(
             this FastNoise fn,
@@ -113,8 +154,12 @@ namespace FastNoise2.Bindings
             void* yPosArray,
             void* zPosArray,
             void* wPosArray,
-            float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed) =>
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int seed
+        ) =>
             fnGenPositionArray4D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -123,8 +168,12 @@ namespace FastNoise2.Bindings
                 yPosArray,
                 zPosArray,
                 wPosArray,
-                xOffset, yOffset, zOffset, wOffset,
+                xOffset,
+                yOffset,
+                zOffset,
+                wOffset,
                 seed,
-                outputMinMax);
+                outputMinMax
+            );
     }
 }

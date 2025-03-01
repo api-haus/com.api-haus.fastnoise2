@@ -2,8 +2,8 @@
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
 	// ReSharper disable once InconsistentNaming
@@ -151,7 +151,7 @@ namespace FastNoise2.NativeTexture.Formats
 			{
 				x = (byte)(((v.x * 0.5f) + 0.5f) * byte.MaxValue),
 				y = (byte)(((v.y * 0.5f) + 0.5f) * byte.MaxValue),
-				z = (byte)(((v.z * 0.5f) + 0.5f) * byte.MaxValue)
+				z = (byte)(((v.z * 0.5f) + 0.5f) * byte.MaxValue),
 			};
 
 		/// <summary>
@@ -204,52 +204,28 @@ namespace FastNoise2.NativeTexture.Formats
 		// Multiplication
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator *(byte3 lhs, byte3 rhs) =>
-			new(
-				(byte)(lhs.x * rhs.x),
-				(byte)(lhs.y * rhs.y),
-				(byte)(lhs.z * rhs.z)
-			);
+			new((byte)(lhs.x * rhs.x), (byte)(lhs.y * rhs.y), (byte)(lhs.z * rhs.z));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator *(byte3 lhs, byte rhs) =>
-			new(
-				(byte)(lhs.x * rhs),
-				(byte)(lhs.y * rhs),
-				(byte)(lhs.z * rhs)
-			);
+			new((byte)(lhs.x * rhs), (byte)(lhs.y * rhs), (byte)(lhs.z * rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator *(byte lhs, byte3 rhs) =>
-			new(
-				(byte)(lhs * rhs.x),
-				(byte)(lhs * rhs.y),
-				(byte)(lhs * rhs.z)
-			);
+			new((byte)(lhs * rhs.x), (byte)(lhs * rhs.y), (byte)(lhs * rhs.z));
 
 		// Addition
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator +(byte3 lhs, byte3 rhs) =>
-			new(
-				(byte)(lhs.x + rhs.x),
-				(byte)(lhs.y + rhs.y),
-				(byte)(lhs.z + rhs.z)
-			);
+			new((byte)(lhs.x + rhs.x), (byte)(lhs.y + rhs.y), (byte)(lhs.z + rhs.z));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator +(byte3 lhs, byte rhs) =>
-			new(
-				(byte)(lhs.x + rhs),
-				(byte)(lhs.y + rhs),
-				(byte)(lhs.z + rhs)
-			);
+			new((byte)(lhs.x + rhs), (byte)(lhs.y + rhs), (byte)(lhs.z + rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator +(byte lhs, byte3 rhs) =>
-			new(
-				(byte)(lhs + rhs.x),
-				(byte)(lhs + rhs.y),
-				(byte)(lhs + rhs.z)
-			);
+			new((byte)(lhs + rhs.x), (byte)(lhs + rhs.y), (byte)(lhs + rhs.z));
 
 		// Subtraction (with clamping to zero)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -289,11 +265,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static byte3 operator /(byte3 lhs, byte rhs) =>
 			rhs == 0
 				? zero
-				: new byte3(
-					(byte)(lhs.x / rhs),
-					(byte)(lhs.y / rhs),
-					(byte)(lhs.z / rhs)
-				);
+				: new byte3((byte)(lhs.x / rhs), (byte)(lhs.y / rhs), (byte)(lhs.z / rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator /(byte lhs, byte3 rhs) =>
@@ -316,11 +288,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static byte3 operator %(byte3 lhs, byte rhs) =>
 			rhs == 0
 				? zero
-				: new byte3(
-					(byte)(lhs.x % rhs),
-					(byte)(lhs.y % rhs),
-					(byte)(lhs.z % rhs)
-				);
+				: new byte3((byte)(lhs.x % rhs), (byte)(lhs.y % rhs), (byte)(lhs.z % rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator %(byte lhs, byte3 rhs) =>
@@ -333,11 +301,7 @@ namespace FastNoise2.NativeTexture.Formats
 		// Increment and decrement
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator ++(byte3 val) =>
-			new(
-				(byte)(val.x + 1),
-				(byte)(val.y + 1),
-				(byte)(val.z + 1)
-			);
+			new((byte)(val.x + 1), (byte)(val.y + 1), (byte)(val.z + 1));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte3 operator --(byte3 val) =>
@@ -350,148 +314,76 @@ namespace FastNoise2.NativeTexture.Formats
 		// Comparison operators - these return bool3 from Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x < rhs.x,
-				lhs.y < rhs.y,
-				lhs.z < rhs.z
-			);
+			new(lhs.x < rhs.x, lhs.y < rhs.y, lhs.z < rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x < rhs,
-				lhs.y < rhs,
-				lhs.z < rhs
-			);
+			new(lhs.x < rhs, lhs.y < rhs, lhs.z < rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <(byte lhs, byte3 rhs) =>
-			new(
-				lhs < rhs.x,
-				lhs < rhs.y,
-				lhs < rhs.z
-			);
+			new(lhs < rhs.x, lhs < rhs.y, lhs < rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <=(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x <= rhs.x,
-				lhs.y <= rhs.y,
-				lhs.z <= rhs.z
-			);
+			new(lhs.x <= rhs.x, lhs.y <= rhs.y, lhs.z <= rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <=(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x <= rhs,
-				lhs.y <= rhs,
-				lhs.z <= rhs
-			);
+			new(lhs.x <= rhs, lhs.y <= rhs, lhs.z <= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator <=(byte lhs, byte3 rhs) =>
-			new(
-				lhs <= rhs.x,
-				lhs <= rhs.y,
-				lhs <= rhs.z
-			);
+			new(lhs <= rhs.x, lhs <= rhs.y, lhs <= rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x > rhs.x,
-				lhs.y > rhs.y,
-				lhs.z > rhs.z
-			);
+			new(lhs.x > rhs.x, lhs.y > rhs.y, lhs.z > rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x > rhs,
-				lhs.y > rhs,
-				lhs.z > rhs
-			);
+			new(lhs.x > rhs, lhs.y > rhs, lhs.z > rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >(byte lhs, byte3 rhs) =>
-			new(
-				lhs > rhs.x,
-				lhs > rhs.y,
-				lhs > rhs.z
-			);
+			new(lhs > rhs.x, lhs > rhs.y, lhs > rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >=(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x >= rhs.x,
-				lhs.y >= rhs.y,
-				lhs.z >= rhs.z
-			);
+			new(lhs.x >= rhs.x, lhs.y >= rhs.y, lhs.z >= rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >=(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x >= rhs,
-				lhs.y >= rhs,
-				lhs.z >= rhs
-			);
+			new(lhs.x >= rhs, lhs.y >= rhs, lhs.z >= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator >=(byte lhs, byte3 rhs) =>
-			new(
-				lhs >= rhs.x,
-				lhs >= rhs.y,
-				lhs >= rhs.z
-			);
+			new(lhs >= rhs.x, lhs >= rhs.y, lhs >= rhs.z);
 
 		// Equality operators
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator ==(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x == rhs.x,
-				lhs.y == rhs.y,
-				lhs.z == rhs.z
-			);
+			new(lhs.x == rhs.x, lhs.y == rhs.y, lhs.z == rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator ==(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x == rhs,
-				lhs.y == rhs,
-				lhs.z == rhs
-			);
+			new(lhs.x == rhs, lhs.y == rhs, lhs.z == rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator ==(byte lhs, byte3 rhs) =>
-			new(
-				lhs == rhs.x,
-				lhs == rhs.y,
-				lhs == rhs.z
-			);
+			new(lhs == rhs.x, lhs == rhs.y, lhs == rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator !=(byte3 lhs, byte3 rhs) =>
-			new(
-				lhs.x != rhs.x,
-				lhs.y != rhs.y,
-				lhs.z != rhs.z
-			);
+			new(lhs.x != rhs.x, lhs.y != rhs.y, lhs.z != rhs.z);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator !=(byte3 lhs, byte rhs) =>
-			new(
-				lhs.x != rhs,
-				lhs.y != rhs,
-				lhs.z != rhs
-			);
+			new(lhs.x != rhs, lhs.y != rhs, lhs.z != rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool3 operator !=(byte lhs, byte3 rhs) =>
-			new(
-				lhs != rhs.x,
-				lhs != rhs.y,
-				lhs != rhs.z
-			);
+			new(lhs != rhs.x, lhs != rhs.y, lhs != rhs.z);
 
 		// Swizzling properties
 		public readonly byte2 xx => new(x, x);
@@ -586,7 +478,8 @@ namespace FastNoise2.NativeTexture.Formats
 
 		/// <summary>Returns a string representation of the byte3 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly string ToString(string format, IFormatProvider formatProvider) => $"byte3({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)})";
+		public readonly string ToString(string format, IFormatProvider formatProvider) =>
+			$"byte3({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)})";
 
 		internal sealed class DebuggerProxy
 		{

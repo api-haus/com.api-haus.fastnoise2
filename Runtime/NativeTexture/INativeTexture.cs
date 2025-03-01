@@ -8,7 +8,8 @@ namespace FastNoise2.NativeTexture
 	/// </summary>
 	/// <typeparam name="TCoord">The coordinate type used for indexing texture data (e.g., int2, int3).</typeparam>
 	/// <typeparam name="TValue">The unmanaged value type stored in the texture (e.g., float).</typeparam>
-	public interface INativeTexture<TCoord, TValue> where TValue : unmanaged
+	public interface INativeTexture<TCoord, TValue>
+		where TValue : unmanaged
 	{
 		/// <summary>
 		/// Gets the resolution of the texture.

@@ -34,7 +34,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float ReadPixelBilinear(this NativeTexture2D<float>.ReadOnly tex2D, float2 pixelCoord)
+		public static float ReadPixelBilinear(
+			this NativeTexture2D<float>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -70,7 +73,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float ReadPixelBilinear(this NativeTexture2D<ushort>.ReadOnly tex2D, float2 pixelCoord)
+		public static float ReadPixelBilinear(
+			this NativeTexture2D<ushort>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -106,7 +112,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 ReadPixelBilinear(this NativeTexture2D<byte2>.ReadOnly tex2D, float2 pixelCoord)
+		public static float2 ReadPixelBilinear(
+			this NativeTexture2D<byte2>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -124,7 +133,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 ReadPixelBilinear(this NativeTexture2D<ushort2> tex2D, float2 pixelCoord)
+		public static float2 ReadPixelBilinear(
+			this NativeTexture2D<ushort2> tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -142,7 +154,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 ReadPixelBilinear(this NativeTexture2D<ushort2>.ReadOnly tex2D, float2 pixelCoord)
+		public static float2 ReadPixelBilinear(
+			this NativeTexture2D<ushort2>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -178,7 +193,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 ReadPixelBilinear(this NativeTexture2D<byte3>.ReadOnly tex2D, float2 pixelCoord)
+		public static float3 ReadPixelBilinear(
+			this NativeTexture2D<byte3>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -196,7 +214,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 ReadPixelBilinear(this NativeTexture2D<ushort3> tex2D, float2 pixelCoord)
+		public static float3 ReadPixelBilinear(
+			this NativeTexture2D<ushort3> tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -214,7 +235,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 ReadPixelBilinear(this NativeTexture2D<ushort3>.ReadOnly tex2D, float2 pixelCoord)
+		public static float3 ReadPixelBilinear(
+			this NativeTexture2D<ushort3>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -250,7 +274,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 ReadPixelBilinear(this NativeTexture2D<byte4>.ReadOnly tex2D, float2 pixelCoord)
+		public static float4 ReadPixelBilinear(
+			this NativeTexture2D<byte4>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -268,7 +295,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 ReadPixelBilinear(this NativeTexture2D<ushort4> tex2D, float2 pixelCoord)
+		public static float4 ReadPixelBilinear(
+			this NativeTexture2D<ushort4> tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -286,7 +316,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 ReadPixelBilinear(this NativeTexture2D<ushort4>.ReadOnly tex2D, float2 pixelCoord)
+		public static float4 ReadPixelBilinear(
+			this NativeTexture2D<ushort4>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
@@ -305,7 +338,8 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T ReadPixelBilinear<T>(this NativeTexture2D<T> tex2D, float2 pixelCoord) where T : unmanaged
+		public static T ReadPixelBilinear<T>(this NativeTexture2D<T> tex2D, float2 pixelCoord)
+			where T : unmanaged
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 			return tex2D[(int2)math.floor(pixelCoord)];
@@ -319,7 +353,11 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelCoord">The normalized floating-point coordinate (range [0,1]) of the pixel.</param>
 		/// <returns>The interpolated pixel value.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T ReadPixelBilinear<T>(this NativeTexture2D<T>.ReadOnly tex2D, float2 pixelCoord) where T : unmanaged
+		public static T ReadPixelBilinear<T>(
+			this NativeTexture2D<T>.ReadOnly tex2D,
+			float2 pixelCoord
+		)
+			where T : unmanaged
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 			return tex2D[(int2)math.floor(pixelCoord)];
@@ -329,17 +367,15 @@ namespace FastNoise2.NativeTexture
 		static void PixelFloorCeil(float2 pixelCoord, out int4 pixelFloorCeil, out float2 ratio)
 		{
 			// Calculate floor and ceil coordinates for interpolation
-			pixelFloorCeil = new int4(
-				(int2)math.floor(pixelCoord),
-				(int2)math.ceil(pixelCoord)
-			);
+			pixelFloorCeil = new int4((int2)math.floor(pixelCoord), (int2)math.ceil(pixelCoord));
 
 			// Compute interpolation ratios
 			ratio = pixelCoord - pixelFloorCeil.xy;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PixelCoord<T>(this NativeTexture2D<T> tex2D, ref float2 pixelCoord) where T : unmanaged
+		static void PixelCoord<T>(this NativeTexture2D<T> tex2D, ref float2 pixelCoord)
+			where T : unmanaged
 		{
 			// Scale normalized coordinates to texture resolution
 			pixelCoord *= tex2D.Resolution;
@@ -347,7 +383,8 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PixelCoord<T>(this NativeTexture2D<T>.ReadOnly tex2D, ref float2 pixelCoord) where T : unmanaged
+		static void PixelCoord<T>(this NativeTexture2D<T>.ReadOnly tex2D, ref float2 pixelCoord)
+			where T : unmanaged
 		{
 			// Scale normalized coordinates to texture resolution
 			pixelCoord *= tex2D.Resolution;
@@ -366,7 +403,10 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 BilinearInterpolation(ref float4x2 samples, ref float2 ratio) => new(
-			BilinearInterpolation(ref samples.c0, ref ratio), BilinearInterpolation(ref samples.c1, ref ratio));
+		static float2 BilinearInterpolation(ref float4x2 samples, ref float2 ratio) =>
+			new(
+				BilinearInterpolation(ref samples.c0, ref ratio),
+				BilinearInterpolation(ref samples.c1, ref ratio)
+			);
 	}
 }

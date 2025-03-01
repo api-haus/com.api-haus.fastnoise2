@@ -12,8 +12,11 @@ namespace FastNoise2.Jobs
 			this FastNoise noise,
 			NativeTexture2D<float> texture,
 			NativeReference<ValueBounds> boundsRef,
-			int seed, int2 start, float frequency,
-			JobHandle dependency = default)
+			int seed,
+			int2 start,
+			float frequency,
+			JobHandle dependency = default
+		)
 		{
 			dependency = new GenUniformGrid2DJob
 			{
@@ -31,8 +34,10 @@ namespace FastNoise2.Jobs
 			this FastNoise noise,
 			NativeTexture2D<float> texture,
 			NativeReference<ValueBounds> boundsRef,
-			int seed, float frequency,
-			JobHandle dependency = default)
+			int seed,
+			float frequency,
+			JobHandle dependency = default
+		)
 		{
 			dependency = new GenTileable2DJob
 			{
@@ -49,8 +54,11 @@ namespace FastNoise2.Jobs
 			this FastNoise noise,
 			NativeTexture3D<float> texture,
 			NativeReference<ValueBounds> boundsRef,
-			int seed, int3 start, float frequency,
-			JobHandle dependency = default)
+			int seed,
+			int3 start,
+			float frequency,
+			JobHandle dependency = default
+		)
 		{
 			dependency = new GenUniformGrid3DJob
 			{

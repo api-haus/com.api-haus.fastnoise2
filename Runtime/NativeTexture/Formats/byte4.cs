@@ -2,8 +2,8 @@
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
 	// ReSharper disable once InconsistentNaming
@@ -15,10 +15,13 @@ namespace FastNoise2.NativeTexture.Formats
 	{
 		/// <summary>x component of the vector.</summary>
 		public byte x;
+
 		/// <summary>y component of the vector.</summary>
 		public byte y;
+
 		/// <summary>z component of the vector.</summary>
 		public byte z;
+
 		/// <summary>w component of the vector.</summary>
 		public byte w;
 
@@ -29,7 +32,12 @@ namespace FastNoise2.NativeTexture.Formats
 		public static readonly byte4 one = new(1, 1, 1, 1);
 
 		/// <summary>byte4 maximum value (all components are byte.MaxValue).</summary>
-		public static readonly byte4 max = new(byte.MaxValue, byte.MaxValue, byte.MaxValue, byte.MaxValue);
+		public static readonly byte4 max = new(
+			byte.MaxValue,
+			byte.MaxValue,
+			byte.MaxValue,
+			byte.MaxValue
+		);
 
 		/// <summary>Constructs a byte4 vector from four byte values.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -166,25 +174,27 @@ namespace FastNoise2.NativeTexture.Formats
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 FromNormalized(float4 v) => new()
-		{
-			x = (byte)(((v.x * 0.5f) + 0.5f) * byte.MaxValue),
-			y = (byte)(((v.y * 0.5f) + 0.5f) * byte.MaxValue),
-			z = (byte)(((v.z * 0.5f) + 0.5f) * byte.MaxValue),
-			w = (byte)(((v.w * 0.5f) + 0.5f) * byte.MaxValue)
-		};
+		public static byte4 FromNormalized(float4 v) =>
+			new()
+			{
+				x = (byte)(((v.x * 0.5f) + 0.5f) * byte.MaxValue),
+				y = (byte)(((v.y * 0.5f) + 0.5f) * byte.MaxValue),
+				z = (byte)(((v.z * 0.5f) + 0.5f) * byte.MaxValue),
+				w = (byte)(((v.w * 0.5f) + 0.5f) * byte.MaxValue),
+			};
 
 		/// <summary>
 		/// Converts a byte4 value (0..255) back to normalized float4 (-1..1)
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly float4 ToNormalized() => new(
-					((float)x / byte.MaxValue * 2f) - 1f,
-					((float)y / byte.MaxValue * 2f) - 1f,
-					((float)z / byte.MaxValue * 2f) - 1f,
-					((float)w / byte.MaxValue * 2f) - 1f
-			 );
+		public readonly float4 ToNormalized() =>
+			new(
+				((float)x / byte.MaxValue * 2f) - 1f,
+				((float)y / byte.MaxValue * 2f) - 1f,
+				((float)z / byte.MaxValue * 2f) - 1f,
+				((float)w / byte.MaxValue * 2f) - 1f
+			);
 
 		// Implicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,12 +210,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float4(byte4 v) => ToFloat4(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float4 ToFloat4(byte4 b4) => new(
-			 (float)b4.x / byte.MaxValue,
-			 (float)b4.y / byte.MaxValue,
-			 (float)b4.z / byte.MaxValue,
-			 (float)b4.w / byte.MaxValue
-		);
+		static float4 ToFloat4(byte4 b4) =>
+			new(
+				(float)b4.x / byte.MaxValue,
+				(float)b4.y / byte.MaxValue,
+				(float)b4.z / byte.MaxValue,
+				(float)b4.w / byte.MaxValue
+			);
 
 		// Explicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -223,291 +234,215 @@ namespace FastNoise2.NativeTexture.Formats
 		// Operators
 		// Multiplication
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator *(byte4 lhs, byte4 rhs) => new(
-			 (byte)(lhs.x * rhs.x),
-			 (byte)(lhs.y * rhs.y),
-			 (byte)(lhs.z * rhs.z),
-			 (byte)(lhs.w * rhs.w)
-		);
+		public static byte4 operator *(byte4 lhs, byte4 rhs) =>
+			new(
+				(byte)(lhs.x * rhs.x),
+				(byte)(lhs.y * rhs.y),
+				(byte)(lhs.z * rhs.z),
+				(byte)(lhs.w * rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator *(byte4 lhs, byte rhs) => new(
-			 (byte)(lhs.x * rhs),
-			 (byte)(lhs.y * rhs),
-			 (byte)(lhs.z * rhs),
-			 (byte)(lhs.w * rhs)
-		);
+		public static byte4 operator *(byte4 lhs, byte rhs) =>
+			new((byte)(lhs.x * rhs), (byte)(lhs.y * rhs), (byte)(lhs.z * rhs), (byte)(lhs.w * rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator *(byte lhs, byte4 rhs) => new(
-			 (byte)(lhs * rhs.x),
-			 (byte)(lhs * rhs.y),
-			 (byte)(lhs * rhs.z),
-			 (byte)(lhs * rhs.w)
-		);
+		public static byte4 operator *(byte lhs, byte4 rhs) =>
+			new((byte)(lhs * rhs.x), (byte)(lhs * rhs.y), (byte)(lhs * rhs.z), (byte)(lhs * rhs.w));
 
 		// Addition
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator +(byte4 lhs, byte4 rhs) => new(
-			 (byte)(lhs.x + rhs.x),
-			 (byte)(lhs.y + rhs.y),
-			 (byte)(lhs.z + rhs.z),
-			 (byte)(lhs.w + rhs.w)
-		);
+		public static byte4 operator +(byte4 lhs, byte4 rhs) =>
+			new(
+				(byte)(lhs.x + rhs.x),
+				(byte)(lhs.y + rhs.y),
+				(byte)(lhs.z + rhs.z),
+				(byte)(lhs.w + rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator +(byte4 lhs, byte rhs) => new(
-			 (byte)(lhs.x + rhs),
-			 (byte)(lhs.y + rhs),
-			 (byte)(lhs.z + rhs),
-			 (byte)(lhs.w + rhs)
-		);
+		public static byte4 operator +(byte4 lhs, byte rhs) =>
+			new((byte)(lhs.x + rhs), (byte)(lhs.y + rhs), (byte)(lhs.z + rhs), (byte)(lhs.w + rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator +(byte lhs, byte4 rhs) => new(
-			 (byte)(lhs + rhs.x),
-			 (byte)(lhs + rhs.y),
-			 (byte)(lhs + rhs.z),
-			 (byte)(lhs + rhs.w)
-		);
+		public static byte4 operator +(byte lhs, byte4 rhs) =>
+			new((byte)(lhs + rhs.x), (byte)(lhs + rhs.y), (byte)(lhs + rhs.z), (byte)(lhs + rhs.w));
 
 		// Subtraction (with clamping to zero)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator -(byte4 lhs, byte4 rhs) => new(
-			 (byte)Math.Max(0, lhs.x - rhs.x),
-			 (byte)Math.Max(0, lhs.y - rhs.y),
-			 (byte)Math.Max(0, lhs.z - rhs.z),
-			 (byte)Math.Max(0, lhs.w - rhs.w)
-		);
+		public static byte4 operator -(byte4 lhs, byte4 rhs) =>
+			new(
+				(byte)Math.Max(0, lhs.x - rhs.x),
+				(byte)Math.Max(0, lhs.y - rhs.y),
+				(byte)Math.Max(0, lhs.z - rhs.z),
+				(byte)Math.Max(0, lhs.w - rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator -(byte4 lhs, byte rhs) => new(
-			 (byte)Math.Max(0, lhs.x - rhs),
-			 (byte)Math.Max(0, lhs.y - rhs),
-			 (byte)Math.Max(0, lhs.z - rhs),
-			 (byte)Math.Max(0, lhs.w - rhs)
-		);
+		public static byte4 operator -(byte4 lhs, byte rhs) =>
+			new(
+				(byte)Math.Max(0, lhs.x - rhs),
+				(byte)Math.Max(0, lhs.y - rhs),
+				(byte)Math.Max(0, lhs.z - rhs),
+				(byte)Math.Max(0, lhs.w - rhs)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator -(byte lhs, byte4 rhs) => new(
-			 (byte)Math.Max(0, lhs - rhs.x),
-			 (byte)Math.Max(0, lhs - rhs.y),
-			 (byte)Math.Max(0, lhs - rhs.z),
-			 (byte)Math.Max(0, lhs - rhs.w)
-		);
+		public static byte4 operator -(byte lhs, byte4 rhs) =>
+			new(
+				(byte)Math.Max(0, lhs - rhs.x),
+				(byte)Math.Max(0, lhs - rhs.y),
+				(byte)Math.Max(0, lhs - rhs.z),
+				(byte)Math.Max(0, lhs - rhs.w)
+			);
 
 		// Division
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator /(byte4 lhs, byte4 rhs) => new(
-			 rhs.x == 0 ? (byte)0 : (byte)(lhs.x / rhs.x),
-			 rhs.y == 0 ? (byte)0 : (byte)(lhs.y / rhs.y),
-			 rhs.z == 0 ? (byte)0 : (byte)(lhs.z / rhs.z),
-			 rhs.w == 0 ? (byte)0 : (byte)(lhs.w / rhs.w)
-		);
+		public static byte4 operator /(byte4 lhs, byte4 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs.x / rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs.y / rhs.y),
+				rhs.z == 0 ? (byte)0 : (byte)(lhs.z / rhs.z),
+				rhs.w == 0 ? (byte)0 : (byte)(lhs.w / rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator /(byte4 lhs, byte rhs) => rhs == 0 ? zero : new byte4(
-			 (byte)(lhs.x / rhs),
-			 (byte)(lhs.y / rhs),
-			 (byte)(lhs.z / rhs),
-			 (byte)(lhs.w / rhs)
-		);
+		public static byte4 operator /(byte4 lhs, byte rhs) =>
+			rhs == 0
+				? zero
+				: new byte4(
+					(byte)(lhs.x / rhs),
+					(byte)(lhs.y / rhs),
+					(byte)(lhs.z / rhs),
+					(byte)(lhs.w / rhs)
+				);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator /(byte lhs, byte4 rhs) => new(
-			 rhs.x == 0 ? (byte)0 : (byte)(lhs / rhs.x),
-			 rhs.y == 0 ? (byte)0 : (byte)(lhs / rhs.y),
-			 rhs.z == 0 ? (byte)0 : (byte)(lhs / rhs.z),
-			 rhs.w == 0 ? (byte)0 : (byte)(lhs / rhs.w)
-		);
+		public static byte4 operator /(byte lhs, byte4 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs / rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs / rhs.y),
+				rhs.z == 0 ? (byte)0 : (byte)(lhs / rhs.z),
+				rhs.w == 0 ? (byte)0 : (byte)(lhs / rhs.w)
+			);
 
 		// Modulo
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator %(byte4 lhs, byte4 rhs) => new(
-			 rhs.x == 0 ? (byte)0 : (byte)(lhs.x % rhs.x),
-			 rhs.y == 0 ? (byte)0 : (byte)(lhs.y % rhs.y),
-			 rhs.z == 0 ? (byte)0 : (byte)(lhs.z % rhs.z),
-			 rhs.w == 0 ? (byte)0 : (byte)(lhs.w % rhs.w)
-		);
+		public static byte4 operator %(byte4 lhs, byte4 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs.x % rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs.y % rhs.y),
+				rhs.z == 0 ? (byte)0 : (byte)(lhs.z % rhs.z),
+				rhs.w == 0 ? (byte)0 : (byte)(lhs.w % rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator %(byte4 lhs, byte rhs) => rhs == 0 ? zero : new byte4(
-			 (byte)(lhs.x % rhs),
-			 (byte)(lhs.y % rhs),
-			 (byte)(lhs.z % rhs),
-			 (byte)(lhs.w % rhs)
-		);
+		public static byte4 operator %(byte4 lhs, byte rhs) =>
+			rhs == 0
+				? zero
+				: new byte4(
+					(byte)(lhs.x % rhs),
+					(byte)(lhs.y % rhs),
+					(byte)(lhs.z % rhs),
+					(byte)(lhs.w % rhs)
+				);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator %(byte lhs, byte4 rhs) => new(
-			 rhs.x == 0 ? (byte)0 : (byte)(lhs % rhs.x),
-			 rhs.y == 0 ? (byte)0 : (byte)(lhs % rhs.y),
-			 rhs.z == 0 ? (byte)0 : (byte)(lhs % rhs.z),
-			 rhs.w == 0 ? (byte)0 : (byte)(lhs % rhs.w)
-		);
+		public static byte4 operator %(byte lhs, byte4 rhs) =>
+			new(
+				rhs.x == 0 ? (byte)0 : (byte)(lhs % rhs.x),
+				rhs.y == 0 ? (byte)0 : (byte)(lhs % rhs.y),
+				rhs.z == 0 ? (byte)0 : (byte)(lhs % rhs.z),
+				rhs.w == 0 ? (byte)0 : (byte)(lhs % rhs.w)
+			);
 
 		// Increment and decrement
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator ++(byte4 val) => new(
-			 (byte)(val.x + 1),
-			 (byte)(val.y + 1),
-			 (byte)(val.z + 1),
-			 (byte)(val.w + 1)
-		);
+		public static byte4 operator ++(byte4 val) =>
+			new((byte)(val.x + 1), (byte)(val.y + 1), (byte)(val.z + 1), (byte)(val.w + 1));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static byte4 operator --(byte4 val) => new(
-			 (byte)Math.Max(0, val.x - 1),
-			 (byte)Math.Max(0, val.y - 1),
-			 (byte)Math.Max(0, val.z - 1),
-			 (byte)Math.Max(0, val.w - 1)
-		);
+		public static byte4 operator --(byte4 val) =>
+			new(
+				(byte)Math.Max(0, val.x - 1),
+				(byte)Math.Max(0, val.y - 1),
+				(byte)Math.Max(0, val.z - 1),
+				(byte)Math.Max(0, val.w - 1)
+			);
 
 		// Comparison operators - these return bool4 from Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(byte4 lhs, byte4 rhs) => new(
-			 lhs.x < rhs.x,
-			 lhs.y < rhs.y,
-			 lhs.z < rhs.z,
-			 lhs.w < rhs.w
-		);
+		public static bool4 operator <(byte4 lhs, byte4 rhs) =>
+			new(lhs.x < rhs.x, lhs.y < rhs.y, lhs.z < rhs.z, lhs.w < rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(byte4 lhs, byte rhs) => new(
-			 lhs.x < rhs,
-			 lhs.y < rhs,
-			 lhs.z < rhs,
-			 lhs.w < rhs
-		);
+		public static bool4 operator <(byte4 lhs, byte rhs) =>
+			new(lhs.x < rhs, lhs.y < rhs, lhs.z < rhs, lhs.w < rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(byte lhs, byte4 rhs) => new(
-			 lhs < rhs.x,
-			 lhs < rhs.y,
-			 lhs < rhs.z,
-			 lhs < rhs.w
-		);
+		public static bool4 operator <(byte lhs, byte4 rhs) =>
+			new(lhs < rhs.x, lhs < rhs.y, lhs < rhs.z, lhs < rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(byte4 lhs, byte4 rhs) => new(
-			 lhs.x <= rhs.x,
-			 lhs.y <= rhs.y,
-			 lhs.z <= rhs.z,
-			 lhs.w <= rhs.w
-		);
+		public static bool4 operator <=(byte4 lhs, byte4 rhs) =>
+			new(lhs.x <= rhs.x, lhs.y <= rhs.y, lhs.z <= rhs.z, lhs.w <= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(byte4 lhs, byte rhs) => new(
-			 lhs.x <= rhs,
-			 lhs.y <= rhs,
-			 lhs.z <= rhs,
-			 lhs.w <= rhs
-		);
+		public static bool4 operator <=(byte4 lhs, byte rhs) =>
+			new(lhs.x <= rhs, lhs.y <= rhs, lhs.z <= rhs, lhs.w <= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(byte lhs, byte4 rhs) => new(
-			 lhs <= rhs.x,
-			 lhs <= rhs.y,
-			 lhs <= rhs.z,
-			 lhs <= rhs.w
-		);
+		public static bool4 operator <=(byte lhs, byte4 rhs) =>
+			new(lhs <= rhs.x, lhs <= rhs.y, lhs <= rhs.z, lhs <= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(byte4 lhs, byte4 rhs) => new(
-			 lhs.x > rhs.x,
-			 lhs.y > rhs.y,
-			 lhs.z > rhs.z,
-			 lhs.w > rhs.w
-		);
+		public static bool4 operator >(byte4 lhs, byte4 rhs) =>
+			new(lhs.x > rhs.x, lhs.y > rhs.y, lhs.z > rhs.z, lhs.w > rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(byte4 lhs, byte rhs) => new(
-			 lhs.x > rhs,
-			 lhs.y > rhs,
-			 lhs.z > rhs,
-			 lhs.w > rhs
-		);
+		public static bool4 operator >(byte4 lhs, byte rhs) =>
+			new(lhs.x > rhs, lhs.y > rhs, lhs.z > rhs, lhs.w > rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(byte lhs, byte4 rhs) => new(
-			 lhs > rhs.x,
-			 lhs > rhs.y,
-			 lhs > rhs.z,
-			 lhs > rhs.w
-		);
+		public static bool4 operator >(byte lhs, byte4 rhs) =>
+			new(lhs > rhs.x, lhs > rhs.y, lhs > rhs.z, lhs > rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(byte4 lhs, byte4 rhs) => new(
-			 lhs.x >= rhs.x,
-			 lhs.y >= rhs.y,
-			 lhs.z >= rhs.z,
-			 lhs.w >= rhs.w
-		);
+		public static bool4 operator >=(byte4 lhs, byte4 rhs) =>
+			new(lhs.x >= rhs.x, lhs.y >= rhs.y, lhs.z >= rhs.z, lhs.w >= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(byte4 lhs, byte rhs) => new(
-			 lhs.x >= rhs,
-			 lhs.y >= rhs,
-			 lhs.z >= rhs,
-			 lhs.w >= rhs
-		);
+		public static bool4 operator >=(byte4 lhs, byte rhs) =>
+			new(lhs.x >= rhs, lhs.y >= rhs, lhs.z >= rhs, lhs.w >= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(byte lhs, byte4 rhs) => new(
-			 lhs >= rhs.x,
-			 lhs >= rhs.y,
-			 lhs >= rhs.z,
-			 lhs >= rhs.w
-		);
+		public static bool4 operator >=(byte lhs, byte4 rhs) =>
+			new(lhs >= rhs.x, lhs >= rhs.y, lhs >= rhs.z, lhs >= rhs.w);
 
 		// Equality operators
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(byte4 lhs, byte4 rhs) => new(
-			 lhs.x == rhs.x,
-			 lhs.y == rhs.y,
-			 lhs.z == rhs.z,
-			 lhs.w == rhs.w
-		);
+		public static bool4 operator ==(byte4 lhs, byte4 rhs) =>
+			new(lhs.x == rhs.x, lhs.y == rhs.y, lhs.z == rhs.z, lhs.w == rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(byte4 lhs, byte rhs) => new(
-			 lhs.x == rhs,
-			 lhs.y == rhs,
-			 lhs.z == rhs,
-			 lhs.w == rhs
-		);
+		public static bool4 operator ==(byte4 lhs, byte rhs) =>
+			new(lhs.x == rhs, lhs.y == rhs, lhs.z == rhs, lhs.w == rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(byte lhs, byte4 rhs) => new(
-			 lhs == rhs.x,
-			 lhs == rhs.y,
-			 lhs == rhs.z,
-			 lhs == rhs.w
-		);
+		public static bool4 operator ==(byte lhs, byte4 rhs) =>
+			new(lhs == rhs.x, lhs == rhs.y, lhs == rhs.z, lhs == rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(byte4 lhs, byte4 rhs) => new(
-			 lhs.x != rhs.x,
-			 lhs.y != rhs.y,
-			 lhs.z != rhs.z,
-			 lhs.w != rhs.w
-		);
+		public static bool4 operator !=(byte4 lhs, byte4 rhs) =>
+			new(lhs.x != rhs.x, lhs.y != rhs.y, lhs.z != rhs.z, lhs.w != rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(byte4 lhs, byte rhs) => new(
-			 lhs.x != rhs,
-			 lhs.y != rhs,
-			 lhs.z != rhs,
-			 lhs.w != rhs
-		);
+		public static bool4 operator !=(byte4 lhs, byte rhs) =>
+			new(lhs.x != rhs, lhs.y != rhs, lhs.z != rhs, lhs.w != rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(byte lhs, byte4 rhs) => new(
-			 lhs != rhs.x,
-			 lhs != rhs.y,
-			 lhs != rhs.z,
-			 lhs != rhs.w
-		);
+		public static bool4 operator !=(byte lhs, byte4 rhs) =>
+			new(lhs != rhs.x, lhs != rhs.y, lhs != rhs.z, lhs != rhs.w);
 
 		// Basic swizzling properties - a small subset of the possible combinations
 		public readonly byte2 xx => new(x, x);
@@ -584,7 +519,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...3]");
 #endif
 				fixed (byte4* array = &this)
-				{ return ((byte*)array)[index]; }
+				{
+					return ((byte*)array)[index];
+				}
 			}
 			set
 			{
@@ -593,13 +530,16 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...3]");
 #endif
 				fixed (byte* array = &x)
-				{ array[index] = value; }
+				{
+					array[index] = value;
+				}
 			}
 		}
 
 		/// <summary>Returns true if the byte4 is equal to a given byte4, false otherwise.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly bool Equals(byte4 other) => x == other.x && y == other.y && z == other.z && w == other.w;
+		public readonly bool Equals(byte4 other) =>
+			x == other.x && y == other.y && z == other.z && w == other.w;
 
 		/// <summary>Returns true if the byte4 is equal to a given byte4, false otherwise.</summary>
 		public override readonly bool Equals(object obj) => obj is byte4 other && Equals(other);
@@ -615,7 +555,7 @@ namespace FastNoise2.NativeTexture.Formats
 		/// <summary>Returns a string representation of the byte4 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public readonly string ToString(string format, IFormatProvider formatProvider) =>
-			 $"byte4({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)}, {w.ToString(format, formatProvider)})";
+			$"byte4({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)}, {w.ToString(format, formatProvider)})";
 
 		internal sealed class DebuggerProxy
 		{

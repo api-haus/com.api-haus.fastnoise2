@@ -26,20 +26,36 @@ namespace FastNoise2.Editor
 			EditorGUI.BeginProperty(position, label, property);
 
 			// Draw label
-			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
+			position = EditorGUI.PrefixLabel(
+				position,
+				GUIUtility.GetControlID(FocusType.Passive),
+				label
+			);
 
 			// Don't make child fields be indented
 			int indent = EditorGUI.indentLevel;
 			EditorGUI.indentLevel = 0;
 
 			// Calculate rects
-			Rect encodedValueRect = new Rect(position.x, position.y, position.width - EDIT_BUTTON_WIDTH - PADDING, position.height);
-			Rect buttonRect = new Rect(position.x + (position.width - EDIT_BUTTON_WIDTH), position.y, EDIT_BUTTON_WIDTH,
-				position.height);
+			Rect encodedValueRect = new Rect(
+				position.x,
+				position.y,
+				position.width - EDIT_BUTTON_WIDTH - PADDING,
+				position.height
+			);
+			Rect buttonRect = new Rect(
+				position.x + (position.width - EDIT_BUTTON_WIDTH),
+				position.y,
+				EDIT_BUTTON_WIDTH,
+				position.height
+			);
 
 			// Draw fields - pass GUIContent.none to each so they are drawn without labels
-			EditorGUI.PropertyField(encodedValueRect, property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH),
-				GUIContent.none);
+			EditorGUI.PropertyField(
+				encodedValueRect,
+				property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH),
+				GUIContent.none
+			);
 			bool isButtonClicked = EditorGUI.LinkButton(buttonRect, "Edit Noise");
 
 			if (isButtonClicked)
@@ -72,7 +88,8 @@ namespace FastNoise2.Editor
 
 		void OnActivate()
 		{
-			if (m_IsEditing) return;
+			if (m_IsEditing)
+				return;
 			m_IsEditing = true;
 
 			s_editorWasActivatedAction?.Invoke(this, true);
@@ -96,7 +113,8 @@ namespace FastNoise2.Editor
 		{
 			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings -= OnCopiedNodeSettings;
 
-			if (!m_IsEditing && !force) return;
+			if (!m_IsEditing && !force)
+				return;
 			m_IsEditing = false;
 
 			s_editorWasActivatedAction?.Invoke(this, false);

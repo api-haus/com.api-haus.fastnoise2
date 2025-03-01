@@ -2,8 +2,8 @@
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
 	// ReSharper disable once InconsistentNaming
@@ -15,6 +15,7 @@ namespace FastNoise2.NativeTexture.Formats
 	{
 		/// <summary>x component of the vector.</summary>
 		public ushort x;
+
 		/// <summary>y component of the vector.</summary>
 		public ushort y;
 
@@ -104,21 +105,20 @@ namespace FastNoise2.NativeTexture.Formats
 		/// Useful for high-precision normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 FromNormalized(float2 v) => new()
-		{
-			x = (ushort)(((v.x * 0.5f) + 0.5f) * ushort.MaxValue),
-			y = (ushort)(((v.y * 0.5f) + 0.5f) * ushort.MaxValue)
-		};
+		public static ushort2 FromNormalized(float2 v) =>
+			new()
+			{
+				x = (ushort)(((v.x * 0.5f) + 0.5f) * ushort.MaxValue),
+				y = (ushort)(((v.y * 0.5f) + 0.5f) * ushort.MaxValue),
+			};
 
 		/// <summary>
 		/// Converts a ushort2 value (0..65535) back to normalized float2 (-1..1)
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly float2 ToNormalized() => new(
-			((float)x / ushort.MaxValue * 2f) - 1f,
-			((float)y / ushort.MaxValue * 2f) - 1f
-		 );
+		public readonly float2 ToNormalized() =>
+			new(((float)x / ushort.MaxValue * 2f) - 1f, ((float)y / ushort.MaxValue * 2f) - 1f);
 
 		// Implicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -134,7 +134,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float2(ushort2 v) => ToFloat2(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 ToFloat2(ushort2 u2) => new((float)u2.x / ushort.MaxValue, (float)u2.y / ushort.MaxValue);
+		static float2 ToFloat2(ushort2 u2) =>
+			new((float)u2.x / ushort.MaxValue, (float)u2.y / ushort.MaxValue);
 
 		// Explicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -146,88 +147,94 @@ namespace FastNoise2.NativeTexture.Formats
 		// Operators
 		// Multiplication
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator *(ushort2 lhs, ushort2 rhs) => new((ushort)(lhs.x * rhs.x), (ushort)(lhs.y * rhs.y));
+		public static ushort2 operator *(ushort2 lhs, ushort2 rhs) =>
+			new((ushort)(lhs.x * rhs.x), (ushort)(lhs.y * rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator *(ushort2 lhs, ushort rhs) => new((ushort)(lhs.x * rhs), (ushort)(lhs.y * rhs));
+		public static ushort2 operator *(ushort2 lhs, ushort rhs) =>
+			new((ushort)(lhs.x * rhs), (ushort)(lhs.y * rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator *(ushort lhs, ushort2 rhs) => new((ushort)(lhs * rhs.x), (ushort)(lhs * rhs.y));
+		public static ushort2 operator *(ushort lhs, ushort2 rhs) =>
+			new((ushort)(lhs * rhs.x), (ushort)(lhs * rhs.y));
 
 		// Addition
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator +(ushort2 lhs, ushort2 rhs) => new((ushort)(lhs.x + rhs.x), (ushort)(lhs.y + rhs.y));
+		public static ushort2 operator +(ushort2 lhs, ushort2 rhs) =>
+			new((ushort)(lhs.x + rhs.x), (ushort)(lhs.y + rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator +(ushort2 lhs, ushort rhs) => new((ushort)(lhs.x + rhs), (ushort)(lhs.y + rhs));
+		public static ushort2 operator +(ushort2 lhs, ushort rhs) =>
+			new((ushort)(lhs.x + rhs), (ushort)(lhs.y + rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator +(ushort lhs, ushort2 rhs) => new((ushort)(lhs + rhs.x), (ushort)(lhs + rhs.y));
+		public static ushort2 operator +(ushort lhs, ushort2 rhs) =>
+			new((ushort)(lhs + rhs.x), (ushort)(lhs + rhs.y));
 
 		// Subtraction (with clamping to zero)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator -(ushort2 lhs, ushort2 rhs) => new(
-			 (ushort)Math.Max(0, lhs.x - rhs.x),
-			 (ushort)Math.Max(0, lhs.y - rhs.y)
-		 );
+		public static ushort2 operator -(ushort2 lhs, ushort2 rhs) =>
+			new((ushort)Math.Max(0, lhs.x - rhs.x), (ushort)Math.Max(0, lhs.y - rhs.y));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator -(ushort2 lhs, ushort rhs) => new(
-			 (ushort)Math.Max(0, lhs.x - rhs),
-			 (ushort)Math.Max(0, lhs.y - rhs)
-		 );
+		public static ushort2 operator -(ushort2 lhs, ushort rhs) =>
+			new((ushort)Math.Max(0, lhs.x - rhs), (ushort)Math.Max(0, lhs.y - rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator -(ushort lhs, ushort2 rhs) => new(
-			 (ushort)Math.Max(0, lhs - rhs.x),
-			 (ushort)Math.Max(0, lhs - rhs.y)
-		 );
+		public static ushort2 operator -(ushort lhs, ushort2 rhs) =>
+			new((ushort)Math.Max(0, lhs - rhs.x), (ushort)Math.Max(0, lhs - rhs.y));
 
 		// Division
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator /(ushort2 lhs, ushort2 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x / rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y / rhs.y)
-		 );
+		public static ushort2 operator /(ushort2 lhs, ushort2 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x / rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y / rhs.y)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator /(ushort2 lhs, ushort rhs) => rhs == 0 ? zero : new ushort2((ushort)(lhs.x / rhs), (ushort)(lhs.y / rhs));
+		public static ushort2 operator /(ushort2 lhs, ushort rhs) =>
+			rhs == 0 ? zero : new ushort2((ushort)(lhs.x / rhs), (ushort)(lhs.y / rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator /(ushort lhs, ushort2 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs / rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs / rhs.y)
-		 );
+		public static ushort2 operator /(ushort lhs, ushort2 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs / rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs / rhs.y)
+			);
 
 		// Modulo
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator %(ushort2 lhs, ushort2 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x % rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y % rhs.y)
-		 );
+		public static ushort2 operator %(ushort2 lhs, ushort2 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x % rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y % rhs.y)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator %(ushort2 lhs, ushort rhs) => rhs == 0 ? zero : new ushort2((ushort)(lhs.x % rhs), (ushort)(lhs.y % rhs));
+		public static ushort2 operator %(ushort2 lhs, ushort rhs) =>
+			rhs == 0 ? zero : new ushort2((ushort)(lhs.x % rhs), (ushort)(lhs.y % rhs));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator %(ushort lhs, ushort2 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs % rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs % rhs.y)
-		 );
+		public static ushort2 operator %(ushort lhs, ushort2 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs % rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs % rhs.y)
+			);
 
 		// Increment and decrement
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator ++(ushort2 val) => new((ushort)(val.x + 1), (ushort)(val.y + 1));
+		public static ushort2 operator ++(ushort2 val) =>
+			new((ushort)(val.x + 1), (ushort)(val.y + 1));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort2 operator --(ushort2 val) => new(
-			 (ushort)Math.Max(0, val.x - 1),
-			 (ushort)Math.Max(0, val.y - 1)
-		 );
+		public static ushort2 operator --(ushort2 val) =>
+			new((ushort)Math.Max(0, val.x - 1), (ushort)Math.Max(0, val.y - 1));
 
 		// Comparison operators - these return bool2 from Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <(ushort2 lhs, ushort2 rhs) => new(lhs.x < rhs.x, lhs.y < rhs.y);
+		public static bool2 operator <(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x < rhs.x, lhs.y < rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator <(ushort2 lhs, ushort rhs) => new(lhs.x < rhs, lhs.y < rhs);
@@ -236,7 +243,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static bool2 operator <(ushort lhs, ushort2 rhs) => new(lhs < rhs.x, lhs < rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator <=(ushort2 lhs, ushort2 rhs) => new(lhs.x <= rhs.x, lhs.y <= rhs.y);
+		public static bool2 operator <=(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x <= rhs.x, lhs.y <= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator <=(ushort2 lhs, ushort rhs) => new(lhs.x <= rhs, lhs.y <= rhs);
@@ -245,7 +253,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static bool2 operator <=(ushort lhs, ushort2 rhs) => new(lhs <= rhs.x, lhs <= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >(ushort2 lhs, ushort2 rhs) => new(lhs.x > rhs.x, lhs.y > rhs.y);
+		public static bool2 operator >(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x > rhs.x, lhs.y > rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator >(ushort2 lhs, ushort rhs) => new(lhs.x > rhs, lhs.y > rhs);
@@ -254,7 +263,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static bool2 operator >(ushort lhs, ushort2 rhs) => new(lhs > rhs.x, lhs > rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator >=(ushort2 lhs, ushort2 rhs) => new(lhs.x >= rhs.x, lhs.y >= rhs.y);
+		public static bool2 operator >=(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x >= rhs.x, lhs.y >= rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator >=(ushort2 lhs, ushort rhs) => new(lhs.x >= rhs, lhs.y >= rhs);
@@ -264,7 +274,8 @@ namespace FastNoise2.NativeTexture.Formats
 
 		// Equality operators
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator ==(ushort2 lhs, ushort2 rhs) => new(lhs.x == rhs.x, lhs.y == rhs.y);
+		public static bool2 operator ==(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x == rhs.x, lhs.y == rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator ==(ushort2 lhs, ushort rhs) => new(lhs.x == rhs, lhs.y == rhs);
@@ -273,7 +284,8 @@ namespace FastNoise2.NativeTexture.Formats
 		public static bool2 operator ==(ushort lhs, ushort2 rhs) => new(lhs == rhs.x, lhs == rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool2 operator !=(ushort2 lhs, ushort2 rhs) => new(lhs.x != rhs.x, lhs.y != rhs.y);
+		public static bool2 operator !=(ushort2 lhs, ushort2 rhs) =>
+			new(lhs.x != rhs.x, lhs.y != rhs.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool2 operator !=(ushort2 lhs, ushort rhs) => new(lhs.x != rhs, lhs.y != rhs);
@@ -297,7 +309,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...1]");
 #endif
 				fixed (ushort2* array = &this)
-				{ return ((ushort*)array)[index]; }
+				{
+					return ((ushort*)array)[index];
+				}
 			}
 			set
 			{
@@ -306,7 +320,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...1]");
 #endif
 				fixed (ushort* array = &x)
-				{ array[index] = value; }
+				{
+					array[index] = value;
+				}
 			}
 		}
 
@@ -327,12 +343,14 @@ namespace FastNoise2.NativeTexture.Formats
 
 		/// <summary>Returns a string representation of the ushort2 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly string ToString(string format, IFormatProvider formatProvider) => $"ushort2({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)})";
+		public readonly string ToString(string format, IFormatProvider formatProvider) =>
+			$"ushort2({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)})";
 
 		internal sealed class DebuggerProxy
 		{
 			public ushort x;
 			public ushort y;
+
 			public DebuggerProxy(ushort2 v)
 			{
 				x = v.x;

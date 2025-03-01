@@ -17,10 +17,6 @@ namespace FastNoise2.Jobs
 		public float frequency;
 
 		public readonly void Execute() =>
-			noise.GenTileable2D(
-				texture,
-				boundsRef,
-				texture.Width, texture.Height,
-				frequency, seed);
+			noise.GenTileable2D(texture, boundsRef, texture.Width, texture.Height, frequency, seed);
 	}
 }

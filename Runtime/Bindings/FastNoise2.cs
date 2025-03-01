@@ -13,9 +13,11 @@
 
         public override readonly int GetHashCode() => HashCode.Combine(mNodeHandle, m_MetadataId);
 
-        public readonly bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && m_MetadataId == other.m_MetadataId;
+        public readonly bool Equals(FastNoise other) =>
+            mNodeHandle == other.mNodeHandle && m_MetadataId == other.m_MetadataId;
 
-        public override readonly bool Equals(object obj) => obj != null && obj is FastNoise other && Equals(other);
+        public override readonly bool Equals(object obj) =>
+            obj != null && obj is FastNoise other && Equals(other);
 
         public static bool operator ==(FastNoise left, FastNoise right) => left.Equals(right);
 
@@ -23,12 +25,15 @@
 
         #endregion
 
-        public static FastNoise Invalid = new() { mNodeHandle = IntPtr.Zero, m_MetadataId = -1, };
+        public static FastNoise Invalid = new() { mNodeHandle = IntPtr.Zero, m_MetadataId = -1 };
 
         [StructLayout(LayoutKind.Sequential)]
         public struct OutputMinMax
         {
-            public OutputMinMax(float minValue = float.PositiveInfinity, float maxValue = float.NegativeInfinity)
+            public OutputMinMax(
+                float minValue = float.PositiveInfinity,
+                float maxValue = float.NegativeInfinity
+            )
             {
                 min = minValue;
                 max = maxValue;
@@ -86,7 +91,10 @@
         public readonly void Set(string memberName, float value)
         {
             Metadata.Member member;
-            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (
+                !s_nodeMetadata[m_MetadataId]
+                    .members.TryGetValue(FormatLookup(memberName), out member)
+            )
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -117,7 +125,10 @@
         public readonly void Set(string memberName, int value)
         {
             Metadata.Member member;
-            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (
+                !s_nodeMetadata[m_MetadataId]
+                    .members.TryGetValue(FormatLookup(memberName), out member)
+            )
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -136,7 +147,10 @@
         public readonly void Set(string memberName, string enumValue)
         {
             Metadata.Member member;
-            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (
+                !s_nodeMetadata[m_MetadataId]
+                    .members.TryGetValue(FormatLookup(memberName), out member)
+            )
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -161,7 +175,10 @@
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
             Metadata.Member member;
-            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (
+                !s_nodeMetadata[m_MetadataId]
+                    .members.TryGetValue(FormatLookup(memberName), out member)
+            )
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -189,90 +206,201 @@
             }
         }
 
-        public readonly OutputMinMax GenUniformGrid2D(float[] noiseOut,
-            int xStart, int yStart,
-            int xSize, int ySize,
-            float frequency, int seed)
+        public readonly OutputMinMax GenUniformGrid2D(
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed
+        )
         {
             float[] minMax = new float[2];
-            fnGenUniformGrid2D(mNodeHandle, noiseOut, xStart, yStart, xSize, ySize, frequency, seed, minMax);
-            return new OutputMinMax(minMax);
-        }
-
-        public readonly OutputMinMax GenUniformGrid3D(float[] noiseOut,
-            int xStart, int yStart, int zStart,
-            int xSize, int ySize, int zSize,
-            float frequency, int seed)
-        {
-            float[] minMax = new float[2];
-            fnGenUniformGrid3D(mNodeHandle, noiseOut, xStart, yStart, zStart, xSize, ySize, zSize, frequency, seed,
-                minMax);
-            return new OutputMinMax(minMax);
-        }
-
-        public readonly OutputMinMax GenUniformGrid4D(float[] noiseOut,
-            int xStart, int yStart, int zStart, int wStart,
-            int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed)
-        {
-            float[] minMax = new float[2];
-            fnGenUniformGrid4D(mNodeHandle, noiseOut, xStart, yStart, zStart, wStart, xSize, ySize, zSize, wSize,
+            fnGenUniformGrid2D(
+                mNodeHandle,
+                noiseOut,
+                xStart,
+                yStart,
+                xSize,
+                ySize,
                 frequency,
-                seed, minMax);
+                seed,
+                minMax
+            );
             return new OutputMinMax(minMax);
         }
 
-        public readonly OutputMinMax GenTileable2D(float[] noiseOut,
-            int xSize, int ySize,
-            float frequency, int seed)
+        public readonly OutputMinMax GenUniformGrid3D(
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            float frequency,
+            int seed
+        )
+        {
+            float[] minMax = new float[2];
+            fnGenUniformGrid3D(
+                mNodeHandle,
+                noiseOut,
+                xStart,
+                yStart,
+                zStart,
+                xSize,
+                ySize,
+                zSize,
+                frequency,
+                seed,
+                minMax
+            );
+            return new OutputMinMax(minMax);
+        }
+
+        public readonly OutputMinMax GenUniformGrid4D(
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int wStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            int wSize,
+            float frequency,
+            int seed
+        )
+        {
+            float[] minMax = new float[2];
+            fnGenUniformGrid4D(
+                mNodeHandle,
+                noiseOut,
+                xStart,
+                yStart,
+                zStart,
+                wStart,
+                xSize,
+                ySize,
+                zSize,
+                wSize,
+                frequency,
+                seed,
+                minMax
+            );
+            return new OutputMinMax(minMax);
+        }
+
+        public readonly OutputMinMax GenTileable2D(
+            float[] noiseOut,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed
+        )
         {
             float[] minMax = new float[2];
             fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, frequency, seed, minMax);
             return new OutputMinMax(minMax);
         }
 
-        public readonly OutputMinMax GenPositionArray2D(float[] noiseOut,
-            float[] xPosArray, float[] yPosArray,
-            float xOffset, float yOffset,
-            int seed)
+        public readonly OutputMinMax GenPositionArray2D(
+            float[] noiseOut,
+            float[] xPosArray,
+            float[] yPosArray,
+            float xOffset,
+            float yOffset,
+            int seed
+        )
         {
             float[] minMax = new float[2];
-            fnGenPositionArray2D(mNodeHandle, noiseOut, xPosArray.Length, xPosArray, yPosArray, xOffset, yOffset, seed,
-                minMax);
-            return new OutputMinMax(minMax);
-        }
-
-        public readonly OutputMinMax GenPositionArray3D(float[] noiseOut,
-            float[] xPosArray, float[] yPosArray, float[] zPosArray,
-            float xOffset, float yOffset, float zOffset,
-            int seed)
-        {
-            float[] minMax = new float[2];
-            fnGenPositionArray3D(mNodeHandle, noiseOut, xPosArray.Length, xPosArray, yPosArray, zPosArray, xOffset,
+            fnGenPositionArray2D(
+                mNodeHandle,
+                noiseOut,
+                xPosArray.Length,
+                xPosArray,
+                yPosArray,
+                xOffset,
                 yOffset,
-                zOffset, seed, minMax);
+                seed,
+                minMax
+            );
             return new OutputMinMax(minMax);
         }
 
-        public readonly OutputMinMax GenPositionArray4D(float[] noiseOut,
-            float[] xPosArray, float[] yPosArray, float[] zPosArray, float[] wPosArray,
-            float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed)
+        public readonly OutputMinMax GenPositionArray3D(
+            float[] noiseOut,
+            float[] xPosArray,
+            float[] yPosArray,
+            float[] zPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int seed
+        )
         {
             float[] minMax = new float[2];
-            fnGenPositionArray4D(mNodeHandle, noiseOut, xPosArray.Length, xPosArray, yPosArray, zPosArray, wPosArray,
-                xOffset, yOffset, zOffset, wOffset, seed, minMax);
+            fnGenPositionArray3D(
+                mNodeHandle,
+                noiseOut,
+                xPosArray.Length,
+                xPosArray,
+                yPosArray,
+                zPosArray,
+                xOffset,
+                yOffset,
+                zOffset,
+                seed,
+                minMax
+            );
             return new OutputMinMax(minMax);
         }
 
+        public readonly OutputMinMax GenPositionArray4D(
+            float[] noiseOut,
+            float[] xPosArray,
+            float[] yPosArray,
+            float[] zPosArray,
+            float[] wPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int seed
+        )
+        {
+            float[] minMax = new float[2];
+            fnGenPositionArray4D(
+                mNodeHandle,
+                noiseOut,
+                xPosArray.Length,
+                xPosArray,
+                yPosArray,
+                zPosArray,
+                wPosArray,
+                xOffset,
+                yOffset,
+                zOffset,
+                wOffset,
+                seed,
+                minMax
+            );
+            return new OutputMinMax(minMax);
+        }
 
-        public readonly float GenSingle2D(float x, float y, int seed) => fnGenSingle2D(mNodeHandle, x, y, seed);
+        public readonly float GenSingle2D(float x, float y, int seed) =>
+            fnGenSingle2D(mNodeHandle, x, y, seed);
 
-        public readonly float GenSingle3D(float x, float y, float z, int seed) => fnGenSingle3D(mNodeHandle, x, y, z, seed);
+        public readonly float GenSingle3D(float x, float y, float z, int seed) =>
+            fnGenSingle3D(mNodeHandle, x, y, z, seed);
 
-        public readonly float GenSingle4D(float x, float y, float z, float w, int seed) => fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
+        public readonly float GenSingle4D(float x, float y, float z, float w, int seed) =>
+            fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
 
-        [NativeDisableUnsafePtrRestriction] internal IntPtr mNodeHandle;
+        [NativeDisableUnsafePtrRestriction]
+        internal IntPtr mNodeHandle;
         private int m_MetadataId;
 
         public class Metadata
@@ -319,20 +447,25 @@
                 int variableCount = fnGetMetadataVariableCount(id);
                 int nodeLookupCount = fnGetMetadataNodeLookupCount(id);
                 int hybridCount = fnGetMetadataHybridCount(id);
-                metadata.members =
-                    new Dictionary<string, Metadata.Member>(variableCount + nodeLookupCount + hybridCount);
+                metadata.members = new Dictionary<string, Metadata.Member>(
+                    variableCount + nodeLookupCount + hybridCount
+                );
 
                 // Init variables
                 for (int variableIdx = 0; variableIdx < variableCount; variableIdx++)
                 {
                     Metadata.Member member = new();
 
-                    member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataVariableName(id, variableIdx)));
+                    member.name = FormatLookup(
+                        Marshal.PtrToStringAnsi(fnGetMetadataVariableName(id, variableIdx))
+                    );
                     member.type = (Metadata.Member.Type)fnGetMetadataVariableType(id, variableIdx);
                     member.index = variableIdx;
 
-                    member.name =
-                        FormatDimensionMember(member.name, fnGetMetadataVariableDimensionIdx(id, variableIdx));
+                    member.name = FormatDimensionMember(
+                        member.name,
+                        fnGetMetadataVariableDimensionIdx(id, variableIdx)
+                    );
 
                     // Get enum names
                     if (member.type == Metadata.Member.Type.Enum)
@@ -343,8 +476,13 @@
                         for (int enumIdx = 0; enumIdx < enumCount; enumIdx++)
                         {
                             member.enumNames.Add(
-                                FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataEnumName(id, variableIdx, enumIdx))),
-                                enumIdx);
+                                FormatLookup(
+                                    Marshal.PtrToStringAnsi(
+                                        fnGetMetadataEnumName(id, variableIdx, enumIdx)
+                                    )
+                                ),
+                                enumIdx
+                            );
                         }
                     }
 
@@ -356,12 +494,16 @@
                 {
                     Metadata.Member member = new();
 
-                    member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataNodeLookupName(id, nodeLookupIdx)));
+                    member.name = FormatLookup(
+                        Marshal.PtrToStringAnsi(fnGetMetadataNodeLookupName(id, nodeLookupIdx))
+                    );
                     member.type = Metadata.Member.Type.NodeLookup;
                     member.index = nodeLookupIdx;
 
-                    member.name =
-                        FormatDimensionMember(member.name, fnGetMetadataNodeLookupDimensionIdx(id, nodeLookupIdx));
+                    member.name = FormatDimensionMember(
+                        member.name,
+                        fnGetMetadataNodeLookupDimensionIdx(id, nodeLookupIdx)
+                    );
 
                     metadata.members.Add(member.name, member);
                 }
@@ -371,11 +513,16 @@
                 {
                     Metadata.Member member = new();
 
-                    member.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataHybridName(id, hybridIdx)));
+                    member.name = FormatLookup(
+                        Marshal.PtrToStringAnsi(fnGetMetadataHybridName(id, hybridIdx))
+                    );
                     member.type = Metadata.Member.Type.Hybrid;
                     member.index = hybridIdx;
 
-                    member.name = FormatDimensionMember(member.name, fnGetMetadataHybridDimensionIdx(id, hybridIdx));
+                    member.name = FormatDimensionMember(
+                        member.name,
+                        fnGetMetadataHybridDimensionIdx(id, hybridIdx)
+                    );
 
                     metadata.members.Add(member.name, member);
                 }
@@ -411,13 +558,14 @@
         private const string NATIVE_LIB = "__Internal";
 #endif
 
-
         [DllImport(NATIVE_LIB)]
         internal static extern IntPtr fnNewFromMetadata(int id, uint simdLevel = 0);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern IntPtr fnNewFromEncodedNodeTree([MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree,
-            uint simdLevel = 0);
+        internal static extern IntPtr fnNewFromEncodedNodeTree(
+            [MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree,
+            uint simdLevel = 0
+        );
 
         [DllImport(NATIVE_LIB)]
         internal static extern void fnDeleteNodeRef(IntPtr nodeHandle);
@@ -429,88 +577,208 @@
         internal static extern int fnGetMetadataID(IntPtr nodeHandle);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid2D(IntPtr nodeHandle, float[] noiseOut,
-            int xStart, int yStart,
-            int xSize, int ySize,
-            float frequency, int seed, float[] outputMinMax);
+        internal static extern uint fnGenUniformGrid2D(
+            IntPtr nodeHandle,
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid3D(IntPtr nodeHandle, float[] noiseOut,
-            int xStart, int yStart, int zStart,
-            int xSize, int ySize, int zSize,
-            float frequency, int seed, float[] outputMinMax);
+        internal static extern uint fnGenUniformGrid3D(
+            IntPtr nodeHandle,
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            float frequency,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid4D(IntPtr nodeHandle, float[] noiseOut,
-            int xStart, int yStart, int zStart, int wStart,
-            int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed, float[] outputMinMax);
+        internal static extern uint fnGenUniformGrid4D(
+            IntPtr nodeHandle,
+            float[] noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int wStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            int wSize,
+            float frequency,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern void fnGenTileable2D(IntPtr node, float[] noiseOut,
-            int xSize, int ySize,
-            float frequency, int seed, float[] outputMinMax);
+        internal static extern void fnGenTileable2D(
+            IntPtr node,
+            float[] noiseOut,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern void fnGenPositionArray2D(IntPtr node, float[] noiseOut, int count,
-            float[] xPosArray, float[] yPosArray,
-            float xOffset, float yOffset,
-            int seed, float[] outputMinMax);
+        internal static extern void fnGenPositionArray2D(
+            IntPtr node,
+            float[] noiseOut,
+            int count,
+            float[] xPosArray,
+            float[] yPosArray,
+            float xOffset,
+            float yOffset,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern void fnGenPositionArray3D(IntPtr node, float[] noiseOut, int count,
-            float[] xPosArray, float[] yPosArray, float[] zPosArray,
-            float xOffset, float yOffset, float zOffset,
-            int seed, float[] outputMinMax);
+        internal static extern void fnGenPositionArray3D(
+            IntPtr node,
+            float[] noiseOut,
+            int count,
+            float[] xPosArray,
+            float[] yPosArray,
+            float[] zPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int seed,
+            float[] outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern void fnGenPositionArray4D(IntPtr node, float[] noiseOut, int count,
-            float[] xPosArray, float[] yPosArray, float[] zPosArray, float[] wPosArray,
-            float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed, float[] outputMinMax);
+        internal static extern void fnGenPositionArray4D(
+            IntPtr node,
+            float[] noiseOut,
+            int count,
+            float[] xPosArray,
+            float[] yPosArray,
+            float[] zPosArray,
+            float[] wPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int seed,
+            float[] outputMinMax
+        );
 
         #region Unsafe versions
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid2D(IntPtr nodeHandle, void* noiseOut,
-            int xStart, int yStart,
-            int xSize, int ySize,
-            float frequency, int seed, void* outputMinMax);
+        internal static extern unsafe uint fnGenUniformGrid2D(
+            IntPtr nodeHandle,
+            void* noiseOut,
+            int xStart,
+            int yStart,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid3D(IntPtr nodeHandle, void* noiseOut,
-            int xStart, int yStart, int zStart,
-            int xSize, int ySize, int zSize,
-            float frequency, int seed, void* outputMinMax);
+        internal static extern unsafe uint fnGenUniformGrid3D(
+            IntPtr nodeHandle,
+            void* noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            float frequency,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid4D(IntPtr nodeHandle, void* noiseOut,
-            int xStart, int yStart, int zStart, int wStart,
-            int xSize, int ySize, int zSize, int wSize,
-            float frequency, int seed, void* outputMinMax);
+        internal static extern unsafe uint fnGenUniformGrid4D(
+            IntPtr nodeHandle,
+            void* noiseOut,
+            int xStart,
+            int yStart,
+            int zStart,
+            int wStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            int wSize,
+            float frequency,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe void fnGenTileable2D(IntPtr node, void* noiseOut,
-            int xSize, int ySize,
-            float frequency, int seed, void* outputMinMax);
+        internal static extern unsafe void fnGenTileable2D(
+            IntPtr node,
+            void* noiseOut,
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe void fnGenPositionArray2D(IntPtr node, void* noiseOut, int count,
-            void* xPosArray, void* yPosArray,
-            float xOffset, float yOffset,
-            int seed, void* outputMinMax);
+        internal static extern unsafe void fnGenPositionArray2D(
+            IntPtr node,
+            void* noiseOut,
+            int count,
+            void* xPosArray,
+            void* yPosArray,
+            float xOffset,
+            float yOffset,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe void fnGenPositionArray3D(IntPtr node, void* noiseOut, int count,
-            void* xPosArray, void* yPosArray, void* zPosArray,
-            float xOffset, float yOffset, float zOffset,
-            int seed, void* outputMinMax);
+        internal static extern unsafe void fnGenPositionArray3D(
+            IntPtr node,
+            void* noiseOut,
+            int count,
+            void* xPosArray,
+            void* yPosArray,
+            void* zPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int seed,
+            void* outputMinMax
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe void fnGenPositionArray4D(IntPtr node, void* noiseOut, int count,
-            void* xPosArray, void* yPosArray, void* zPosArray, void* wPosArray,
-            float xOffset, float yOffset, float zOffset, float wOffset,
-            int seed, void* outputMinMax);
+        internal static extern unsafe void fnGenPositionArray4D(
+            IntPtr node,
+            void* noiseOut,
+            int count,
+            void* xPosArray,
+            void* yPosArray,
+            void* zPosArray,
+            void* wPosArray,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int seed,
+            void* outputMinMax
+        );
 
         #endregion
 
@@ -518,10 +786,23 @@
         internal static extern float fnGenSingle2D(IntPtr node, float x, float y, int seed);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern float fnGenSingle3D(IntPtr node, float x, float y, float z, int seed);
+        internal static extern float fnGenSingle3D(
+            IntPtr node,
+            float x,
+            float y,
+            float z,
+            int seed
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern float fnGenSingle4D(IntPtr node, float x, float y, float z, float w, int seed);
+        internal static extern float fnGenSingle4D(
+            IntPtr node,
+            float x,
+            float y,
+            float z,
+            float w,
+            int seed
+        );
 
         [DllImport(NATIVE_LIB)]
         internal static extern int fnGetMetadataCount();
@@ -546,13 +827,25 @@
         internal static extern int fnGetMetadataEnumCount(int id, int variableIndex);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern IntPtr fnGetMetadataEnumName(int id, int variableIndex, int enumIndex);
+        internal static extern IntPtr fnGetMetadataEnumName(
+            int id,
+            int variableIndex,
+            int enumIndex
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern bool fnSetVariableFloat(IntPtr nodeHandle, int variableIndex, float value);
+        internal static extern bool fnSetVariableFloat(
+            IntPtr nodeHandle,
+            int variableIndex,
+            float value
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern bool fnSetVariableIntEnum(IntPtr nodeHandle, int variableIndex, int value);
+        internal static extern bool fnSetVariableIntEnum(
+            IntPtr nodeHandle,
+            int variableIndex,
+            int value
+        );
 
         // Node Lookup
         [DllImport(NATIVE_LIB)]
@@ -565,7 +858,11 @@
         internal static extern int fnGetMetadataNodeLookupDimensionIdx(int id, int nodeLookupIndex);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern bool fnSetNodeLookup(IntPtr nodeHandle, int nodeLookupIndex, IntPtr nodeLookupHandle);
+        internal static extern bool fnSetNodeLookup(
+            IntPtr nodeHandle,
+            int nodeLookupIndex,
+            IntPtr nodeLookupHandle
+        );
 
         // Hybrid
         [DllImport(NATIVE_LIB)]
@@ -578,11 +875,18 @@
         internal static extern int fnGetMetadataHybridDimensionIdx(int id, int nodeLookupIndex);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern bool fnSetHybridNodeLookup(IntPtr nodeHandle, int nodeLookupIndex,
-            IntPtr nodeLookupHandle);
+        internal static extern bool fnSetHybridNodeLookup(
+            IntPtr nodeHandle,
+            int nodeLookupIndex,
+            IntPtr nodeLookupHandle
+        );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern bool fnSetHybridFloat(IntPtr nodeHandle, int nodeLookupIndex, float value);
+        internal static extern bool fnSetHybridFloat(
+            IntPtr nodeHandle,
+            int nodeLookupIndex,
+            float value
+        );
 
         public readonly bool IsCreated => Invalid != this;
     }

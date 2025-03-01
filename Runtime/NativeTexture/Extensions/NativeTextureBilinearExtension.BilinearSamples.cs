@@ -1,14 +1,17 @@
 namespace FastNoise2.NativeTexture
 {
+	using System.Runtime.CompilerServices;
 	using Formats;
 	using Unity.Mathematics;
-	using System.Runtime.CompilerServices;
 
 	public static partial class NativeTextureSamplingExtension
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<float> tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamples(
+			this NativeTexture2D<float> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4(
 				tex2D[pixelFloorCeil.xy],
@@ -18,8 +21,11 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<float>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamples(
+			this NativeTexture2D<float>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4(
 				tex2D[pixelFloorCeil.xy],
@@ -29,8 +35,11 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort> tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamples(
+			this NativeTexture2D<ushort> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4(
 				(float)tex2D[pixelFloorCeil.xy] / ushort.MaxValue,
@@ -40,8 +49,11 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamples(
+			this NativeTexture2D<ushort>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4(
 				(float)tex2D[pixelFloorCeil.xy] / ushort.MaxValue,
@@ -51,8 +63,11 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte> tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamples(
+			this NativeTexture2D<byte> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates and normalize to 0..1
 			samples = math.float4(
 				(float)tex2D[pixelFloorCeil.xy] / byte.MaxValue,
@@ -63,8 +78,11 @@ namespace FastNoise2.NativeTexture
 
 		// Optional overload for when byte contains signed -1..1 data normalized to 0..255
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<byte> tex2D, ref int4 pixelFloorCeil,
-			out float4 samples) =>
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<byte> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4 samples
+		) =>
 			// Retrieve pixel values at surrounding coordinates and normalize to -1..1
 			samples = math.float4(
 				((float)tex2D[pixelFloorCeil.xy] / byte.MaxValue * 2f) - 1f,
@@ -74,8 +92,11 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte2> tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte2> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			byte2 b1 = tex2D[pixelFloorCeil.xy];
 			byte2 b2 = tex2D[pixelFloorCeil.xw];
@@ -90,16 +111,17 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte2>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte2>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			byte2 b1 = tex2D[pixelFloorCeil.xy];
 			byte2 b2 = tex2D[pixelFloorCeil.xw];
@@ -114,17 +136,18 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		// For when byte2 contains signed -1..1 data normalized to 0..255
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<byte2> tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<byte2> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			byte2 b1 = tex2D[pixelFloorCeil.xy];
 			byte2 b2 = tex2D[pixelFloorCeil.xw];
@@ -139,16 +162,17 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort2> tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort2> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			ushort2 u1 = tex2D[pixelFloorCeil.xy];
 			ushort2 u2 = tex2D[pixelFloorCeil.xw];
@@ -163,16 +187,17 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort2>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort2>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			ushort2 u1 = tex2D[pixelFloorCeil.xy];
 			ushort2 u2 = tex2D[pixelFloorCeil.xw];
@@ -187,17 +212,18 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		// For when ushort2 contains signed -1..1 data normalized to 0..65535
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<ushort2> tex2D, ref int4 pixelFloorCeil,
-			out float4x2 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<ushort2> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x2 samples
+		)
 		{
 			ushort2 u1 = tex2D[pixelFloorCeil.xy];
 			ushort2 u2 = tex2D[pixelFloorCeil.xw];
@@ -212,17 +238,18 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = math.float4x2(
-				math.float4(
-					f1.x, f2.x, f3.x, f4.x),
-				math.float4(
-					f1.y, f2.y, f3.y, f4.y)
+				math.float4(f1.x, f2.x, f3.x, f4.x),
+				math.float4(f1.y, f2.y, f3.y, f4.y)
 			);
 		}
 
 		// For byte3 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte3> tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte3> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			byte3 b1 = tex2D[pixelFloorCeil.xy];
 			byte3 b2 = tex2D[pixelFloorCeil.xw];
@@ -237,15 +264,27 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte3>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte3>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			byte3 b1 = tex2D[pixelFloorCeil.xy];
 			byte3 b2 = tex2D[pixelFloorCeil.xw];
@@ -260,16 +299,28 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
 		// For normalized byte3 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<byte3> tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<byte3> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			byte3 b1 = tex2D[pixelFloorCeil.xy];
 			byte3 b2 = tex2D[pixelFloorCeil.xw];
@@ -284,16 +335,28 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
 		// For ushort3 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort3> tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort3> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			ushort3 u1 = tex2D[pixelFloorCeil.xy];
 			ushort3 u2 = tex2D[pixelFloorCeil.xw];
@@ -308,15 +371,27 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort3>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort3>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			ushort3 u1 = tex2D[pixelFloorCeil.xy];
 			ushort3 u2 = tex2D[pixelFloorCeil.xw];
@@ -331,16 +406,28 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
 		// For normalized ushort3 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<ushort3> tex2D, ref int4 pixelFloorCeil,
-			out float4x3 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<ushort3> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x3 samples
+		)
 		{
 			ushort3 u1 = tex2D[pixelFloorCeil.xy];
 			ushort3 u2 = tex2D[pixelFloorCeil.xw];
@@ -355,9 +442,18 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x3(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z
 			);
 		}
 
@@ -382,8 +478,11 @@ namespace FastNoise2.NativeTexture
 
 		// For byte4 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte4> tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte4> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			byte4 b1 = tex2D[pixelFloorCeil.xy];
 			byte4 b2 = tex2D[pixelFloorCeil.xw];
@@ -398,16 +497,31 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<byte4>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<byte4>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			byte4 b1 = tex2D[pixelFloorCeil.xy];
 			byte4 b2 = tex2D[pixelFloorCeil.xw];
@@ -422,17 +536,32 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 
 		// For normalized byte4 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<byte4> tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<byte4> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			byte4 b1 = tex2D[pixelFloorCeil.xy];
 			byte4 b2 = tex2D[pixelFloorCeil.xw];
@@ -447,17 +576,32 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 
 		// For ushort4 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort4> tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort4> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			ushort4 u1 = tex2D[pixelFloorCeil.xy];
 			ushort4 u2 = tex2D[pixelFloorCeil.xw];
@@ -472,16 +616,31 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(this NativeTexture2D<ushort4>.ReadOnly tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamples(
+			this NativeTexture2D<ushort4>.ReadOnly tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			ushort4 u1 = tex2D[pixelFloorCeil.xy];
 			ushort4 u2 = tex2D[pixelFloorCeil.xw];
@@ -496,17 +655,32 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 
 		// For normalized ushort4 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(this NativeTexture2D<ushort4> tex2D, ref int4 pixelFloorCeil,
-			out float4x4 samples)
+		static void BilinearSamplesNormalized(
+			this NativeTexture2D<ushort4> tex2D,
+			ref int4 pixelFloorCeil,
+			out float4x4 samples
+		)
 		{
 			ushort4 u1 = tex2D[pixelFloorCeil.xy];
 			ushort4 u2 = tex2D[pixelFloorCeil.xw];
@@ -521,10 +695,22 @@ namespace FastNoise2.NativeTexture
 
 			// Retrieve pixel values at surrounding coordinates
 			samples = new float4x4(
-				f1.x, f2.x, f3.x, f4.x,
-				f1.y, f2.y, f3.y, f4.y,
-				f1.z, f2.z, f3.z, f4.z,
-				f1.w, f2.w, f3.w, f4.w
+				f1.x,
+				f2.x,
+				f3.x,
+				f4.x,
+				f1.y,
+				f2.y,
+				f3.y,
+				f4.y,
+				f1.z,
+				f2.z,
+				f3.z,
+				f4.z,
+				f1.w,
+				f2.w,
+				f3.w,
+				f4.w
 			);
 		}
 

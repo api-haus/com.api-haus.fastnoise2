@@ -13,17 +13,23 @@ namespace FastNoise2.NativeTexture
 	public static class NativeTextureUnsafeUtility
 	{
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
-		private static void CheckConvertArguments<T>(int2 resolution) where T : unmanaged
+		private static void CheckConvertArguments<T>(int2 resolution)
+			where T : unmanaged
 		{
 			if (resolution.x < 0 || resolution.y < 0)
 			{
-				throw new ArgumentOutOfRangeException("resolution", "Resolution dimensions must be >= 0");
+				throw new ArgumentOutOfRangeException(
+					"resolution",
+					"Resolution dimensions must be >= 0"
+				);
 			}
 
 			// Verify T is unmanaged
 			if (!UnsafeUtility.IsUnmanaged<T>())
 			{
-				throw new InvalidOperationException($"{typeof(T)} used in NativeTexture2D<{typeof(T)}> must be unmanaged (contain no managed types).");
+				throw new InvalidOperationException(
+					$"{typeof(T)} used in NativeTexture2D<{typeof(T)}> must be unmanaged (contain no managed types)."
+				);
 			}
 		}
 
@@ -35,7 +41,12 @@ namespace FastNoise2.NativeTexture
 		/// <param name="resolution">The resolution (width, height) of the texture.</param>
 		/// <param name="allocator">The allocator that was used to create the memory pointed to, or Allocator.None if memory is not owned by this container.</param>
 		/// <returns>A NativeTexture2D that references the provided data.</returns>
-		public unsafe static NativeTexture2D<T> ConvertExistingDataToNativeTexture2D<T>(void* dataPointer, int2 resolution, Allocator allocator = Allocator.None) where T : unmanaged
+		public unsafe static NativeTexture2D<T> ConvertExistingDataToNativeTexture2D<T>(
+			void* dataPointer,
+			int2 resolution,
+			Allocator allocator = Allocator.None
+		)
+			where T : unmanaged
 		{
 			CheckConvertArguments<T>(resolution);
 
@@ -57,9 +68,14 @@ namespace FastNoise2.NativeTexture
 			// Set static safety ID
 			if (NativeTexture2D<T>.s_staticSafetyId == 0)
 			{
-				NativeTexture2D<T>.s_staticSafetyId = AtomicSafetyHandle.NewStaticSafetyId<NativeTexture2D<T>>();
+				NativeTexture2D<T>.s_staticSafetyId = AtomicSafetyHandle.NewStaticSafetyId<
+					NativeTexture2D<T>
+				>();
 			}
-			AtomicSafetyHandle.SetStaticSafetyId(ref result.m_Safety, NativeTexture2D<T>.s_staticSafetyId);
+			AtomicSafetyHandle.SetStaticSafetyId(
+				ref result.m_Safety,
+				NativeTexture2D<T>.s_staticSafetyId
+			);
 
 			return result;
 		}
@@ -70,7 +86,8 @@ namespace FastNoise2.NativeTexture
 		/// <typeparam name="T">The type of elements in the texture.</typeparam>
 		/// <param name="texture">The texture to get the pointer from.</param>
 		/// <returns>An unsafe pointer to the texture data.</returns>
-		public unsafe static void* GetUnsafePtr<T>(this NativeTexture2D<T> texture) where T : unmanaged
+		public unsafe static void* GetUnsafePtr<T>(this NativeTexture2D<T> texture)
+			where T : unmanaged
 		{
 			AtomicSafetyHandle.CheckWriteAndThrow(texture.m_Safety);
 			return texture.m_Buffer;
@@ -82,7 +99,8 @@ namespace FastNoise2.NativeTexture
 		/// <typeparam name="T">The type of elements in the texture.</typeparam>
 		/// <param name="texture">The texture to get the pointer from.</param>
 		/// <returns>An unsafe read-only pointer to the texture data.</returns>
-		public unsafe static void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T> texture) where T : unmanaged
+		public unsafe static void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T> texture)
+			where T : unmanaged
 		{
 			AtomicSafetyHandle.CheckReadAndThrow(texture.m_Safety);
 			return texture.m_Buffer;
@@ -94,7 +112,8 @@ namespace FastNoise2.NativeTexture
 		/// <typeparam name="T">The type of elements in the texture.</typeparam>
 		/// <param name="texture">The read-only texture view to get the pointer from.</param>
 		/// <returns>An unsafe read-only pointer to the texture data.</returns>
-		public unsafe static void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T>.ReadOnly texture) where T : unmanaged
+		public unsafe static void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T>.ReadOnly texture)
+			where T : unmanaged
 		{
 			AtomicSafetyHandle.CheckReadAndThrow(texture.safety);
 			return texture.buffer;
@@ -106,7 +125,10 @@ namespace FastNoise2.NativeTexture
 		/// <typeparam name="T">The type of elements in the texture.</typeparam>
 		/// <param name="texture">The texture to get the pointer from.</param>
 		/// <returns>An unsafe pointer to the texture data without any safety checks.</returns>
-		public unsafe static void* GetUnsafeBufferPointerWithoutChecks<T>(NativeTexture2D<T> texture) where T : unmanaged
+		public unsafe static void* GetUnsafeBufferPointerWithoutChecks<T>(
+			NativeTexture2D<T> texture
+		)
+			where T : unmanaged
 		{
 			return texture.m_Buffer;
 		}

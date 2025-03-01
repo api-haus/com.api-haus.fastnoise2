@@ -22,7 +22,8 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
 
 			// Create bounds reference for tracking min/max values
-			NativeReference<ValueBounds> boundsRef = NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef =
+				NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
 
 			JobHandle noiseJobDependency = default;
 
@@ -65,15 +66,12 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
 
 			// Create a bounds reference to track min/max values during noise generation
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+				Allocator.TempJob
+			);
 
 			// Generate noise with built-in bounds tracking
-			nodeTree.GenUniformGrid2D(
-				nt,
-				boundsRef,
-				0, 0,
-				nt.Width, nt.Height,
-				0.02f, 1337);
+			nodeTree.GenUniformGrid2D(nt, boundsRef, 0, 0, nt.Width, nt.Height, 0.02f, 1337);
 
 			// Now normalize based on the tracked bounds
 			JobHandle dependency = default;
@@ -98,18 +96,17 @@ namespace FastNoise2.Tests
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new NativeTexture2D<float>(new int2(512, 512), Allocator.TempJob);
+			NativeTexture2D<float> nt = new NativeTexture2D<float>(
+				new int2(512, 512),
+				Allocator.TempJob
+			);
 
 			// Create a bounds reference using our extension method
-			NativeReference<ValueBounds> boundsRef = NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef =
+				NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
 
 			// Generate noise directly with built-in bounds tracking
-			nodeTree.GenUniformGrid2D(
-				nt,
-				boundsRef,
-				0, 0,
-				nt.Width, nt.Height,
-				0.02f, 1337);
+			nodeTree.GenUniformGrid2D(nt, boundsRef, 0, 0, nt.Width, nt.Height, 0.02f, 1337);
 
 			// Schedule normalization only (bounds already tracked by FastNoise2)
 			JobHandle dependency = default;
@@ -117,7 +114,9 @@ namespace FastNoise2.Tests
 
 			dependency.Complete();
 
-			Debug.Log($"Generated noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}");
+			Debug.Log(
+				$"Generated noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}"
+			);
 
 			nt.ApplyTo(texture);
 
@@ -139,7 +138,9 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
 
 			// Create bounds reference for tracking
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+				Allocator.TempJob
+			);
 
 			// Initial job dependency
 			JobHandle dependency = default;
@@ -152,7 +153,8 @@ namespace FastNoise2.Tests
 				1337, // seed
 				new int2(0, 0), // start position
 				0.02f, // frequency
-				dependency); // pass the dependency chain
+				dependency
+			); // pass the dependency chain
 
 			// Chain the normalization job after the noise generation
 			// The normalization job will automatically wait for noise generation to complete
@@ -162,7 +164,9 @@ namespace FastNoise2.Tests
 			dependency.Complete();
 
 			// Output the results
-			Debug.Log($"Chained noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}");
+			Debug.Log(
+				$"Chained noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}"
+			);
 
 			nt.ApplyTo(texture);
 

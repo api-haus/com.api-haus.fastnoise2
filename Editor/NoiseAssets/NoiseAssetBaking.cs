@@ -47,11 +47,18 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture2D(BakedNoiseTextureAsset noiseAsset, Texture2D texture)
+		static unsafe void GenerateNoiseTexture2D(
+			BakedNoiseTextureAsset noiseAsset,
+			Texture2D texture
+		)
 		{
 			using FastNoise graph = noiseAsset.graph.Instantiate();
 
-			NativeArray<float> buffer = AllocateNative(noiseAsset, texture, out NativeReference<float2> minMax);
+			NativeArray<float> buffer = AllocateNative(
+				noiseAsset,
+				texture,
+				out NativeReference<float2> minMax
+			);
 			using NativeReference<float2> nativeReference = minMax;
 
 			graph.GenUniformGrid2D(
@@ -68,16 +75,18 @@ namespace FastNoise2.Editor.NoiseAssets
 			texture.Apply(false);
 		}
 
-		static NativeArray<float> AllocateNative(BakedNoiseTextureAsset noiseAsset, Texture3D texture,
-			out NativeReference<float2> minMax)
+		static NativeArray<float> AllocateNative(
+			BakedNoiseTextureAsset noiseAsset,
+			Texture3D texture,
+			out NativeReference<float2> minMax
+		)
 		{
 			minMax = default;
 			try
 			{
 				NativeArray<float> buffer = texture.GetPixelData<float>(0);
 				minMax = new NativeReference<float2>(
-					new float2(float.PositiveInfinity,
-						float.NegativeInfinity),
+					new float2(float.PositiveInfinity, float.NegativeInfinity),
 					Allocator.Temp
 				);
 				return buffer;
@@ -90,16 +99,18 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static NativeArray<float> AllocateNative(BakedNoiseTextureAsset noiseAsset, Texture2D texture,
-			out NativeReference<float2> minMax)
+		static NativeArray<float> AllocateNative(
+			BakedNoiseTextureAsset noiseAsset,
+			Texture2D texture,
+			out NativeReference<float2> minMax
+		)
 		{
 			minMax = default;
 			try
 			{
 				NativeArray<float> buffer = texture.GetRawTextureData<float>();
 				minMax = new NativeReference<float2>(
-					new float2(float.PositiveInfinity,
-						float.NegativeInfinity),
+					new float2(float.PositiveInfinity, float.NegativeInfinity),
 					Allocator.Temp
 				);
 				return buffer;
@@ -112,11 +123,18 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture3D(BakedNoiseTextureAsset noiseAsset, Texture3D texture)
+		static unsafe void GenerateNoiseTexture3D(
+			BakedNoiseTextureAsset noiseAsset,
+			Texture3D texture
+		)
 		{
 			using FastNoise graph = noiseAsset.graph.Instantiate();
 
-			NativeArray<float> buffer = AllocateNative(noiseAsset, texture, out NativeReference<float2> minMax);
+			NativeArray<float> buffer = AllocateNative(
+				noiseAsset,
+				texture,
+				out NativeReference<float2> minMax
+			);
 			using NativeReference<float2> nativeReference = minMax;
 
 			graph.GenUniformGrid3D(
@@ -145,8 +163,10 @@ namespace FastNoise2.Editor.NoiseAssets
 				return false;
 			if (existingTexture.height != noiseAsset.resolution.y)
 				return false;
-			if (existingTexture.dimension == TextureDimension.Tex3D &&
-					((Texture3D)existingTexture).depth != noiseAsset.resolution.z)
+			if (
+				existingTexture.dimension == TextureDimension.Tex3D
+				&& ((Texture3D)existingTexture).depth != noiseAsset.resolution.z
+			)
 				return false;
 
 			return true;
@@ -174,16 +194,22 @@ namespace FastNoise2.Editor.NoiseAssets
 						noiseAsset.resolution.x,
 						noiseAsset.resolution.y,
 						GetTextureFormat(noiseAsset),
-						false)
-					{ name = noiseAsset.name };
+						false
+					)
+					{
+						name = noiseAsset.name,
+					};
 				case NoiseAssetTextureOutput.Texture3D:
 					return new Texture3D(
 						noiseAsset.resolution.x,
 						noiseAsset.resolution.y,
 						noiseAsset.resolution.z,
 						GetTextureFormat(noiseAsset),
-						false)
-					{ name = noiseAsset.name };
+						false
+					)
+					{
+						name = noiseAsset.name,
+					};
 				default:
 					throw new ArgumentOutOfRangeException(nameof(noiseAsset.textureOutput));
 			}

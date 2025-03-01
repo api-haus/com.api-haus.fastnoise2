@@ -18,7 +18,8 @@ namespace FastNoise2.Authoring.NoiseGraph
 		public FixedString512Bytes Fixed512 => new(encodedGraph);
 		public FixedString4096Bytes Fixed4096 => new(encodedGraph);
 
-		[SerializeField] string encodedGraph = "DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==";
+		[SerializeField]
+		string encodedGraph = "DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==";
 
 		public string EncodedValue => encodedGraph;
 
@@ -47,7 +48,10 @@ namespace FastNoise2.Authoring.NoiseGraph
 	{
 		public static FastNoise Instantiate(this FastNoiseGraph graph)
 		{
-			Debug.Assert(!string.IsNullOrWhiteSpace(graph.EncodedValue), nameof(graph.EncodedValue));
+			Debug.Assert(
+				!string.IsNullOrWhiteSpace(graph.EncodedValue),
+				nameof(graph.EncodedValue)
+			);
 			var noise = FastNoise.FromEncodedNodeTree(graph.EncodedValue);
 
 			return noise;

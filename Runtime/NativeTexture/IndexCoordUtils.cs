@@ -23,9 +23,7 @@ namespace FastNoise2.NativeTexture
 			int y = remainderAfterZ / width;
 			int x = remainderAfterZ % width;
 
-			return new int3(
-				x, y, z
-			);
+			return new int3(x, y, z);
 		}
 
 		/// <summary>
@@ -40,9 +38,7 @@ namespace FastNoise2.NativeTexture
 			int y = pixelIndex / width;
 			int x = pixelIndex % width;
 
-			return new int2(
-				x, y
-			);
+			return new int2(x, y);
 		}
 
 		/// <summary>
@@ -63,7 +59,6 @@ namespace FastNoise2.NativeTexture
 		/// <param name="width">The width dimension of the texture.</param>
 		/// <returns>The corresponding linear pixel index.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static int ToIndex(this int2 id, int width) =>
-			(id.y * width) + id.x;
+		public static int ToIndex(this int2 id, int width) => (id.y * width) + id.x;
 	}
 }

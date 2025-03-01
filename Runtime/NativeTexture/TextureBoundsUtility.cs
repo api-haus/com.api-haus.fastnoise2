@@ -1,11 +1,11 @@
 namespace FastNoise2.NativeTexture
 {
 	using System;
+	using FastNoise2.Bindings;
+	using FastNoise2.Jobs;
 	using Unity.Collections;
 	using Unity.Jobs;
-	using FastNoise2.Jobs;
 	using Unity.Mathematics;
-	using FastNoise2.Bindings;
 
 	/// <summary>
 	/// Utility methods for working with texture value bounds and normalization.
@@ -32,9 +32,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="dependency">Any job dependencies.</param>
 		/// <returns>A JobHandle for the scheduled normalization job.</returns>
 		public static JobHandle NormalizeTexture(
-				NativeTexture2D<float> texture,
-				NativeReference<ValueBounds> boundsRef,
-				JobHandle dependency = default)
+			NativeTexture2D<float> texture,
+			NativeReference<ValueBounds> boundsRef,
+			JobHandle dependency = default
+		)
 		{
 			return texture.ScheduleNormalize(boundsRef, dependency);
 		}
@@ -46,8 +47,10 @@ namespace FastNoise2.NativeTexture
 		/// <param name="min">The minimum value to set.</param>
 		/// <param name="max">The maximum value to set.</param>
 		public static void SetExplicitBounds(
-				NativeReference<ValueBounds> boundsRef,
-				float min, float max)
+			NativeReference<ValueBounds> boundsRef,
+			float min,
+			float max
+		)
 		{
 			ValueBounds bounds = boundsRef.Value;
 			bounds.Min = min;
@@ -66,12 +69,13 @@ namespace FastNoise2.NativeTexture
 		/// <param name="dependency">Any job dependencies.</param>
 		/// <returns>A JobHandle for the scheduled jobs.</returns>
 		public static JobHandle GenerateNormalizedNoise(
-				FastNoise noise,
-				NativeTexture2D<float> texture,
-				NativeReference<ValueBounds> boundsRef,
-				float frequency,
-				int seed,
-				JobHandle dependency = default)
+			FastNoise noise,
+			NativeTexture2D<float> texture,
+			NativeReference<ValueBounds> boundsRef,
+			float frequency,
+			int seed,
+			JobHandle dependency = default
+		)
 		{
 			// Complete the dependency since we need to use the CPU for noise generation
 			dependency.Complete();
@@ -79,12 +83,15 @@ namespace FastNoise2.NativeTexture
 			// Generate noise directly into the texture using FastNoise's built-in bounds tracking
 			// (The bounds are automatically reset inside this method)
 			noise.GenUniformGrid2D(
-					texture,
-					boundsRef,
-					0, 0,
-					texture.Width, texture.Height,
-					frequency,
-					seed);
+				texture,
+				boundsRef,
+				0,
+				0,
+				texture.Width,
+				texture.Height,
+				frequency,
+				seed
+			);
 
 			// Schedule the normalization
 			return NormalizeTexture(texture, boundsRef, dependency);

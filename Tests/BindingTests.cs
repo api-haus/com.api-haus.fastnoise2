@@ -38,7 +38,9 @@ namespace FastNoise2.Tests
 			GenerateBitmap(maxSmooth, "testMetadata");
 
 			// Dunes
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
+				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
+			);
 
 			// Encoded node trees can be invalid and return null
 			if (nodeTree != FastNoise.Invalid)
@@ -50,7 +52,9 @@ namespace FastNoise2.Tests
 		[Test]
 		public void GenerateBitmapWithValueBounds()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
+				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
+			);
 
 			// Encoded node trees can be invalid and return null
 			if (nodeTree != FastNoise.Invalid)
@@ -61,7 +65,11 @@ namespace FastNoise2.Tests
 
 		static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)
 		{
-			using (BinaryWriter writer = new BinaryWriter(File.Open(filename + ".bmp", FileMode.Create)))
+			using (
+				BinaryWriter writer = new BinaryWriter(
+					File.Open(filename + ".bmp", FileMode.Create)
+				)
+			)
 			{
 				const uint imageDataOffset = 14u + 12u + (256u * 3u);
 
@@ -71,13 +79,13 @@ namespace FastNoise2.Tests
 				writer.Write(imageDataOffset + (uint)(size * size)); // file size
 				writer.Write(0); // reserved
 				writer.Write(imageDataOffset); // image data offset
-																			 // Bmp Info Header (12)
+				// Bmp Info Header (12)
 				writer.Write(12u); // size of header
 				writer.Write(size); // width
 				writer.Write(size); // height
 				writer.Write((ushort)1); // color planes
 				writer.Write((ushort)8); // bit depth
-																 // Colour map
+				// Colour map
 				for (int i = 0; i < 256; i++)
 				{
 					writer.Write((byte)i);
@@ -87,7 +95,15 @@ namespace FastNoise2.Tests
 
 				// Image data
 				float[] noiseData = new float[size * size];
-				FastNoise.OutputMinMax minMax = fastNoise.GenUniformGrid2D(noiseData, 0, 0, size, size, 0.02f, 1337);
+				FastNoise.OutputMinMax minMax = fastNoise.GenUniformGrid2D(
+					noiseData,
+					0,
+					0,
+					size,
+					size,
+					0.02f,
+					1337
+				);
 
 				float scale = 255.0f / (minMax.max - minMax.min);
 
@@ -101,9 +117,17 @@ namespace FastNoise2.Tests
 			}
 		}
 
-		static void GenerateBitmapWithTrackedBounds(FastNoise fastNoise, string filename, ushort size = 512)
+		static void GenerateBitmapWithTrackedBounds(
+			FastNoise fastNoise,
+			string filename,
+			ushort size = 512
+		)
 		{
-			using (BinaryWriter writer = new BinaryWriter(File.Open(filename + ".bmp", FileMode.Create)))
+			using (
+				BinaryWriter writer = new BinaryWriter(
+					File.Open(filename + ".bmp", FileMode.Create)
+				)
+			)
 			{
 				const uint imageDataOffset = 14u + 12u + (256u * 3u);
 
@@ -113,13 +137,13 @@ namespace FastNoise2.Tests
 				writer.Write(imageDataOffset + (uint)(size * size)); // file size
 				writer.Write(0); // reserved
 				writer.Write(imageDataOffset); // image data offset
-																			 // Bmp Info Header (12)
+				// Bmp Info Header (12)
 				writer.Write(12u); // size of header
 				writer.Write(size); // width
 				writer.Write(size); // height
 				writer.Write((ushort)1); // color planes
 				writer.Write((ushort)8); // bit depth
-																 // Colour map
+				// Colour map
 				for (int i = 0; i < 256; i++)
 				{
 					writer.Write((byte)i);
@@ -129,10 +153,16 @@ namespace FastNoise2.Tests
 
 				// Image data - use NativeTexture2D and ValueBounds
 				NativeTexture2D<float> noiseTexture = new NativeTexture2D<float>(
-					new int2(size, size), Allocator.Temp);
+					new int2(size, size),
+					Allocator.Temp
+				);
 
 				// Create a bounds reference to track min/max values
-				using (NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(Allocator.Temp))
+				using (
+					NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+						Allocator.Temp
+					)
+				)
 				{
 					// Reset bounds before generation
 					boundsRef.Reset();
@@ -141,9 +171,13 @@ namespace FastNoise2.Tests
 					fastNoise.GenUniformGrid2D(
 						noiseTexture,
 						boundsRef,
-						0, 0,
-						size, size,
-						0.02f, 1337);
+						0,
+						0,
+						size,
+						size,
+						0.02f,
+						1337
+					);
 
 					// Precalculate normalization values
 					boundsRef.PrecalculateScale();

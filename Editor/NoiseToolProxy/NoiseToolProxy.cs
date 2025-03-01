@@ -31,7 +31,10 @@ namespace FastNoise2.Editor.NoiseToolProxy
 					if (!string.IsNullOrEmpty(line) && EncodedNoiseRegex.IsMatch(line))
 						CopiedNodeSettings?.Invoke(line);
 				}
-				catch (Exception e) { Debug.LogException(e); }
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+				}
 			}
 		}
 
@@ -66,7 +69,7 @@ namespace FastNoise2.Editor.NoiseToolProxy
 					UseShellExecute = false,
 					WindowStyle = ProcessWindowStyle.Normal,
 					WorkingDirectory = GetWorkingDir(),
-					StandardInputEncoding = null
+					StandardInputEncoding = null,
 				}
 			);
 

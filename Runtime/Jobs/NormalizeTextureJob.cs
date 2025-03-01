@@ -9,27 +9,36 @@ namespace FastNoise2.Jobs
 	[BurstCompile]
 	public struct NormalizeTextureJob : IJobParallelFor
 	{
-		[NativeMatchesParallelForLength] NativeArray<float> m_Texture;
+		[NativeMatchesParallelForLength]
+		NativeArray<float> m_Texture;
 
-		[ReadOnly] NativeReference<ValueBounds> m_BoundsRef;
+		[ReadOnly]
+		NativeReference<ValueBounds> m_BoundsRef;
 
 		[BurstCompile]
-		public void Execute(int i) =>
-				m_Texture[i] = m_BoundsRef.NormalizeValue(m_Texture[i]);
+		public void Execute(int i) => m_Texture[i] = m_BoundsRef.NormalizeValue(m_Texture[i]);
 
-		public static JobHandle Schedule(NativeTexture2D<float> tex, NativeReference<ValueBounds> boundsRef, JobHandle dependency = default) =>
-				new NormalizeTextureJob
-				{
-					m_Texture = tex.AsDeferredJobArray(),
-					m_BoundsRef = boundsRef,
-				}.Schedule(tex.Length, 64, dependency);
+		public static JobHandle Schedule(
+			NativeTexture2D<float> tex,
+			NativeReference<ValueBounds> boundsRef,
+			JobHandle dependency = default
+		) =>
+			new NormalizeTextureJob
+			{
+				m_Texture = tex.AsDeferredJobArray(),
+				m_BoundsRef = boundsRef,
+			}.Schedule(tex.Length, 64, dependency);
 
-		public static JobHandle Schedule(NativeTexture3D<float> tex, NativeReference<ValueBounds> boundsRef, JobHandle dependency = default) =>
-				new NormalizeTextureJob
-				{
-					m_Texture = tex.AsDeferredJobArray(),
-					m_BoundsRef = boundsRef,
-				}.Schedule(tex.Length, 64, dependency);
+		public static JobHandle Schedule(
+			NativeTexture3D<float> tex,
+			NativeReference<ValueBounds> boundsRef,
+			JobHandle dependency = default
+		) =>
+			new NormalizeTextureJob
+			{
+				m_Texture = tex.AsDeferredJobArray(),
+				m_BoundsRef = boundsRef,
+			}.Schedule(tex.Length, 64, dependency);
 	}
 
 	[BurstCompile]
@@ -39,8 +48,9 @@ namespace FastNoise2.Jobs
 
 		public readonly void Execute() => bounds.PrecalculateScale();
 
-		public static JobHandle Schedule(NativeReference<ValueBounds> boundsRef,
-				JobHandle dependency = default) =>
-				new PrecalculateScaleJob { bounds = boundsRef }.Schedule(dependency);
+		public static JobHandle Schedule(
+			NativeReference<ValueBounds> boundsRef,
+			JobHandle dependency = default
+		) => new PrecalculateScaleJob { bounds = boundsRef }.Schedule(dependency);
 	}
 }

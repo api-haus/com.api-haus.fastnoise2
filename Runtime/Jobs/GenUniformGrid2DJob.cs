@@ -22,8 +22,12 @@ namespace FastNoise2.Jobs
 			noise.GenUniformGrid2D(
 				texture,
 				boundsRef,
-				offset.x, offset.y,
-				texture.Width, texture.Height,
-				frequency, seed);
+				offset.x,
+				offset.y,
+				texture.Width,
+				texture.Height,
+				frequency,
+				seed
+			);
 	}
 }

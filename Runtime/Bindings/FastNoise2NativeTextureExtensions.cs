@@ -11,59 +11,79 @@ namespace FastNoise2.Bindings
             this FastNoise fn,
             NativeTexture2D<float> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
-            int xStart, int yStart,
-            int xSize, int ySize,
+            int xStart,
+            int yStart,
+            int xSize,
+            int ySize,
             float frequency,
-            int seed)
+            int seed
+        )
         {
             boundsRef.Reset();
 
             fnGenUniformGrid2D(
                 fn.mNodeHandle,
                 nativeTexture.GetUnsafePtr(),
-                xStart, yStart,
-                xSize, ySize,
-                frequency, seed,
+                xStart,
+                yStart,
+                xSize,
+                ySize,
+                frequency,
+                seed,
                 boundsRef.GetUnsafePtr()
             );
         }
-
 
         public static unsafe void GenUniformGrid3D(
             this FastNoise fn,
             NativeTexture3D<float> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
-            int xStart, int yStart, int zStart,
-            int xSize, int ySize, int zSize,
-            float frequency, int seed)
+            int xStart,
+            int yStart,
+            int zStart,
+            int xSize,
+            int ySize,
+            int zSize,
+            float frequency,
+            int seed
+        )
         {
             boundsRef.Reset();
 
             fnGenUniformGrid3D(
                 fn.mNodeHandle,
                 nativeTexture.GetUnsafePtr(),
-                xStart, yStart, zStart,
-                xSize, ySize, zSize,
-                frequency, seed,
+                xStart,
+                yStart,
+                zStart,
+                xSize,
+                ySize,
+                zSize,
+                frequency,
+                seed,
                 boundsRef.GetUnsafePtr()
             );
         }
-
 
         public static unsafe void GenTileable2D(
             this FastNoise fn,
             NativeTexture2D<float> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
-            int xSize, int ySize,
-            float frequency, int seed)
+            int xSize,
+            int ySize,
+            float frequency,
+            int seed
+        )
         {
             boundsRef.Reset();
 
             fnGenTileable2D(
                 fn.mNodeHandle,
                 nativeTexture.GetUnsafePtr(),
-                xSize, ySize,
-                frequency, seed,
+                xSize,
+                ySize,
+                frequency,
+                seed,
                 boundsRef.GetUnsafePtr()
             );
         }
@@ -75,8 +95,10 @@ namespace FastNoise2.Bindings
             int positionCount,
             NativeArray<float> xPosArray,
             NativeArray<float> yPosArray,
-            float xOffset, float yOffset,
-            int seed)
+            float xOffset,
+            float yOffset,
+            int seed
+        )
         {
             boundsRef.Reset();
 
@@ -86,7 +108,8 @@ namespace FastNoise2.Bindings
                 positionCount,
                 xPosArray.GetUnsafePtr(),
                 yPosArray.GetUnsafePtr(),
-                xOffset, yOffset,
+                xOffset,
+                yOffset,
                 seed,
                 boundsRef.GetUnsafePtr()
             );
@@ -100,8 +123,11 @@ namespace FastNoise2.Bindings
             NativeArray<float> xPosArray,
             NativeArray<float> yPosArray,
             NativeArray<float> zPosArray,
-            float xOffset, float yOffset, float zOffset,
-            int seed)
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int seed
+        )
         {
             boundsRef.Reset();
 
@@ -112,7 +138,9 @@ namespace FastNoise2.Bindings
                 xPosArray.GetUnsafePtr(),
                 yPosArray.GetUnsafePtr(),
                 zPosArray.GetUnsafePtr(),
-                xOffset, yOffset, zOffset,
+                xOffset,
+                yOffset,
+                zOffset,
                 seed,
                 boundsRef.GetUnsafePtr()
             );

@@ -2,8 +2,8 @@
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
-	using System.Runtime.CompilerServices;
 	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
 
 	// ReSharper disable once InconsistentNaming
@@ -15,10 +15,13 @@ namespace FastNoise2.NativeTexture.Formats
 	{
 		/// <summary>x component of the vector.</summary>
 		public ushort x;
+
 		/// <summary>y component of the vector.</summary>
 		public ushort y;
+
 		/// <summary>z component of the vector.</summary>
 		public ushort z;
+
 		/// <summary>w component of the vector.</summary>
 		public ushort w;
 
@@ -29,7 +32,12 @@ namespace FastNoise2.NativeTexture.Formats
 		public static readonly ushort4 one = new(1, 1, 1, 1);
 
 		/// <summary>ushort4 maximum value (all components are ushort.MaxValue).</summary>
-		public static readonly ushort4 max = new(ushort.MaxValue, ushort.MaxValue, ushort.MaxValue, ushort.MaxValue);
+		public static readonly ushort4 max = new(
+			ushort.MaxValue,
+			ushort.MaxValue,
+			ushort.MaxValue,
+			ushort.MaxValue
+		);
 
 		/// <summary>Constructs a ushort4 vector from four ushort values.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -166,25 +174,27 @@ namespace FastNoise2.NativeTexture.Formats
 		/// Useful for high-precision normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 FromNormalized(float4 v) => new()
-		{
-			x = (ushort)(((v.x * 0.5f) + 0.5f) * ushort.MaxValue),
-			y = (ushort)(((v.y * 0.5f) + 0.5f) * ushort.MaxValue),
-			z = (ushort)(((v.z * 0.5f) + 0.5f) * ushort.MaxValue),
-			w = (ushort)(((v.w * 0.5f) + 0.5f) * ushort.MaxValue)
-		};
+		public static ushort4 FromNormalized(float4 v) =>
+			new()
+			{
+				x = (ushort)(((v.x * 0.5f) + 0.5f) * ushort.MaxValue),
+				y = (ushort)(((v.y * 0.5f) + 0.5f) * ushort.MaxValue),
+				z = (ushort)(((v.z * 0.5f) + 0.5f) * ushort.MaxValue),
+				w = (ushort)(((v.w * 0.5f) + 0.5f) * ushort.MaxValue),
+			};
 
 		/// <summary>
 		/// Converts a ushort4 value (0..65535) back to normalized float4 (-1..1)
 		/// Useful for normal map data
 		/// </summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly float4 ToNormalized() => new(
-					((float)x / ushort.MaxValue * 2f) - 1f,
-					((float)y / ushort.MaxValue * 2f) - 1f,
-					((float)z / ushort.MaxValue * 2f) - 1f,
-					((float)w / ushort.MaxValue * 2f) - 1f
-			 );
+		public readonly float4 ToNormalized() =>
+			new(
+				((float)x / ushort.MaxValue * 2f) - 1f,
+				((float)y / ushort.MaxValue * 2f) - 1f,
+				((float)z / ushort.MaxValue * 2f) - 1f,
+				((float)w / ushort.MaxValue * 2f) - 1f
+			);
 
 		// Implicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -200,12 +210,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float4(ushort4 v) => ToFloat4(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float4 ToFloat4(ushort4 u4) => new(
-			 (float)u4.x / ushort.MaxValue,
-			 (float)u4.y / ushort.MaxValue,
-			 (float)u4.z / ushort.MaxValue,
-			 (float)u4.w / ushort.MaxValue
-		);
+		static float4 ToFloat4(ushort4 u4) =>
+			new(
+				(float)u4.x / ushort.MaxValue,
+				(float)u4.y / ushort.MaxValue,
+				(float)u4.z / ushort.MaxValue,
+				(float)u4.w / ushort.MaxValue
+			);
 
 		// Explicit conversions
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -223,291 +234,235 @@ namespace FastNoise2.NativeTexture.Formats
 		// Operators
 		// Multiplication
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator *(ushort4 lhs, ushort4 rhs) => new(
-			 (ushort)(lhs.x * rhs.x),
-			 (ushort)(lhs.y * rhs.y),
-			 (ushort)(lhs.z * rhs.z),
-			 (ushort)(lhs.w * rhs.w)
-		);
+		public static ushort4 operator *(ushort4 lhs, ushort4 rhs) =>
+			new(
+				(ushort)(lhs.x * rhs.x),
+				(ushort)(lhs.y * rhs.y),
+				(ushort)(lhs.z * rhs.z),
+				(ushort)(lhs.w * rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator *(ushort4 lhs, ushort rhs) => new(
-			 (ushort)(lhs.x * rhs),
-			 (ushort)(lhs.y * rhs),
-			 (ushort)(lhs.z * rhs),
-			 (ushort)(lhs.w * rhs)
-		);
+		public static ushort4 operator *(ushort4 lhs, ushort rhs) =>
+			new(
+				(ushort)(lhs.x * rhs),
+				(ushort)(lhs.y * rhs),
+				(ushort)(lhs.z * rhs),
+				(ushort)(lhs.w * rhs)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator *(ushort lhs, ushort4 rhs) => new(
-			 (ushort)(lhs * rhs.x),
-			 (ushort)(lhs * rhs.y),
-			 (ushort)(lhs * rhs.z),
-			 (ushort)(lhs * rhs.w)
-		);
+		public static ushort4 operator *(ushort lhs, ushort4 rhs) =>
+			new(
+				(ushort)(lhs * rhs.x),
+				(ushort)(lhs * rhs.y),
+				(ushort)(lhs * rhs.z),
+				(ushort)(lhs * rhs.w)
+			);
 
 		// Addition
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator +(ushort4 lhs, ushort4 rhs) => new(
-			 (ushort)(lhs.x + rhs.x),
-			 (ushort)(lhs.y + rhs.y),
-			 (ushort)(lhs.z + rhs.z),
-			 (ushort)(lhs.w + rhs.w)
-		);
+		public static ushort4 operator +(ushort4 lhs, ushort4 rhs) =>
+			new(
+				(ushort)(lhs.x + rhs.x),
+				(ushort)(lhs.y + rhs.y),
+				(ushort)(lhs.z + rhs.z),
+				(ushort)(lhs.w + rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator +(ushort4 lhs, ushort rhs) => new(
-			 (ushort)(lhs.x + rhs),
-			 (ushort)(lhs.y + rhs),
-			 (ushort)(lhs.z + rhs),
-			 (ushort)(lhs.w + rhs)
-		);
+		public static ushort4 operator +(ushort4 lhs, ushort rhs) =>
+			new(
+				(ushort)(lhs.x + rhs),
+				(ushort)(lhs.y + rhs),
+				(ushort)(lhs.z + rhs),
+				(ushort)(lhs.w + rhs)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator +(ushort lhs, ushort4 rhs) => new(
-			 (ushort)(lhs + rhs.x),
-			 (ushort)(lhs + rhs.y),
-			 (ushort)(lhs + rhs.z),
-			 (ushort)(lhs + rhs.w)
-		);
+		public static ushort4 operator +(ushort lhs, ushort4 rhs) =>
+			new(
+				(ushort)(lhs + rhs.x),
+				(ushort)(lhs + rhs.y),
+				(ushort)(lhs + rhs.z),
+				(ushort)(lhs + rhs.w)
+			);
 
 		// Subtraction (with clamping to zero)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator -(ushort4 lhs, ushort4 rhs) => new(
-			 (ushort)Math.Max(0, lhs.x - rhs.x),
-			 (ushort)Math.Max(0, lhs.y - rhs.y),
-			 (ushort)Math.Max(0, lhs.z - rhs.z),
-			 (ushort)Math.Max(0, lhs.w - rhs.w)
-		);
+		public static ushort4 operator -(ushort4 lhs, ushort4 rhs) =>
+			new(
+				(ushort)Math.Max(0, lhs.x - rhs.x),
+				(ushort)Math.Max(0, lhs.y - rhs.y),
+				(ushort)Math.Max(0, lhs.z - rhs.z),
+				(ushort)Math.Max(0, lhs.w - rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator -(ushort4 lhs, ushort rhs) => new(
-			 (ushort)Math.Max(0, lhs.x - rhs),
-			 (ushort)Math.Max(0, lhs.y - rhs),
-			 (ushort)Math.Max(0, lhs.z - rhs),
-			 (ushort)Math.Max(0, lhs.w - rhs)
-		);
+		public static ushort4 operator -(ushort4 lhs, ushort rhs) =>
+			new(
+				(ushort)Math.Max(0, lhs.x - rhs),
+				(ushort)Math.Max(0, lhs.y - rhs),
+				(ushort)Math.Max(0, lhs.z - rhs),
+				(ushort)Math.Max(0, lhs.w - rhs)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator -(ushort lhs, ushort4 rhs) => new(
-			 (ushort)Math.Max(0, lhs - rhs.x),
-			 (ushort)Math.Max(0, lhs - rhs.y),
-			 (ushort)Math.Max(0, lhs - rhs.z),
-			 (ushort)Math.Max(0, lhs - rhs.w)
-		);
+		public static ushort4 operator -(ushort lhs, ushort4 rhs) =>
+			new(
+				(ushort)Math.Max(0, lhs - rhs.x),
+				(ushort)Math.Max(0, lhs - rhs.y),
+				(ushort)Math.Max(0, lhs - rhs.z),
+				(ushort)Math.Max(0, lhs - rhs.w)
+			);
 
 		// Division
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator /(ushort4 lhs, ushort4 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x / rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y / rhs.y),
-			 rhs.z == 0 ? (ushort)0 : (ushort)(lhs.z / rhs.z),
-			 rhs.w == 0 ? (ushort)0 : (ushort)(lhs.w / rhs.w)
-		);
+		public static ushort4 operator /(ushort4 lhs, ushort4 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x / rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y / rhs.y),
+				rhs.z == 0 ? (ushort)0 : (ushort)(lhs.z / rhs.z),
+				rhs.w == 0 ? (ushort)0 : (ushort)(lhs.w / rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator /(ushort4 lhs, ushort rhs) => rhs == 0 ? zero : new ushort4(
-			 (ushort)(lhs.x / rhs),
-			 (ushort)(lhs.y / rhs),
-			 (ushort)(lhs.z / rhs),
-			 (ushort)(lhs.w / rhs)
-		);
+		public static ushort4 operator /(ushort4 lhs, ushort rhs) =>
+			rhs == 0
+				? zero
+				: new ushort4(
+					(ushort)(lhs.x / rhs),
+					(ushort)(lhs.y / rhs),
+					(ushort)(lhs.z / rhs),
+					(ushort)(lhs.w / rhs)
+				);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator /(ushort lhs, ushort4 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs / rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs / rhs.y),
-			 rhs.z == 0 ? (ushort)0 : (ushort)(lhs / rhs.z),
-			 rhs.w == 0 ? (ushort)0 : (ushort)(lhs / rhs.w)
-		);
+		public static ushort4 operator /(ushort lhs, ushort4 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs / rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs / rhs.y),
+				rhs.z == 0 ? (ushort)0 : (ushort)(lhs / rhs.z),
+				rhs.w == 0 ? (ushort)0 : (ushort)(lhs / rhs.w)
+			);
 
 		// Modulo
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator %(ushort4 lhs, ushort4 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x % rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y % rhs.y),
-			 rhs.z == 0 ? (ushort)0 : (ushort)(lhs.z % rhs.z),
-			 rhs.w == 0 ? (ushort)0 : (ushort)(lhs.w % rhs.w)
-		);
+		public static ushort4 operator %(ushort4 lhs, ushort4 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs.x % rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs.y % rhs.y),
+				rhs.z == 0 ? (ushort)0 : (ushort)(lhs.z % rhs.z),
+				rhs.w == 0 ? (ushort)0 : (ushort)(lhs.w % rhs.w)
+			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator %(ushort4 lhs, ushort rhs) => rhs == 0 ? zero : new ushort4(
-			 (ushort)(lhs.x % rhs),
-			 (ushort)(lhs.y % rhs),
-			 (ushort)(lhs.z % rhs),
-			 (ushort)(lhs.w % rhs)
-		);
+		public static ushort4 operator %(ushort4 lhs, ushort rhs) =>
+			rhs == 0
+				? zero
+				: new ushort4(
+					(ushort)(lhs.x % rhs),
+					(ushort)(lhs.y % rhs),
+					(ushort)(lhs.z % rhs),
+					(ushort)(lhs.w % rhs)
+				);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator %(ushort lhs, ushort4 rhs) => new(
-			 rhs.x == 0 ? (ushort)0 : (ushort)(lhs % rhs.x),
-			 rhs.y == 0 ? (ushort)0 : (ushort)(lhs % rhs.y),
-			 rhs.z == 0 ? (ushort)0 : (ushort)(lhs % rhs.z),
-			 rhs.w == 0 ? (ushort)0 : (ushort)(lhs % rhs.w)
-		);
+		public static ushort4 operator %(ushort lhs, ushort4 rhs) =>
+			new(
+				rhs.x == 0 ? (ushort)0 : (ushort)(lhs % rhs.x),
+				rhs.y == 0 ? (ushort)0 : (ushort)(lhs % rhs.y),
+				rhs.z == 0 ? (ushort)0 : (ushort)(lhs % rhs.z),
+				rhs.w == 0 ? (ushort)0 : (ushort)(lhs % rhs.w)
+			);
 
 		// Increment and decrement
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator ++(ushort4 val) => new(
-			 (ushort)(val.x + 1),
-			 (ushort)(val.y + 1),
-			 (ushort)(val.z + 1),
-			 (ushort)(val.w + 1)
-		);
+		public static ushort4 operator ++(ushort4 val) =>
+			new((ushort)(val.x + 1), (ushort)(val.y + 1), (ushort)(val.z + 1), (ushort)(val.w + 1));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static ushort4 operator --(ushort4 val) => new(
-			 (ushort)Math.Max(0, val.x - 1),
-			 (ushort)Math.Max(0, val.y - 1),
-			 (ushort)Math.Max(0, val.z - 1),
-			 (ushort)Math.Max(0, val.w - 1)
-		);
+		public static ushort4 operator --(ushort4 val) =>
+			new(
+				(ushort)Math.Max(0, val.x - 1),
+				(ushort)Math.Max(0, val.y - 1),
+				(ushort)Math.Max(0, val.z - 1),
+				(ushort)Math.Max(0, val.w - 1)
+			);
 
 		// Comparison operators - these return bool4 from Unity.Mathematics
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x < rhs.x,
-			 lhs.y < rhs.y,
-			 lhs.z < rhs.z,
-			 lhs.w < rhs.w
-		);
+		public static bool4 operator <(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x < rhs.x, lhs.y < rhs.y, lhs.z < rhs.z, lhs.w < rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(ushort4 lhs, ushort rhs) => new(
-			 lhs.x < rhs,
-			 lhs.y < rhs,
-			 lhs.z < rhs,
-			 lhs.w < rhs
-		);
+		public static bool4 operator <(ushort4 lhs, ushort rhs) =>
+			new(lhs.x < rhs, lhs.y < rhs, lhs.z < rhs, lhs.w < rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <(ushort lhs, ushort4 rhs) => new(
-			 lhs < rhs.x,
-			 lhs < rhs.y,
-			 lhs < rhs.z,
-			 lhs < rhs.w
-		);
+		public static bool4 operator <(ushort lhs, ushort4 rhs) =>
+			new(lhs < rhs.x, lhs < rhs.y, lhs < rhs.z, lhs < rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x <= rhs.x,
-			 lhs.y <= rhs.y,
-			 lhs.z <= rhs.z,
-			 lhs.w <= rhs.w
-		);
+		public static bool4 operator <=(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x <= rhs.x, lhs.y <= rhs.y, lhs.z <= rhs.z, lhs.w <= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(ushort4 lhs, ushort rhs) => new(
-			 lhs.x <= rhs,
-			 lhs.y <= rhs,
-			 lhs.z <= rhs,
-			 lhs.w <= rhs
-		);
+		public static bool4 operator <=(ushort4 lhs, ushort rhs) =>
+			new(lhs.x <= rhs, lhs.y <= rhs, lhs.z <= rhs, lhs.w <= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator <=(ushort lhs, ushort4 rhs) => new(
-			 lhs <= rhs.x,
-			 lhs <= rhs.y,
-			 lhs <= rhs.z,
-			 lhs <= rhs.w
-		);
+		public static bool4 operator <=(ushort lhs, ushort4 rhs) =>
+			new(lhs <= rhs.x, lhs <= rhs.y, lhs <= rhs.z, lhs <= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x > rhs.x,
-			 lhs.y > rhs.y,
-			 lhs.z > rhs.z,
-			 lhs.w > rhs.w
-		);
+		public static bool4 operator >(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x > rhs.x, lhs.y > rhs.y, lhs.z > rhs.z, lhs.w > rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(ushort4 lhs, ushort rhs) => new(
-			 lhs.x > rhs,
-			 lhs.y > rhs,
-			 lhs.z > rhs,
-			 lhs.w > rhs
-		);
+		public static bool4 operator >(ushort4 lhs, ushort rhs) =>
+			new(lhs.x > rhs, lhs.y > rhs, lhs.z > rhs, lhs.w > rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >(ushort lhs, ushort4 rhs) => new(
-			 lhs > rhs.x,
-			 lhs > rhs.y,
-			 lhs > rhs.z,
-			 lhs > rhs.w
-		);
+		public static bool4 operator >(ushort lhs, ushort4 rhs) =>
+			new(lhs > rhs.x, lhs > rhs.y, lhs > rhs.z, lhs > rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x >= rhs.x,
-			 lhs.y >= rhs.y,
-			 lhs.z >= rhs.z,
-			 lhs.w >= rhs.w
-		);
+		public static bool4 operator >=(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x >= rhs.x, lhs.y >= rhs.y, lhs.z >= rhs.z, lhs.w >= rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(ushort4 lhs, ushort rhs) => new(
-			 lhs.x >= rhs,
-			 lhs.y >= rhs,
-			 lhs.z >= rhs,
-			 lhs.w >= rhs
-		);
+		public static bool4 operator >=(ushort4 lhs, ushort rhs) =>
+			new(lhs.x >= rhs, lhs.y >= rhs, lhs.z >= rhs, lhs.w >= rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator >=(ushort lhs, ushort4 rhs) => new(
-			 lhs >= rhs.x,
-			 lhs >= rhs.y,
-			 lhs >= rhs.z,
-			 lhs >= rhs.w
-		);
+		public static bool4 operator >=(ushort lhs, ushort4 rhs) =>
+			new(lhs >= rhs.x, lhs >= rhs.y, lhs >= rhs.z, lhs >= rhs.w);
 
 		// Equality operators
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x == rhs.x,
-			 lhs.y == rhs.y,
-			 lhs.z == rhs.z,
-			 lhs.w == rhs.w
-		);
+		public static bool4 operator ==(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x == rhs.x, lhs.y == rhs.y, lhs.z == rhs.z, lhs.w == rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(ushort4 lhs, ushort rhs) => new(
-			 lhs.x == rhs,
-			 lhs.y == rhs,
-			 lhs.z == rhs,
-			 lhs.w == rhs
-		);
+		public static bool4 operator ==(ushort4 lhs, ushort rhs) =>
+			new(lhs.x == rhs, lhs.y == rhs, lhs.z == rhs, lhs.w == rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator ==(ushort lhs, ushort4 rhs) => new(
-			 lhs == rhs.x,
-			 lhs == rhs.y,
-			 lhs == rhs.z,
-			 lhs == rhs.w
-		);
+		public static bool4 operator ==(ushort lhs, ushort4 rhs) =>
+			new(lhs == rhs.x, lhs == rhs.y, lhs == rhs.z, lhs == rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(ushort4 lhs, ushort4 rhs) => new(
-			 lhs.x != rhs.x,
-			 lhs.y != rhs.y,
-			 lhs.z != rhs.z,
-			 lhs.w != rhs.w
-		);
+		public static bool4 operator !=(ushort4 lhs, ushort4 rhs) =>
+			new(lhs.x != rhs.x, lhs.y != rhs.y, lhs.z != rhs.z, lhs.w != rhs.w);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(ushort4 lhs, ushort rhs) => new(
-			 lhs.x != rhs,
-			 lhs.y != rhs,
-			 lhs.z != rhs,
-			 lhs.w != rhs
-		);
+		public static bool4 operator !=(ushort4 lhs, ushort rhs) =>
+			new(lhs.x != rhs, lhs.y != rhs, lhs.z != rhs, lhs.w != rhs);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static bool4 operator !=(ushort lhs, ushort4 rhs) => new(
-			 lhs != rhs.x,
-			 lhs != rhs.y,
-			 lhs != rhs.z,
-			 lhs != rhs.w
-		);
+		public static bool4 operator !=(ushort lhs, ushort4 rhs) =>
+			new(lhs != rhs.x, lhs != rhs.y, lhs != rhs.z, lhs != rhs.w);
 
 		// Basic swizzling properties - a small subset of the possible combinations
 		public readonly ushort2 xx => new(x, x);
@@ -584,7 +539,9 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...3]");
 #endif
 				fixed (ushort4* array = &this)
-				{ return ((ushort*)array)[index]; }
+				{
+					return ((ushort*)array)[index];
+				}
 			}
 			set
 			{
@@ -593,13 +550,16 @@ namespace FastNoise2.NativeTexture.Formats
 					throw new System.ArgumentException("index must be between[0...3]");
 #endif
 				fixed (ushort* array = &x)
-				{ array[index] = value; }
+				{
+					array[index] = value;
+				}
 			}
 		}
 
 		/// <summary>Returns true if the ushort4 is equal to a given ushort4, false otherwise.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly bool Equals(ushort4 other) => x == other.x && y == other.y && z == other.z && w == other.w;
+		public readonly bool Equals(ushort4 other) =>
+			x == other.x && y == other.y && z == other.z && w == other.w;
 
 		/// <summary>Returns true if the ushort4 is equal to a given ushort4, false otherwise.</summary>
 		public override readonly bool Equals(object obj) => obj is ushort4 other && Equals(other);
@@ -615,7 +575,7 @@ namespace FastNoise2.NativeTexture.Formats
 		/// <summary>Returns a string representation of the ushort4 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public readonly string ToString(string format, IFormatProvider formatProvider) =>
-			 $"ushort4({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)}, {w.ToString(format, formatProvider)})";
+			$"ushort4({x.ToString(format, formatProvider)}, {y.ToString(format, formatProvider)}, {z.ToString(format, formatProvider)}, {w.ToString(format, formatProvider)})";
 
 		internal sealed class DebuggerProxy
 		{

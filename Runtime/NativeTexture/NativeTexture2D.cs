@@ -19,7 +19,8 @@ namespace FastNoise2.NativeTexture
 	[NativeContainer]
 	[NativeContainerSupportsMinMaxWriteRestriction]
 	[NativeContainerSupportsDeallocateOnJobCompletion]
-	public struct NativeTexture2D<T> : INativeTexture<int2, T>, INativeDisposable where T : unmanaged
+	public struct NativeTexture2D<T> : INativeTexture<int2, T>, INativeDisposable
+		where T : unmanaged
 	{
 		[ReadOnly]
 		[NativeDisableUnsafePtrRestriction]
@@ -33,6 +34,7 @@ namespace FastNoise2.NativeTexture
 		internal int m_MinIndex;
 		internal int m_MaxIndex;
 		internal AtomicSafetyHandle m_Safety;
+
 		// Allocator type
 		internal Allocator m_AllocatorLabel;
 #pragma warning restore IDE1006 // Naming Styles
@@ -132,12 +134,18 @@ namespace FastNoise2.NativeTexture
 		{
 			if (allocator <= Allocator.None)
 			{
-				throw new ArgumentException("Allocator must be Temp, TempJob or Persistent", "allocator");
+				throw new ArgumentException(
+					"Allocator must be Temp, TempJob or Persistent",
+					"allocator"
+				);
 			}
 
 			if (allocator >= Allocator.FirstUserIndex)
 			{
-				throw new ArgumentException("Use CollectionHelper.CreateNativeArray for custom allocator", "allocator");
+				throw new ArgumentException(
+					"Use CollectionHelper.CreateNativeArray for custom allocator",
+					"allocator"
+				);
 			}
 
 			if (length < 0)
@@ -190,11 +198,14 @@ namespace FastNoise2.NativeTexture
 			if (index < Length && (m_MinIndex != 0 || m_MaxIndex != Length - 1))
 			{
 				throw new IndexOutOfRangeException(
-						$"Index {index} is out of restricted IJobParallelFor range [{m_MinIndex}...{m_MaxIndex}] in NativeTexture2D.\n" +
-						"NativeTexture2D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job.");
+					$"Index {index} is out of restricted IJobParallelFor range [{m_MinIndex}...{m_MaxIndex}] in NativeTexture2D.\n"
+						+ "NativeTexture2D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job."
+				);
 			}
 
-			throw new IndexOutOfRangeException($"Index {index} is out of range of '{Length}' Length.");
+			throw new IndexOutOfRangeException(
+				$"Index {index} is out of range of '{Length}' Length."
+			);
 		}
 
 		#endregion
@@ -302,7 +313,10 @@ namespace FastNoise2.NativeTexture
 
 			// Create a NativeArray that references the same memory
 			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-				m_Buffer, m_Length, Allocator.None);
+				m_Buffer,
+				m_Length,
+				Allocator.None
+			);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, arraySafety);
@@ -324,7 +338,10 @@ namespace FastNoise2.NativeTexture
 
 			// Create a NativeArray that references the same memory
 			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-				m_Buffer, m_Length, Allocator.None);
+				m_Buffer,
+				m_Length,
+				Allocator.None
+			);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, m_Safety);
@@ -341,7 +358,7 @@ namespace FastNoise2.NativeTexture
 		/// <param name="updateMipmaps">Whether to update mipmaps after applying data.</param>
 		/// <returns>The updated Texture2D object.</returns>
 		[BurstDiscard]
-		public unsafe readonly Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
+		public readonly unsafe Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
 		{
 			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 
@@ -353,7 +370,8 @@ namespace FastNoise2.NativeTexture
 				UnsafeUtility.MemCpy(
 					writeableTextureMemory.GetUnsafePtr(),
 					m_Buffer,
-					(long)UnsafeUtility.SizeOf<T>() * m_Length);
+					(long)UnsafeUtility.SizeOf<T>() * m_Length
+				);
 			}
 
 			texture.Apply(updateMipmaps);
@@ -450,7 +468,7 @@ namespace FastNoise2.NativeTexture
 				length = m_Length,
 				allocatorLabel = m_AllocatorLabel,
 				safety = m_Safety,
-				texturePtr = texturePtr
+				texturePtr = texturePtr,
 			};
 
 			JobHandle handle = jobData.Schedule(inputDeps);
@@ -475,11 +493,12 @@ namespace FastNoise2.NativeTexture
 		public readonly struct ReadOnly : INativeTexture<int2, T>
 		{
 			[NativeDisableUnsafePtrRestriction]
-			internal unsafe readonly void* buffer;
+			internal readonly unsafe void* buffer;
 			internal readonly int length;
 			internal readonly AtomicSafetyHandle safety;
 			internal readonly int2 resolution;
 			internal readonly bool isUnityTexture2DPointer;
+
 			[NativeDisableUnsafePtrRestriction]
 			internal readonly IntPtr texturePtr;
 
@@ -522,11 +541,12 @@ namespace FastNoise2.NativeTexture
 				{
 					AtomicSafetyHandle.CheckReadAndThrow(safety);
 					if ((uint)index >= (uint)length)
-						throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+						throw new IndexOutOfRangeException(
+							$"Index {index} is out of range (must be between 0 and {length - 1})."
+						);
 
 					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
 				}
-
 				[WriteAccessRequired]
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
 			}
@@ -539,11 +559,12 @@ namespace FastNoise2.NativeTexture
 					int index = coord.ToIndex(Width);
 					AtomicSafetyHandle.CheckReadAndThrow(safety);
 					if ((uint)index >= (uint)length)
-						throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+						throw new IndexOutOfRangeException(
+							$"Index {index} is out of range (must be between 0 and {length - 1})."
+						);
 
 					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
 				}
-
 				[WriteAccessRequired]
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
 			}
@@ -553,7 +574,9 @@ namespace FastNoise2.NativeTexture
 				int index = pixelCoord.ToIndex(Width);
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
 				if ((uint)index >= (uint)length)
-					throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+					throw new IndexOutOfRangeException(
+						$"Index {index} is out of range (must be between 0 and {length - 1})."
+					);
 
 				return UnsafeUtility.ReadArrayElement<T>(buffer, index);
 			}
@@ -562,7 +585,9 @@ namespace FastNoise2.NativeTexture
 			{
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
 				if ((uint)pixelIndex >= (uint)length)
-					throw new IndexOutOfRangeException($"Index {pixelIndex} is out of range (must be between 0 and {length - 1}).");
+					throw new IndexOutOfRangeException(
+						$"Index {pixelIndex} is out of range (must be between 0 and {length - 1})."
+					);
 
 				coord = pixelIndex.ToCoord(Width);
 				return UnsafeUtility.ReadArrayElement<T>(buffer, pixelIndex);
@@ -578,7 +603,9 @@ namespace FastNoise2.NativeTexture
 				// Check if buffer is valid before proceeding
 				if (buffer == null)
 				{
-					throw new InvalidOperationException("Cannot create NativeArray from null buffer");
+					throw new InvalidOperationException(
+						"Cannot create NativeArray from null buffer"
+					);
 				}
 
 				AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(safety);
@@ -589,8 +616,12 @@ namespace FastNoise2.NativeTexture
 #endif
 
 				// Create a NativeArray from our buffer
-				NativeArray<T> tempArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-					 buffer, length, Allocator.None);
+				NativeArray<T> tempArray =
+					NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+						buffer,
+						length,
+						Allocator.None
+					);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tempArray, arraySafety);
@@ -611,7 +642,9 @@ namespace FastNoise2.NativeTexture
 
 			public unsafe void* GetUnsafePtr()
 			{
-				throw new NotSupportedException("Cannot get unsafe pointer from ReadOnly view, use GetUnsafeReadOnlyPtr instead");
+				throw new NotSupportedException(
+					"Cannot get unsafe pointer from ReadOnly view, use GetUnsafeReadOnlyPtr instead"
+				);
 			}
 
 			public unsafe void* GetUnsafeReadOnlyPtr()

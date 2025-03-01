@@ -14,7 +14,8 @@ namespace FastNoise2.Editor.NoiseAssets
 
 			if (GUILayout.Button("Bake"))
 			{
-				System.Collections.Generic.IEnumerable<BakedNoiseTextureAsset> targetAssets = targets.OfType<BakedNoiseTextureAsset>();
+				System.Collections.Generic.IEnumerable<BakedNoiseTextureAsset> targetAssets =
+					targets.OfType<BakedNoiseTextureAsset>();
 
 				foreach (BakedNoiseTextureAsset noiseAsset in targetAssets)
 				{
