@@ -31,7 +31,7 @@
 3. Paste the following URL and click `Add`:
 
 ```
-https://github.com/Auburn/FastNoise2.git
+https://github.com/api-haus/com.auburn.fastnoise2.git
 ```
 
 Unity will automatically download and install the package.
@@ -113,7 +113,7 @@ Replace `path/to/library` with the actual path to the native library file.
 
 ### ⚠️ Disclaimer
 
-> **Perform these actions at your own risk.** Modifying file permissions and removing security attributes can expose your system to potential security risks. Ensure you trust the source of the libraries before proceeding.
+> **Perform these actions at your own risk.** Modifying file permissions and removing security attributes can expose your system to potential security risks. Ensure you trust the source of the libraries before proceeding. There is always a risk of repository being overtaken by malicious actor.
 
 ---
 
@@ -123,7 +123,6 @@ Replace `path/to/library` with the actual path to the native library file.
 - [ ] Complete Noise Editor integration (serialization to/from Noise Tool)
 - [ ] Support for all texture dimensions and job types
 - [ ] Comprehensive documentation and additional examples
-- [ ] Migration to NewSIMD branch
 - [ ] macOS CodeSigning
 - [ ] Continuous Integration (CI), Semantic Versioning (SemVer), and OpenUPM support
 
