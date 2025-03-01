@@ -66,80 +66,36 @@ Unity will automatically download and install the package.
 
 ## Usage Examples
 
-### Generating 2D Noise Texture
-
-```csharp
-using UnityEngine;
-using Unity.Collections;
-using FastNoise2;
-using FastNoise2.NativeTexture;
-
-public class NoiseExample : MonoBehaviour
-{
-    public Texture2D texture;
-
-    void Start()
-    {
-        var noise = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
-        using var nativeTexture = new NativeTexture2D<float>(texture, Allocator.TempJob);
-
-        noise.GenUniformGrid2D(nativeTexture, 0, 0, texture.width, texture.height, 0.02f, 1337);
-        nativeTexture.ApplyTo(texture);
-    }
-}
-```
-
-### Generating 3D Noise Texture
-
-```csharp
-using UnityEngine;
-using Unity.Collections;
-using Unity.Mathematics;
-using FastNoise2;
-using FastNoise2.NativeTexture;
-
-public class Noise3DExample : MonoBehaviour
-{
-    public Texture3D texture3D;
-
-    void Start()
-    {
-        var noise = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
-        int3 resolution = new int3(texture3D.width, texture3D.height, texture3D.depth);
-        using var nativeTexture3D = new NativeTexture3D<float>(resolution, Allocator.TempJob);
-
-        noise.GenUniformGrid3D(nativeTexture3D, 0, int3.zero, 0.02f);
-        nativeTexture3D.ApplyTo(texture3D);
-    }
-}
-```
-
 ### Using Jobs for Noise Generation
 
 ```csharp
-using UnityEngine;
-using Unity.Collections;
-using Unity.Jobs;
-using FastNoise2;
-using FastNoise2.NativeTexture;
-
-public class NoiseWithJobsExample : MonoBehaviour
+public class NoiseJobsExample : MonoBehaviour
 {
-    public Texture2D texture;
-
     void Start()
     {
-        var noise = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
-        using var nativeTexture = new NativeTexture2D<float>(texture, Allocator.TempJob);
-        
-        // Schedule the noise generation job
-        var job = noise.GenUniformGrid2DJob(nativeTexture, 0, 0, texture.width, texture.height, 0.02f, 1337);
-        job.Schedule().Complete();
-        
-        // Optionally normalize the results
-        nativeTexture.NormalizeJob(new ValueBounds(0, 1)).Schedule().Complete();
-        
-        nativeTexture.ApplyTo(texture);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+
+			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> noiseTexture2D = new NativeTexture2D<float>(512, Allocator.TempJob);
+
+			// Create a bounds reference for tracking min/max values
+			using NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(Allocator.Temp);
+
+			// Generate noise directly into the native texture with built-in bounds tracking
+			nodeTree.GenUniformGrid2D(
+				noiseTexture2D,
+				boundsRef,
+				0, 0,
+				noiseTexture2D.Width, noiseTexture2D.Height,
+				0.02f, 1337);
+
+			// Log the bounds for verification
+			Debug.Log($"Noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}");
+
+			noiseTexture2D.ApplyTo(texture);
+
+			File.WriteAllBytes("texNative.png", texture.EncodeToPNG());
+			Object.DestroyImmediate(texture);
     }
 }
 ```
