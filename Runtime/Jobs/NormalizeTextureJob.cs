@@ -1,57 +1,46 @@
 namespace FastNoise2.Jobs
 {
-   using NativeTexture;
-   using Unity.Burst;
-   using Unity.Collections;
-   using Unity.Jobs;
+	using NativeTexture;
+	using Unity.Burst;
+	using Unity.Collections;
+	using Unity.Collections.LowLevel.Unsafe;
+	using Unity.Jobs;
 
-   [BurstCompile]
-   public struct NormalizeTextureJob : IJobParallelFor
-   {
-	  [NativeMatchesParallelForLength] NativeArray<float> texture;
+	[BurstCompile]
+	public struct NormalizeTextureJob : IJobParallelFor
+	{
+		[NativeMatchesParallelForLength] NativeArray<float> m_Texture;
 
-	  [ReadOnly] NativeReference<ValueBounds<float>> boundsRef;
+		[ReadOnly] NativeReference<ValueBounds> m_BoundsRef;
 
-	  [BurstCompile]
-	  public void Execute(int i) =>
-		  texture[i] = boundsRef.NormalizeValue(texture[i]);
+		[BurstCompile]
+		public void Execute(int i) =>
+				m_Texture[i] = m_BoundsRef.NormalizeValue(m_Texture[i]);
 
-	  public static JobHandle Schedule(NativeTexture2D<float> tex, JobHandle dependency = default) =>
-		  new NormalizeTextureJob
-		  {
-			 texture = tex.rawTextureData, //
-			 boundsRef = tex.BoundsRef,
-		  }.Schedule(tex.Length, tex.Width, dependency);
+		public static JobHandle Schedule(NativeTexture2D<float> tex, NativeReference<ValueBounds> boundsRef, JobHandle dependency = default) =>
+				new NormalizeTextureJob
+				{
+					m_Texture = tex.AsDeferredJobArray(),
+					m_BoundsRef = boundsRef,
+				}.Schedule(tex.Length, 64, dependency);
 
-	  public static JobHandle Schedule(NativeTexture3D<float> tex, JobHandle dependency = default) =>
-		  new NormalizeTextureJob
-		  {
-			 texture = tex.rawTextureData, //
-			 boundsRef = tex.BoundsRef,
-		  }.Schedule(tex.Length, tex.Width, dependency);
-   }
+		public static JobHandle Schedule(NativeTexture3D<float> tex, NativeReference<ValueBounds> boundsRef, JobHandle dependency = default) =>
+				new NormalizeTextureJob
+				{
+					m_Texture = tex.AsDeferredJobArray(),
+					m_BoundsRef = boundsRef,
+				}.Schedule(tex.Length, 64, dependency);
+	}
 
-   [BurstCompile]
-   public struct PrecalculateScaleJob : IJob
-   {
-	  public NativeReference<ValueBounds<float>> Bounds;
+	[BurstCompile]
+	public struct PrecalculateScaleJob : IJob
+	{
+		public NativeReference<ValueBounds> bounds;
 
-	  public readonly void Execute() => Bounds.PrecalculateScale();
+		public readonly void Execute() => bounds.PrecalculateScale();
 
-	  public static JobHandle Schedule(NativeReference<ValueBounds<float>> boundsRef,
-		  JobHandle dependency = default) =>
-		  new PrecalculateScaleJob { Bounds = boundsRef }.Schedule(dependency);
-   }
-
-   [BurstCompile]
-   struct ResetBoundsJob : IJob
-   {
-	  [WriteOnly] public NativeReference<ValueBounds<float>> Bounds;
-
-	  public readonly void Execute() => Bounds.Reset();
-
-	  public static JobHandle Schedule(NativeReference<ValueBounds<float>> boundsRef,
-		  JobHandle dependency = default) =>
-		  new ResetBoundsJob { Bounds = boundsRef }.Schedule(dependency);
-   }
+		public static JobHandle Schedule(NativeReference<ValueBounds> boundsRef,
+				JobHandle dependency = default) =>
+				new PrecalculateScaleJob { bounds = boundsRef }.Schedule(dependency);
+	}
 }

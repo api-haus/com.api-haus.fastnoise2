@@ -1,33 +1,35 @@
 using System.IO;
 using NUnit.Framework;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
 namespace FastNoise2.Tests
 {
 	using Bindings;
+	using NativeTexture;
 
 	public class BindingTests
 	{
 		[Test]
 		public void GenerateBitmapTestSafe()
 		{
-			using var cellular = new FastNoise("CellularDistance");
+			using FastNoise cellular = new FastNoise("CellularDistance");
 			cellular.Set("ReturnType", "Index0Add1");
 			cellular.Set("DistanceIndex0", 2);
 
-			using var fractal = new FastNoise("FractalFBm");
+			using FastNoise fractal = new FastNoise("FractalFBm");
 			fractal.Set("Source", new FastNoise("Simplex"));
 			fractal.Set("Gain", 0.3f);
 			fractal.Set("Lacunarity", 0.6f);
 
-			using var addDim = new FastNoise("AddDimension");
+			using FastNoise addDim = new FastNoise("AddDimension");
 			addDim.Set("Source", cellular);
 			addDim.Set("NewDimensionPosition", 0.5f);
 			// or
 			// addDim.Set("NewDimensionPosition", new FastNoise("Perlin"));
 
-			using var maxSmooth = new FastNoise("MaxSmooth");
+			using FastNoise maxSmooth = new FastNoise("MaxSmooth");
 			maxSmooth.Set("LHS", fractal);
 			maxSmooth.Set("RHS", addDim);
 
@@ -36,7 +38,7 @@ namespace FastNoise2.Tests
 			GenerateBitmap(maxSmooth, "testMetadata");
 
 			// Dunes
-			using var nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			// Encoded node trees can be invalid and return null
 			if (nodeTree != FastNoise.Invalid)
@@ -45,9 +47,21 @@ namespace FastNoise2.Tests
 			}
 		}
 
+		[Test]
+		public void GenerateBitmapWithValueBounds()
+		{
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+
+			// Encoded node trees can be invalid and return null
+			if (nodeTree != FastNoise.Invalid)
+			{
+				GenerateBitmapWithTrackedBounds(nodeTree, "testWithValueBounds");
+			}
+		}
+
 		static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)
 		{
-			using (var writer = new BinaryWriter(File.Open(filename + ".bmp", FileMode.Create)))
+			using (BinaryWriter writer = new BinaryWriter(File.Open(filename + ".bmp", FileMode.Create)))
 			{
 				const uint imageDataOffset = 14u + 12u + (256u * 3u);
 
@@ -57,14 +71,14 @@ namespace FastNoise2.Tests
 				writer.Write(imageDataOffset + (uint)(size * size)); // file size
 				writer.Write(0); // reserved
 				writer.Write(imageDataOffset); // image data offset
-				// Bmp Info Header (12)
+																			 // Bmp Info Header (12)
 				writer.Write(12u); // size of header
 				writer.Write(size); // width
 				writer.Write(size); // height
 				writer.Write((ushort)1); // color planes
 				writer.Write((ushort)8); // bit depth
-				// Colour map
-				for (var i = 0; i < 256; i++)
+																 // Colour map
+				for (int i = 0; i < 256; i++)
 				{
 					writer.Write((byte)i);
 					writer.Write((byte)i);
@@ -72,18 +86,91 @@ namespace FastNoise2.Tests
 				}
 
 				// Image data
-				var noiseData = new float[size * size];
-				var minMax = fastNoise.GenUniformGrid2D(noiseData, 0, 0, size, size, 0.02f, 1337);
+				float[] noiseData = new float[size * size];
+				FastNoise.OutputMinMax minMax = fastNoise.GenUniformGrid2D(noiseData, 0, 0, size, size, 0.02f, 1337);
 
-				var scale = 255.0f / (minMax.max - minMax.min);
+				float scale = 255.0f / (minMax.max - minMax.min);
 
-				foreach (var noise in noiseData)
+				foreach (float noise in noiseData)
 				{
 					//Scale noise to 0 - 255
-					var noiseI = (int)math.round((noise - minMax.min) * scale);
+					int noiseI = (int)math.round((noise - minMax.min) * scale);
 
 					writer.Write((byte)math.clamp(noiseI, 0, 255));
 				}
+			}
+		}
+
+		static void GenerateBitmapWithTrackedBounds(FastNoise fastNoise, string filename, ushort size = 512)
+		{
+			using (BinaryWriter writer = new BinaryWriter(File.Open(filename + ".bmp", FileMode.Create)))
+			{
+				const uint imageDataOffset = 14u + 12u + (256u * 3u);
+
+				// File header (14)
+				writer.Write('B');
+				writer.Write('M');
+				writer.Write(imageDataOffset + (uint)(size * size)); // file size
+				writer.Write(0); // reserved
+				writer.Write(imageDataOffset); // image data offset
+																			 // Bmp Info Header (12)
+				writer.Write(12u); // size of header
+				writer.Write(size); // width
+				writer.Write(size); // height
+				writer.Write((ushort)1); // color planes
+				writer.Write((ushort)8); // bit depth
+																 // Colour map
+				for (int i = 0; i < 256; i++)
+				{
+					writer.Write((byte)i);
+					writer.Write((byte)i);
+					writer.Write((byte)i);
+				}
+
+				// Image data - use NativeTexture2D and ValueBounds
+				NativeTexture2D<float> noiseTexture = new NativeTexture2D<float>(
+					new int2(size, size), Allocator.Temp);
+
+				// Create a bounds reference to track min/max values
+				using (NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(Allocator.Temp))
+				{
+					// Reset bounds before generation
+					boundsRef.Reset();
+
+					// Generate noise with bounds tracking
+					fastNoise.GenUniformGrid2D(
+						noiseTexture,
+						boundsRef,
+						0, 0,
+						size, size,
+						0.02f, 1337);
+
+					// Precalculate normalization values
+					boundsRef.PrecalculateScale();
+
+					// Get the min/max values
+					float min = boundsRef.Value.Min;
+					float max = boundsRef.Value.Max;
+
+					Debug.Log($"Noise bounds: Min={min}, Max={max}");
+
+					// Scale factor for 0-255 range
+					float scale = 255.0f / (max - min);
+
+					// Get native array and process
+					NativeArray<float> noiseData = noiseTexture.AsArray();
+
+					foreach (float noise in noiseData)
+					{
+						//Scale noise to 0 - 255
+						int noiseI = (int)math.round((noise - min) * scale);
+
+						writer.Write((byte)math.clamp(noiseI, 0, 255));
+					}
+				}
+
+				// Dispose the texture
+				noiseTexture.Dispose();
 			}
 		}
 	}

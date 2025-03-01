@@ -1,265 +1,630 @@
 namespace FastNoise2.NativeTexture
 {
-   using System;
-   using System.Diagnostics;
-   using System.Runtime.CompilerServices;
-   using Unity.Burst;
-   using Unity.Collections;
-   using Unity.Collections.LowLevel.Unsafe;
-   using Unity.Jobs;
-   using Unity.Mathematics;
-   using UnityEngine;
+	using System;
+	using System.Diagnostics;
+	using System.Runtime.CompilerServices;
+	using Unity.Burst;
+	using Unity.Collections;
+	using Unity.Collections.LowLevel.Unsafe;
+	using Unity.Jobs;
+	using Unity.Mathematics;
+	using UnityEngine;
 
-   /// <summary>
-   /// A native wrapper for Unity's Texture2D that provides efficient memory management and direct texture data access.
-   /// Implements INativeTexture for 2D textures and INativeDisposable for proper resource cleanup.
-   /// </summary>
-   /// <typeparam name="T">The unmanaged type of the texture data (e.g., float).</typeparam>
-   [DebuggerDisplay("Length = {RawTextureData.m_Length}")]
-   public struct NativeTexture2D<T> : INativeTexture<int2, T>, INativeDisposable where T : unmanaged
-   {
-	  /// <summary>
-	  /// Gets a reference to the bounds containing minimum, maximum, and scale values of the texture data.
-	  /// This reference is used for normalization operations.
-	  /// </summary>
-	  [field: NativeDisableContainerSafetyRestriction]
-	  public NativeReference<ValueBounds<T>> BoundsRef { get; }
+	/// <summary>
+	/// A native wrapper for Unity's Texture2D that provides efficient memory management and direct texture data access.
+	/// Implements INativeTexture for 2D textures and INativeDisposable for proper resource cleanup.
+	/// </summary>
+	/// <typeparam name="T">The unmanaged type of the texture data (e.g., float).</typeparam>
+	[DebuggerDisplay("Length = {m_Length}")]
+	[NativeContainer]
+	[NativeContainerSupportsMinMaxWriteRestriction]
+	[NativeContainerSupportsDeallocateOnJobCompletion]
+	public struct NativeTexture2D<T> : INativeTexture<int2, T>, INativeDisposable where T : unmanaged
+	{
+		[ReadOnly]
+		[NativeDisableUnsafePtrRestriction]
+		internal IntPtr texturePtr;
 
-	  internal NativeArray<T> rawTextureData;
+		// Support for IJobParallelFor min/max restrictions
+#pragma warning disable IDE1006 // Naming Styles
+		[NativeDisableUnsafePtrRestriction]
+		internal unsafe void* m_Buffer;
+		internal int m_Length;
+		internal int m_MinIndex;
+		internal int m_MaxIndex;
+		internal AtomicSafetyHandle m_Safety;
+		// Allocator type
+		internal Allocator m_AllocatorLabel;
+#pragma warning restore IDE1006 // Naming Styles
 
-	  [ReadOnly]
-	  [NativeDisableUnsafePtrRestriction]
-	  readonly IntPtr m_TexturePtr;
+		// Static safety ID
+		internal static int s_staticSafetyId;
 
-	  public readonly bool isReadonly;
-	  readonly AtomicSafetyHandle m_Safety;
+		/// <summary>
+		/// Gets the width of the texture in pixels.
+		/// </summary>
+		public readonly int Width => Resolution.x;
 
-	  /// <summary>
-	  /// Gets the width of the texture in pixels.
-	  /// </summary>
-	  public readonly int Width => Resolution.x;
+		/// <summary>
+		/// Gets the height of the texture in pixels.
+		/// </summary>
+		public readonly int Height => Resolution.y;
 
-	  /// <summary>
-	  /// Gets the height of the texture in pixels.
-	  /// </summary>
-	  public readonly int Height => Resolution.y;
+		/// <summary>
+		/// Gets whether the native texture has been created and initialized.
+		/// </summary>
+		public unsafe readonly bool IsCreated => m_Buffer != null;
 
-	  /// <summary>
-	  /// Gets whether the native texture has been created and initialized.
-	  /// </summary>
-	  public readonly bool IsCreated => rawTextureData.IsCreated;
+		/// <summary>
+		/// Gets whether the texture data points directly to a Unity Texture2D native pointer.
+		/// Returns true if the texture is not using a Unity native pointer.
+		/// </summary>
+		public readonly bool IsUnityTexture2DPointer => texturePtr != IntPtr.Zero;
 
-	  /// <summary>
-	  /// Gets whether the texture data points directly to a Unity Texture2D native pointer.
-	  /// Returns true if the texture is not using a Unity native pointer.
-	  /// </summary>
-	  public readonly bool IsUnityTexture2DPointer => m_TexturePtr == IntPtr.Zero;
+		/// <summary>
+		/// Gets the resolution (width, height) of the texture.
+		/// </summary>
+		public int2 Resolution { get; internal set; }
 
-	  #region Constructors
+		#region Constructors
 
-	  /// <summary>
-	  /// Creates a NativeTexture2D from an existing Unity Texture2D.
-	  /// </summary>
-	  /// <param name="texture">The source Unity Texture2D to wrap.</param>
-	  /// <param name="boundsAllocator">The allocator to use for the bounds data.</param>
-	  public NativeTexture2D(Texture2D texture, Allocator boundsAllocator)
-	  {
-		 m_Safety = AtomicSafetyHandle.Create();
-		 Resolution = new int2(texture.width, texture.height);
-		 m_TexturePtr = texture.GetNativeTexturePtr();
-		 rawTextureData = texture.GetRawTextureData<T>();
-		 BoundsRef = new NativeReference<ValueBounds<T>>(
-			 new ValueBounds<T>(),
-			 boundsAllocator
-		 );
-		 isReadonly = false;
-	  }
+		/// <summary>
+		/// Creates a NativeTexture2D from an existing Unity Texture2D.
+		/// </summary>
+		/// <param name="texture">The source Unity Texture2D to wrap.</param>
+		public unsafe NativeTexture2D(Texture2D texture)
+		{
+			Resolution = new int2(texture.width, texture.height);
+			texturePtr = texture.GetNativeTexturePtr();
 
-	  /// <summary>
-	  /// Creates a new NativeTexture2D with the specified resolution.
-	  /// </summary>
-	  /// <param name="resolution">The dimensions of the texture (width, height).</param>
-	  /// <param name="allocator">The allocator to use for the texture and bounds data.</param>
-	  public NativeTexture2D(int2 resolution, Allocator allocator)
-	  {
-		 m_Safety = AtomicSafetyHandle.Create();
-		 Resolution = resolution;
-		 m_TexturePtr = IntPtr.Zero;
-		 rawTextureData = new NativeArray<T>(resolution.x * resolution.y, allocator);
-		 BoundsRef = new NativeReference<ValueBounds<T>>(
-			 new ValueBounds<T>(),
-			 allocator
-		 );
-		 isReadonly = false;
-	  }
+			// Get the raw texture data
+			NativeArray<T> textureData = texture.GetRawTextureData<T>();
+			m_Buffer = textureData.GetUnsafePtr();
 
-	  /// <summary>
-	  /// Creates a new NativeTexture2D with the specified resolution.
-	  /// </summary>
-	  /// <param name="nativeDataPointer">Pointer to native memory.</param>
-	  /// <param name="resolution">The dimensions of the texture (width, height).</param>
-	  /// <param name="allocator">The allocator to use for the texture and bounds data.</param>
-	  public unsafe NativeTexture2D(void* nativeDataPointer, int2 resolution, Allocator allocator)
-	  {
-		 Resolution = resolution;
-		 m_TexturePtr = IntPtr.Zero;
-		 rawTextureData = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(nativeDataPointer,
-			 resolution.x * resolution.y,
-			 Allocator.None);
+			// We don't own this memory - Texture2D does
+			m_AllocatorLabel = Allocator.None;
 
-		 m_Safety = AtomicSafetyHandle.Create();
+			// Initialize safety handles
+			m_Safety = AtomicSafetyHandle.Create();
+			InitStaticSafetyId(ref m_Safety);
+
+			// Set min/max indices for job system
+			m_MinIndex = 0;
+			m_MaxIndex = (Resolution.x * Resolution.y) - 1;
+			m_Length = Resolution.x * Resolution.y;
+		}
+
+		/// <summary>
+		/// Creates a new NativeTexture2D with the specified resolution.
+		/// </summary>
+		/// <param name="resolution">The dimensions of the texture (width, height).</param>
+		/// <param name="allocator">The allocator to use for the texture data.</param>
+		public unsafe NativeTexture2D(int2 resolution, Allocator allocator)
+		{
+			Resolution = resolution;
+			texturePtr = IntPtr.Zero;
+
+			// Allocate memory directly
+			int length = resolution.x * resolution.y;
+			long size = (long)UnsafeUtility.SizeOf<T>() * length;
+
+			CheckAllocateArguments(length, allocator);
+
+			m_Buffer = UnsafeUtility.MallocTracked(size, UnsafeUtility.AlignOf<T>(), allocator, 0);
+			m_AllocatorLabel = allocator;
+
+			// Initialize safety handles
+			m_Safety = AtomicSafetyHandle.Create();
+			InitStaticSafetyId(ref m_Safety);
+
+			// Set min/max indices for job system
+			m_MinIndex = 0;
+			m_MaxIndex = length - 1;
+			m_Length = length;
+		}
+
+		#endregion
+
+		#region Safety Handling
+
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private static void CheckAllocateArguments(int length, Allocator allocator)
+		{
+			if (allocator <= Allocator.None)
+			{
+				throw new ArgumentException("Allocator must be Temp, TempJob or Persistent", "allocator");
+			}
+
+			if (allocator >= Allocator.FirstUserIndex)
+			{
+				throw new ArgumentException("Use CollectionHelper.CreateNativeArray for custom allocator", "allocator");
+			}
+
+			if (length < 0)
+			{
+				throw new ArgumentOutOfRangeException("length", "Length must be >= 0");
+			}
+		}
+
+		/// <summary>
+		/// Initialize static safety ID for this container type
+		/// </summary>
+		[BurstDiscard]
+		private static void InitStaticSafetyId(ref AtomicSafetyHandle handle)
+		{
+			if (s_staticSafetyId == 0)
+			{
+				s_staticSafetyId = AtomicSafetyHandle.NewStaticSafetyId<NativeTexture2D<T>>();
+			}
+
+			AtomicSafetyHandle.SetStaticSafetyId(ref handle, s_staticSafetyId);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private readonly void CheckElementReadAccess(int index)
+		{
+			if (index < m_MinIndex || index > m_MaxIndex)
+			{
+				FailOutOfRangeError(index);
+			}
+
+			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private readonly void CheckElementWriteAccess(int index)
+		{
+			if (index < m_MinIndex || index > m_MaxIndex)
+			{
+				FailOutOfRangeError(index);
+			}
+
+			AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+		}
+
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
+		private readonly void FailOutOfRangeError(int index)
+		{
+			if (index < Length && (m_MinIndex != 0 || m_MaxIndex != Length - 1))
+			{
+				throw new IndexOutOfRangeException(
+						$"Index {index} is out of restricted IJobParallelFor range [{m_MinIndex}...{m_MaxIndex}] in NativeTexture2D.\n" +
+						"NativeTexture2D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job.");
+			}
+
+			throw new IndexOutOfRangeException($"Index {index} is out of range of '{Length}' Length.");
+		}
+
+		#endregion
+
+		#region INativeTexture API
+
+		/// <summary>
+		/// Gets the total number of pixels in the texture.
+		/// </summary>
+		public readonly int Length => m_Length;
+
+		/// <summary>
+		/// Conventional texel size.
+		/// </summary>
+		public readonly float4 TexelSize => new(Resolution, math.rcp(Resolution));
+
+		/// <summary>
+		/// Gets or sets the texture value at the specified linear pixel index.
+		/// </summary>
+		/// <param name="index">The linear index of the pixel.</param>
+		/// <returns>The value at the specified index.</returns>
+		public unsafe T this[int index]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				CheckElementReadAccess(index);
+				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
+			}
+			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set
+			{
+				CheckElementWriteAccess(index);
+				UnsafeUtility.WriteArrayElement(m_Buffer, index, value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the texture value at the specified 2D coordinate.
+		/// </summary>
+		/// <param name="coord">The 2D coordinate (x, y) of the pixel.</param>
+		/// <returns>The value at the specified coordinate.</returns>
+		public unsafe T this[int2 coord]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				int index = coord.ToIndex(Width);
+				CheckElementReadAccess(index);
+				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
+			}
+			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set
+			{
+				int index = coord.ToIndex(Width);
+				CheckElementWriteAccess(index);
+				UnsafeUtility.WriteArrayElement(m_Buffer, index, value);
+			}
+		}
+
+		/// <summary>
+		/// Reads the texture value at the specified 2D coordinate.
+		/// </summary>
+		/// <param name="pixelCoord">The 2D coordinate of the pixel.</param>
+		/// <returns>The value at the specified coordinate.</returns>
+		public unsafe T ReadPixel(int2 pixelCoord)
+		{
+			int index = pixelCoord.ToIndex(Width);
+			CheckElementReadAccess(index);
+			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
+		}
+
+		/// <summary>
+		/// Reads the texture value at the specified linear index and outputs the corresponding 2D coordinate.
+		/// </summary>
+		/// <param name="pixelIndex">The linear index of the pixel.</param>
+		/// <param name="coord">Outputs the 2D coordinate corresponding to the linear index.</param>
+		/// <returns>The value at the specified index.</returns>
+		public unsafe T ReadPixel(int pixelIndex, out int2 coord)
+		{
+			CheckElementReadAccess(pixelIndex);
+			coord = pixelIndex.ToCoord(Width);
+			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, pixelIndex);
+		}
+
+		/// <summary>
+		/// Returns the underlying texture data as a NativeArray.
+		/// </summary>
+		/// <returns>A NativeArray containing the texture data.</returns>
+		public unsafe readonly NativeArray<T> AsArray()
+		{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-		 AtomicSafetyHandle handle = m_Safety;
-		 AtomicSafetyHandle.UseSecondaryVersion(ref handle);
-		 NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref rawTextureData, handle);
+			// Check if buffer is valid before proceeding
+			if (m_Buffer == null)
+			{
+				throw new InvalidOperationException("Cannot create NativeArray from null buffer");
+			}
+
+			AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
+			AtomicSafetyHandle arraySafety = m_Safety;
+			AtomicSafetyHandle.UseSecondaryVersion(ref arraySafety);
+#else
+			AtomicSafetyHandle arraySafety = m_Safety;
 #endif
 
-		 BoundsRef = new NativeReference<ValueBounds<T>>(
-			 new ValueBounds<T>(),
-			 allocator
-		 );
-		 isReadonly = true;
-	  }
+			// Create a NativeArray that references the same memory
+			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+				m_Buffer, m_Length, Allocator.None);
 
-	  #endregion
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, arraySafety);
+#endif
 
-	  #region INativeTexture API
+			return array;
+		}
 
-	  /// <summary>
-	  /// Gets the resolution (width, height) of the texture.
-	  /// </summary>
-	  public int2 Resolution { get; }
+		/// <summary>
+		/// Returns an array that aliases this texture for use in a job. When you use this array in a job
+		/// that modifies the data, you can schedule job which depends on that job the deferred array.
+		/// </summary>
+		/// <returns>A NativeArray that can be used safely in chained jobs.</returns>
+		public unsafe NativeArray<T> AsDeferredJobArray()
+		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+			AtomicSafetyHandle.CheckExistsAndThrow(m_Safety);
+#endif
 
-	  /// <summary>
-	  /// Gets the bounds containing minimum, maximum, and scale values of the texture data.
-	  /// </summary>
-	  public readonly ValueBounds<T> Bounds => BoundsRef.Value;
+			// Create a NativeArray that references the same memory
+			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+				m_Buffer, m_Length, Allocator.None);
 
-	  /// <summary>
-	  /// Gets the total number of pixels in the texture.
-	  /// </summary>
-	  public int Length
-	  {
-		 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		 get => rawTextureData.Length;
-	  }
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, m_Safety);
+#endif
 
-	  /// <summary>
-	  /// Conventional texel size.
-	  /// </summary>
-	  public readonly float4 TexelSize => new(Resolution, math.rcp(Resolution));
+			return array;
+		}
 
-	  /// <summary>
-	  /// Gets or sets the texture value at the specified linear pixel index.
-	  /// </summary>
-	  /// <param name="index">The linear index of the pixel.</param>
-	  /// <returns>The value at the specified index.</returns>
-	  public T this[int index]
-	  {
-		 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		 get => rawTextureData[index];
-		 [WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
-		 set => rawTextureData[index] = value;
-	  }
+		/// <summary>
+		/// Applies the native texture data to a Unity Texture2D object.
+		/// If the texture pointers don't match, copies the data to the target texture.
+		/// </summary>
+		/// <param name="texture">The Texture2D object to apply data to.</param>
+		/// <param name="updateMipmaps">Whether to update mipmaps after applying data.</param>
+		/// <returns>The updated Texture2D object.</returns>
+		[BurstDiscard]
+		public unsafe readonly Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
+		{
+			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 
-	  /// <summary>
-	  /// Gets or sets the texture value at the specified 2D coordinate.
-	  /// </summary>
-	  /// <param name="coord">The 2D coordinate (x, y) of the pixel.</param>
-	  /// <returns>The value at the specified coordinate.</returns>
-	  public T this[int2 coord]
-	  {
-		 [MethodImpl(MethodImplOptions.AggressiveInlining)]
-		 get => this[coord.ToIndex(Width)];
-		 [WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
-		 set => this[coord.ToIndex(Width)] = value;
-	  }
+			if (texture.GetNativeTexturePtr() != texturePtr)
+			{
+				NativeArray<T> writeableTextureMemory = texture.GetRawTextureData<T>();
 
-	  /// <summary>
-	  /// Reads the texture value at the specified 2D coordinate.
-	  /// </summary>
-	  /// <param name="pixelCoord">The 2D coordinate of the pixel.</param>
-	  /// <returns>The value at the specified coordinate.</returns>
-	  public T ReadPixel(int2 pixelCoord) =>
-		  this[pixelCoord.ToIndex(Width)];
+				// Copy our memory to the texture's memory
+				UnsafeUtility.MemCpy(
+					writeableTextureMemory.GetUnsafePtr(),
+					m_Buffer,
+					(long)UnsafeUtility.SizeOf<T>() * m_Length);
+			}
 
-	  /// <summary>
-	  /// Reads the texture value at the specified linear index and outputs the corresponding 2D coordinate.
-	  /// </summary>
-	  /// <param name="pixelIndex">The linear index of the pixel.</param>
-	  /// <param name="coord">Outputs the 2D coordinate corresponding to the linear index.</param>
-	  /// <returns>The value at the specified index.</returns>
-	  public T ReadPixel(int pixelIndex, out int2 coord) =>
-		  this[coord = pixelIndex.ToCoord(Width)];
+			texture.Apply(updateMipmaps);
+			return texture;
+		}
 
-	  /// <summary>
-	  /// Returns the underlying texture data as a NativeArray.
-	  /// </summary>
-	  /// <returns>A NativeArray containing the texture data.</returns>
-	  public readonly NativeArray<T> AsNativeArray() => rawTextureData;
+		/// <summary>
+		/// Gets an unsafe pointer to the underlying texture data.
+		/// </summary>
+		/// <returns>An unsafe pointer to the texture data.</returns>
+		public unsafe readonly void* GetUnsafePtr()
+		{
+			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+			return m_Buffer;
+		}
 
-	  /// <summary>
-	  /// Applies the native texture data to a Unity Texture2D object.
-	  /// If the texture pointers don't match, copies the data to the target texture.
-	  /// </summary>
-	  /// <param name="texture">The Texture2D object to apply data to.</param>
-	  /// <param name="updateMipmaps">Whether to update mipmaps after applying data.</param>
-	  /// <returns>The updated Texture2D object.</returns>
-	  [BurstDiscard]
-	  public readonly Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
-	  {
-		 if (texture.GetNativeTexturePtr() != m_TexturePtr)
-		 {
-			NativeArray<T> textureData = rawTextureData;
-			NativeArray<T> writeableTextureMemory = texture.GetRawTextureData<T>();
+		/// <summary>
+		/// Gets an unsafe read-only pointer to the underlying texture data.
+		/// </summary>
+		/// <returns>An unsafe read-only pointer to the texture data.</returns>
+		public unsafe readonly void* GetUnsafeReadOnlyPtr()
+		{
+			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+			return m_Buffer;
+		}
 
-			textureData.CopyTo(writeableTextureMemory);
-		 }
+		#endregion
 
-		 texture.Apply(updateMipmaps);
-		 return texture;
-	  }
+		#region IDisposable
 
-	  /// <summary>
-	  /// Gets an unsafe pointer to the underlying texture data.
-	  /// </summary>
-	  /// <returns>An unsafe pointer to the texture data.</returns>
-	  public readonly unsafe void* GetUnsafePtr() => rawTextureData.GetUnsafePtr();
+		/// <summary>
+		/// Disposes of the native texture resources, including the raw texture data if it was created.
+		/// </summary>
+		[WriteAccessRequired]
+		public unsafe void Dispose()
+		{
+			if (!AtomicSafetyHandle.IsDefaultValue(m_Safety))
+			{
+				AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
+				AtomicSafetyHandle.Release(m_Safety);
+			}
 
-	  #endregion
+			if (!IsUnityTexture2DPointer && IsCreated && m_AllocatorLabel > Allocator.None)
+			{
+				UnsafeUtility.FreeTracked(m_Buffer, m_AllocatorLabel);
+				m_AllocatorLabel = Allocator.Invalid;
+			}
 
-	  #region IDisposable
+			// Clear the reference to prevent double-disposal
+			m_Buffer = null;
+		}
 
-	  /// <summary>
-	  /// Disposes of the native texture resources, including the raw texture data and bounds reference if they were created.
-	  /// </summary>
-	  public void Dispose()
-	  {
-		 AtomicSafetyHandle.Release(m_Safety);
-		 if (!isReadonly && !IsUnityTexture2DPointer && rawTextureData.IsCreated)
-			rawTextureData.Dispose();
-		 if (BoundsRef.IsCreated)
-			BoundsRef.Dispose();
-	  }
+		/// <summary>
+		/// Schedules the disposal of native texture resources as a job.
+		/// </summary>
+		/// <param name="inputDeps">The JobHandle for any dependent jobs.</param>
+		/// <returns>A JobHandle for the scheduled dispose job.</returns>
+		[BurstCompile]
+		struct DisposeJob : IJob
+		{
+			[NativeDisableUnsafePtrRestriction]
+			internal unsafe void* buffer;
+			internal int length;
+			internal Allocator allocatorLabel;
+			internal AtomicSafetyHandle safety;
 
-	  /// <summary>
-	  /// Schedules the disposal of native texture resources as a job.
-	  /// </summary>
-	  /// <param name="inputDeps">The JobHandle for any dependent jobs.</param>
-	  /// <returns>A JobHandle for the scheduled dispose job.</returns>
-	  [BurstCompile]
-	  struct DisposeJob : IJob
-	  {
-		 public NativeTexture2D<T> texture;
+			[ReadOnly]
+			[NativeDisableUnsafePtrRestriction]
+			internal IntPtr texturePtr;
 
-		 public void Execute() => texture.Dispose();
-	  }
+			public unsafe void Execute()
+			{
+				if (texturePtr == IntPtr.Zero && buffer != null && allocatorLabel > Allocator.None)
+				{
+					UnsafeUtility.FreeTracked(buffer, allocatorLabel);
+				}
+			}
+		}
 
-	  public JobHandle Dispose(JobHandle inputDeps) => new DisposeJob
-	  {
-		 texture = this, //
-	  }.Schedule(inputDeps);
+		public unsafe JobHandle Dispose(JobHandle inputDeps)
+		{
+			if (!IsCreated)
+				return inputDeps;
 
-	  #endregion
-   }
+			if (!AtomicSafetyHandle.IsDefaultValue(m_Safety))
+			{
+				AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
+			}
+
+			// Schedule disposal job
+			DisposeJob jobData = new DisposeJob
+			{
+				buffer = m_Buffer,
+				length = m_Length,
+				allocatorLabel = m_AllocatorLabel,
+				safety = m_Safety,
+				texturePtr = texturePtr
+			};
+
+			JobHandle handle = jobData.Schedule(inputDeps);
+
+			// Release the safety handle after scheduling
+			AtomicSafetyHandle.Release(m_Safety);
+
+			// Ensure we don't double-dispose by clearing the reference
+			m_Buffer = null;
+			m_AllocatorLabel = Allocator.Invalid;
+
+			return handle;
+		}
+
+		#endregion
+
+		/// <summary>
+		/// Creates a read-only view of the native texture.
+		/// </summary>
+		/// <returns>A read-only view of the texture.</returns>
+		[NativeContainerIsReadOnly]
+		public readonly struct ReadOnly : INativeTexture<int2, T>
+		{
+			[NativeDisableUnsafePtrRestriction]
+			internal unsafe readonly void* buffer;
+			internal readonly int length;
+			internal readonly AtomicSafetyHandle safety;
+			internal readonly int2 resolution;
+			internal readonly bool isUnityTexture2DPointer;
+			[NativeDisableUnsafePtrRestriction]
+			internal readonly IntPtr texturePtr;
+
+			internal unsafe ReadOnly(NativeTexture2D<T> texture)
+			{
+				buffer = texture.m_Buffer;
+				length = texture.Length;
+				safety = texture.m_Safety;
+				resolution = texture.Resolution;
+				isUnityTexture2DPointer = texture.IsUnityTexture2DPointer;
+				texturePtr = texture.texturePtr;
+			}
+
+			/// <summary>
+			/// Gets the resolution (width, height) of the texture.
+			/// </summary>
+			public int2 Resolution => resolution;
+
+			public int Width => resolution.x;
+			public int Height => resolution.y;
+
+			public int Length => length;
+
+			public readonly float4 TexelSize => new(resolution, math.rcp(resolution));
+
+			/// <summary>
+			/// Gets whether the native texture has been created and initialized.
+			/// </summary>
+			public unsafe bool IsCreated => buffer != null;
+
+			/// <summary>
+			/// Gets whether the texture data points directly to a Unity Texture2D native pointer.
+			/// </summary>
+			public bool IsUnityTexture2DPointer => isUnityTexture2DPointer;
+
+			public unsafe T this[int index]
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get
+				{
+					AtomicSafetyHandle.CheckReadAndThrow(safety);
+					if ((uint)index >= (uint)length)
+						throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+
+					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+				}
+
+				[WriteAccessRequired]
+				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
+			}
+
+			public unsafe T this[int2 coord]
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get
+				{
+					int index = coord.ToIndex(Width);
+					AtomicSafetyHandle.CheckReadAndThrow(safety);
+					if ((uint)index >= (uint)length)
+						throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+
+					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+				}
+
+				[WriteAccessRequired]
+				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
+			}
+
+			public unsafe T ReadPixel(int2 pixelCoord)
+			{
+				int index = pixelCoord.ToIndex(Width);
+				AtomicSafetyHandle.CheckReadAndThrow(safety);
+				if ((uint)index >= (uint)length)
+					throw new IndexOutOfRangeException($"Index {index} is out of range (must be between 0 and {length - 1}).");
+
+				return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+			}
+
+			public unsafe T ReadPixel(int pixelIndex, out int2 coord)
+			{
+				AtomicSafetyHandle.CheckReadAndThrow(safety);
+				if ((uint)pixelIndex >= (uint)length)
+					throw new IndexOutOfRangeException($"Index {pixelIndex} is out of range (must be between 0 and {length - 1}).");
+
+				coord = pixelIndex.ToCoord(Width);
+				return UnsafeUtility.ReadArrayElement<T>(buffer, pixelIndex);
+			}
+
+			/// <summary>
+			/// Returns the underlying texture data as a NativeArray.
+			/// </summary>
+			/// <returns>A NativeArray containing the texture data.</returns>
+			public unsafe NativeArray<T> AsArray()
+			{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+				// Check if buffer is valid before proceeding
+				if (buffer == null)
+				{
+					throw new InvalidOperationException("Cannot create NativeArray from null buffer");
+				}
+
+				AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(safety);
+				AtomicSafetyHandle arraySafety = safety;
+				AtomicSafetyHandle.UseSecondaryVersion(ref arraySafety);
+#else
+				AtomicSafetyHandle arraySafety = safety;
+#endif
+
+				// Create a NativeArray from our buffer
+				NativeArray<T> tempArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+					 buffer, length, Allocator.None);
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+				NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tempArray, arraySafety);
+#endif
+
+				return tempArray;
+			}
+
+			/// <summary>
+			/// Applies the native texture data to a Unity Texture2D object.
+			/// Cannot be used from a ReadOnly view as it would modify the texture.
+			/// </summary>
+			[BurstDiscard]
+			public Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
+			{
+				throw new NotSupportedException("Cannot apply texture data from a ReadOnly view");
+			}
+
+			public unsafe void* GetUnsafePtr()
+			{
+				throw new NotSupportedException("Cannot get unsafe pointer from ReadOnly view, use GetUnsafeReadOnlyPtr instead");
+			}
+
+			public unsafe void* GetUnsafeReadOnlyPtr()
+			{
+				AtomicSafetyHandle.CheckReadAndThrow(safety);
+				return buffer;
+			}
+		}
+
+		/// <summary>
+		/// Returns a read-only view of this texture.
+		/// </summary>
+		/// <returns>A read-only view of the texture.</returns>
+		public ReadOnly AsReadOnly() => new ReadOnly(this);
+	}
 }

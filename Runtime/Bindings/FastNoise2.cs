@@ -11,9 +11,9 @@
     {
         #region IEquatable
 
-        public override readonly int GetHashCode() => HashCode.Combine(mNodeHandle, mMetadataId);
+        public override readonly int GetHashCode() => HashCode.Combine(mNodeHandle, m_MetadataId);
 
-        public readonly bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && mMetadataId == other.mMetadataId;
+        public readonly bool Equals(FastNoise other) => mNodeHandle == other.mNodeHandle && m_MetadataId == other.m_MetadataId;
 
         public override readonly bool Equals(object obj) => obj != null && obj is FastNoise other && Equals(other);
 
@@ -23,7 +23,7 @@
 
         #endregion
 
-        public static FastNoise Invalid = new() { mNodeHandle = IntPtr.Zero, mMetadataId = -1, };
+        public static FastNoise Invalid = new() { mNodeHandle = IntPtr.Zero, m_MetadataId = -1, };
 
         [StructLayout(LayoutKind.Sequential)]
         public struct OutputMinMax
@@ -53,18 +53,18 @@
 
         public FastNoise(string metadataName)
         {
-            if (!metadataNameLookup.TryGetValue(FormatLookup(metadataName), out mMetadataId))
+            if (!s_metadataNameLookup.TryGetValue(FormatLookup(metadataName), out m_MetadataId))
             {
                 throw new ArgumentException("Failed to find metadata name: " + metadataName);
             }
 
-            mNodeHandle = fnNewFromMetadata(mMetadataId);
+            mNodeHandle = fnNewFromMetadata(m_MetadataId);
         }
 
         private FastNoise(IntPtr nodeHandle)
         {
             mNodeHandle = nodeHandle;
-            mMetadataId = fnGetMetadataID(nodeHandle);
+            m_MetadataId = fnGetMetadataID(nodeHandle);
         }
 
         public readonly void Dispose() => fnDeleteNodeRef(mNodeHandle);
@@ -86,7 +86,7 @@
         public readonly void Set(string memberName, float value)
         {
             Metadata.Member member;
-            if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -117,7 +117,7 @@
         public readonly void Set(string memberName, int value)
         {
             Metadata.Member member;
-            if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -136,7 +136,7 @@
         public readonly void Set(string memberName, string enumValue)
         {
             Metadata.Member member;
-            if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -161,7 +161,7 @@
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
             Metadata.Member member;
-            if (!nodeMetadata[mMetadataId].members.TryGetValue(FormatLookup(memberName), out member))
+            if (!s_nodeMetadata[m_MetadataId].members.TryGetValue(FormatLookup(memberName), out member))
             {
                 throw new ArgumentException("Failed to find member name: " + memberName);
             }
@@ -273,7 +273,7 @@
         public readonly float GenSingle4D(float x, float y, float z, float w, int seed) => fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
 
         [NativeDisableUnsafePtrRestriction] internal IntPtr mNodeHandle;
-        private int mMetadataId;
+        private int m_MetadataId;
 
         public class Metadata
         {
@@ -303,8 +303,8 @@
         {
             int metadataCount = fnGetMetadataCount();
 
-            nodeMetadata = new Metadata[metadataCount];
-            metadataNameLookup = new Dictionary<string, int>(metadataCount);
+            s_nodeMetadata = new Metadata[metadataCount];
+            s_metadataNameLookup = new Dictionary<string, int>(metadataCount);
 
             // Collect metadata for all FastNoise node classes
             for (int id = 0; id < metadataCount; id++)
@@ -314,7 +314,7 @@
                 metadata.id = id;
                 metadata.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataName(id)));
                 //Console.WriteLine(id + " - " + metadata.name);
-                metadataNameLookup.Add(metadata.name, id);
+                s_metadataNameLookup.Add(metadata.name, id);
 
                 int variableCount = fnGetMetadataVariableCount(id);
                 int nodeLookupCount = fnGetMetadataNodeLookupCount(id);
@@ -380,7 +380,7 @@
                     metadata.members.Add(member.name, member);
                 }
 
-                nodeMetadata[id] = metadata;
+                s_nodeMetadata[id] = metadata;
             }
         }
 
@@ -399,8 +399,8 @@
         // Ignores spaces and caps, harder to mistype strings
         private static string FormatLookup(string s) => s.Replace(" ", "").ToLower();
 
-        private static Dictionary<string, int> metadataNameLookup;
-        private static Metadata[] nodeMetadata;
+        private static readonly Dictionary<string, int> s_metadataNameLookup;
+        private static readonly Metadata[] s_nodeMetadata;
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX || UNITY_EMBEDDED_LINUX || UNITY_STANDALONE_LINUX || UNITY_ANDROID
         private const string NATIVE_LIB = "FastNoise";

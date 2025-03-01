@@ -521,7 +521,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly byte3 xzx => new(x, z, x);
 		public readonly byte3 xzy => new(x, z, y);
 		public readonly byte3 xzz => new(x, z, z);
-		
+
 		public readonly byte3 yxx => new(y, x, x);
 		public readonly byte3 yxy => new(y, x, y);
 		public readonly byte3 yxz => new(y, x, z);
@@ -531,7 +531,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly byte3 yzx => new(y, z, x);
 		public readonly byte3 yzy => new(y, z, y);
 		public readonly byte3 yzz => new(y, z, z);
-		
+
 		public readonly byte3 zxx => new(z, x, x);
 		public readonly byte3 zxy => new(z, x, y);
 		public readonly byte3 zxz => new(z, x, z);

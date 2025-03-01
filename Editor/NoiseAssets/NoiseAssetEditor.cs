@@ -14,9 +14,9 @@ namespace FastNoise2.Editor.NoiseAssets
 
 			if (GUILayout.Button("Bake"))
 			{
-				var targetAssets = targets.OfType<NoiseAsset>();
+				System.Collections.Generic.IEnumerable<NoiseAsset> targetAssets = targets.OfType<NoiseAsset>();
 
-				foreach (var noiseAsset in targetAssets)
+				foreach (NoiseAsset noiseAsset in targetAssets)
 				{
 					string assetPath = AssetDatabase.GetAssetPath(noiseAsset);
 					noiseAsset.BakeIntoAsset(assetPath);

@@ -477,7 +477,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly ushort3 xzx => new(x, z, x);
 		public readonly ushort3 xzy => new(x, z, y);
 		public readonly ushort3 xzz => new(x, z, z);
-		
+
 		public readonly ushort3 yxx => new(y, x, x);
 		public readonly ushort3 yxy => new(y, x, y);
 		public readonly ushort3 yxz => new(y, x, z);
@@ -487,7 +487,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly ushort3 yzx => new(y, z, x);
 		public readonly ushort3 yzy => new(y, z, y);
 		public readonly ushort3 yzz => new(y, z, z);
-		
+
 		public readonly ushort3 zxx => new(z, x, x);
 		public readonly ushort3 zxy => new(z, x, y);
 		public readonly ushort3 zxz => new(z, x, z);

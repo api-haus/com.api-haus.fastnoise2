@@ -15,7 +15,7 @@ namespace FastNoise2.Editor.NoiseAssets
 	{
 		public static void BakeIntoAsset(this NoiseAsset noiseAsset, string assetPath)
 		{
-			var texture = AssetDatabase.LoadAssetAtPath<Texture>(assetPath);
+			Texture texture = AssetDatabase.LoadAssetAtPath<Texture>(assetPath);
 			if (!Validate(noiseAsset, texture))
 			{
 				if (texture)
@@ -48,7 +48,7 @@ namespace FastNoise2.Editor.NoiseAssets
 
 		static unsafe void GenerateNoiseTexture2D(NoiseAsset noiseAsset, Texture2D texture)
 		{
-			using var graph = noiseAsset.graph.Instantiate();
+			using FastNoise graph = noiseAsset.graph.Instantiate();
 
 			NativeArray<float> buffer = AllocateNative(noiseAsset, texture, out NativeReference<float2> minMax);
 			using NativeReference<float2> nativeReference = minMax;
@@ -73,7 +73,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			minMax = default;
 			try
 			{
-				var buffer = texture.GetPixelData<float>(0);
+				NativeArray<float> buffer = texture.GetPixelData<float>(0);
 				minMax = new NativeReference<float2>(
 					new float2(float.PositiveInfinity,
 						float.NegativeInfinity),
@@ -95,7 +95,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			minMax = default;
 			try
 			{
-				var buffer = texture.GetRawTextureData<float>();
+				NativeArray<float> buffer = texture.GetRawTextureData<float>();
 				minMax = new NativeReference<float2>(
 					new float2(float.PositiveInfinity,
 						float.NegativeInfinity),
@@ -113,7 +113,7 @@ namespace FastNoise2.Editor.NoiseAssets
 
 		static unsafe void GenerateNoiseTexture3D(NoiseAsset noiseAsset, Texture3D texture)
 		{
-			using var graph = noiseAsset.graph.Instantiate();
+			using FastNoise graph = noiseAsset.graph.Instantiate();
 
 			NativeArray<float> buffer = AllocateNative(noiseAsset, texture, out NativeReference<float2> minMax);
 			using NativeReference<float2> nativeReference = minMax;
@@ -145,7 +145,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			if (existingTexture.height != noiseAsset.resolution.y)
 				return false;
 			if (existingTexture.dimension == TextureDimension.Tex3D &&
-			    ((Texture3D)existingTexture).depth != noiseAsset.resolution.z)
+					((Texture3D)existingTexture).depth != noiseAsset.resolution.z)
 				return false;
 
 			return true;
@@ -173,14 +173,16 @@ namespace FastNoise2.Editor.NoiseAssets
 						noiseAsset.resolution.x,
 						noiseAsset.resolution.y,
 						GetTextureFormat(noiseAsset),
-						false) { name = noiseAsset.name };
+						false)
+					{ name = noiseAsset.name };
 				case NoiseAssetTextureOutput.Texture3D:
 					return new Texture3D(
 						noiseAsset.resolution.x,
 						noiseAsset.resolution.y,
 						noiseAsset.resolution.z,
 						GetTextureFormat(noiseAsset),
-						false) { name = noiseAsset.name };
+						false)
+					{ name = noiseAsset.name };
 				default:
 					throw new ArgumentOutOfRangeException(nameof(noiseAsset.textureOutput));
 			}
