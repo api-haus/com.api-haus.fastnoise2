@@ -10,10 +10,10 @@ namespace FastNoise2.Jobs
 	public struct NormalizeTextureJob : IJobParallelFor
 	{
 		[NativeMatchesParallelForLength]
-		NativeArray<float> m_Texture;
+		private NativeArray<float> m_Texture;
 
 		[ReadOnly]
-		NativeReference<ValueBounds> m_BoundsRef;
+		private NativeReference<ValueBounds> m_BoundsRef;
 
 		[BurstCompile]
 		public void Execute(int i) => m_Texture[i] = m_BoundsRef.NormalizeValue(m_Texture[i]);

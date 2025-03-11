@@ -20,10 +20,9 @@ namespace FastNoise2.Editor.NoiseToolProxy
 	///
 	public static class NoiseToolProxy
 	{
-		static async Task ReadProcessNotifyNode()
+		private static async Task ReadProcessNotifyNode()
 		{
 			while (NoiseToolProcess is { HasExited: false })
-			{
 				try
 				{
 					string line = await NoiseToolProcess.StandardOutput.ReadLineAsync();
@@ -35,13 +34,12 @@ namespace FastNoise2.Editor.NoiseToolProxy
 				{
 					Debug.LogException(e);
 				}
-			}
 		}
 
 		public static Process NoiseToolProcess;
-		static EditorCoroutine LogsCoroutine;
+		private static EditorCoroutine LogsCoroutine;
 
-		static readonly Regex EncodedNoiseRegex = new(@"^[-A-Za-z0-9+/]*={0,3}$");
+		private static readonly Regex EncodedNoiseRegex = new(@"^[-A-Za-z0-9+/]*={0,3}$");
 
 		public static Process LaunchNoiseTool(string profile = "")
 		{
@@ -85,24 +83,15 @@ namespace FastNoise2.Editor.NoiseToolProxy
 			NoiseToolProcess = null;
 		}
 
-		public static string GetPackageRoot()
-		{
-			return Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
-		}
+		public static string GetPackageRoot() => Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
 
 		/// <summary>
 		/// NoiseTool writes a file named NoiseTool.ini here.
 		/// It contains saved node graph.
 		/// </summary>
-		public static string GetWorkingDir()
-		{
-			return Path.Join(Application.dataPath, "../Library/com.auburn.fastnoise2/");
-		}
+		public static string GetWorkingDir() => Path.Join(Application.dataPath, "../Library/com.auburn.fastnoise2/");
 
-		public static string GetAbsoluteToolPath()
-		{
-			return Path.Join(GetPackageRoot(), GetPlatformToolPath());
-		}
+		public static string GetAbsoluteToolPath() => Path.Join(GetPackageRoot(), GetPlatformToolPath());
 
 		public static string GetPlatformToolPath()
 		{

@@ -26,21 +26,25 @@ namespace FastNoise2.NativeTexture
 		[NativeDisableUnsafePtrRestriction]
 		internal IntPtr texturePtr;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+		internal AtomicSafetyHandle m_Safety;
+		internal static readonly SharedStatic<int> s_staticSafetyId = SharedStatic<int>.GetOrCreate<
+			NativeList<T>
+		>();
+#endif
+
 		// Support for IJobParallelFor min/max restrictions
 #pragma warning disable IDE1006 // Naming Styles
 		[NativeDisableUnsafePtrRestriction]
 		internal unsafe void* m_Buffer;
+
 		internal int m_Length;
 		internal int m_MinIndex;
 		internal int m_MaxIndex;
-		internal AtomicSafetyHandle m_Safety;
 
 		// Allocator type
 		internal Allocator m_AllocatorLabel;
 #pragma warning restore IDE1006 // Naming Styles
-
-		// Static safety ID
-		private static int s_staticSafetyId;
 
 		/// <summary>
 		/// Gets the width (X dimension) of the 3D texture in pixels.
@@ -65,7 +69,7 @@ namespace FastNoise2.NativeTexture
 		/// <summary>
 		/// Gets whether the native texture has been created and initialized.
 		/// </summary>
-		public unsafe readonly bool IsCreated => m_Buffer != null;
+		public readonly unsafe bool IsCreated => m_Buffer != null;
 
 		/// <summary>
 		/// Gets whether the texture data points directly to a Unity Texture2D native pointer.
@@ -93,9 +97,11 @@ namespace FastNoise2.NativeTexture
 			// We don't own this memory - Texture2D does
 			m_AllocatorLabel = Allocator.None;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			// Initialize safety handles
 			m_Safety = AtomicSafetyHandle.Create();
 			InitStaticSafetyId(ref m_Safety);
+#endif
 
 			// Set min/max indices for job system
 			m_MinIndex = 0;
@@ -123,37 +129,16 @@ namespace FastNoise2.NativeTexture
 			m_Buffer = UnsafeUtility.MallocTracked(size, UnsafeUtility.AlignOf<T>(), allocator, 0);
 			m_AllocatorLabel = allocator;
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			// Initialize safety handles
 			m_Safety = AtomicSafetyHandle.Create();
 			InitStaticSafetyId(ref m_Safety);
+#endif
 
 			// Set min/max indices for job system
 			m_MinIndex = 0;
 			m_MaxIndex = length - 1;
 			m_Length = length;
-		}
-
-		/// <summary>
-		/// Creates a new NativeTexture3D with the specified 3D resolution.
-		/// </summary>
-		/// <param name="nativeDataPointer">Pointer to native memory.</param>
-		/// <param name="resolution">The 3D dimensions (width, height, depth) of the texture.</param>
-		public unsafe NativeTexture3D(void* nativeDataPointer, int3 resolution)
-		{
-			Resolution = resolution;
-			widthXHeight = resolution.x * resolution.y;
-			texturePtr = IntPtr.Zero;
-			m_Buffer = nativeDataPointer;
-			m_AllocatorLabel = Allocator.None;
-
-			// Initialize safety handles
-			m_Safety = AtomicSafetyHandle.Create();
-			InitStaticSafetyId(ref m_Safety);
-
-			// Set min/max indices for job system
-			m_MinIndex = 0;
-			m_MaxIndex = (resolution.x * resolution.y * resolution.z) - 1;
-			m_Length = resolution.x * resolution.y * resolution.z;
 		}
 
 		#endregion
@@ -164,51 +149,46 @@ namespace FastNoise2.NativeTexture
 		private static void CheckAllocateArguments(int length, Allocator allocator)
 		{
 			if (allocator <= Allocator.None)
-			{
 				throw new ArgumentException(
 					"Allocator must be Temp, TempJob or Persistent",
 					"allocator"
 				);
-			}
 
 			if (allocator >= Allocator.FirstUserIndex)
-			{
 				throw new ArgumentException(
 					"Use CollectionHelper.CreateNativeArray for custom allocator",
 					"allocator"
 				);
-			}
 
 			if (length < 0)
-			{
 				throw new ArgumentOutOfRangeException("length", "Length must be >= 0");
-			}
 		}
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 		/// <summary>
 		/// Initialize static safety ID for this container type
 		/// </summary>
 		[BurstDiscard]
+		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		private static void InitStaticSafetyId(ref AtomicSafetyHandle handle)
 		{
-			if (s_staticSafetyId == 0)
-			{
-				s_staticSafetyId = AtomicSafetyHandle.NewStaticSafetyId<NativeTexture3D<T>>();
-			}
+			if (s_staticSafetyId.Data == 0)
+				s_staticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<NativeTexture2D<T>>();
 
-			AtomicSafetyHandle.SetStaticSafetyId(ref handle, s_staticSafetyId);
+			AtomicSafetyHandle.SetStaticSafetyId(ref handle, s_staticSafetyId.Data);
 		}
+#endif
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		private readonly void CheckElementReadAccess(int index)
 		{
 			if (index < m_MinIndex || index > m_MaxIndex)
-			{
 				FailOutOfRangeError(index);
-			}
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -216,23 +196,21 @@ namespace FastNoise2.NativeTexture
 		private readonly void CheckElementWriteAccess(int index)
 		{
 			if (index < m_MinIndex || index > m_MaxIndex)
-			{
 				FailOutOfRangeError(index);
-			}
 
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckWriteAndThrow(m_Safety);
+#endif
 		}
 
 		[Conditional("ENABLE_UNITY_COLLECTIONS_CHECKS")]
 		private readonly void FailOutOfRangeError(int index)
 		{
 			if (index < m_Length && (m_MinIndex != 0 || m_MaxIndex != m_Length - 1))
-			{
 				throw new IndexOutOfRangeException(
 					$"Index {index} is out of restricted IJobParallelFor range [{m_MinIndex}...{m_MaxIndex}] in NativeTexture3D.\n"
 						+ "NativeTexture3D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job."
 				);
-			}
 
 			throw new IndexOutOfRangeException(
 				$"Index {index} is out of range of '{m_Length}' Length."
@@ -275,7 +253,8 @@ namespace FastNoise2.NativeTexture
 				CheckElementReadAccess(index);
 				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
 			}
-			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[WriteAccessRequired]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				CheckElementWriteAccess(index);
@@ -297,7 +276,8 @@ namespace FastNoise2.NativeTexture
 				CheckElementReadAccess(index);
 				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
 			}
-			[WriteAccessRequired, MethodImpl(MethodImplOptions.AggressiveInlining)]
+			[WriteAccessRequired]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				int index = coord.ToIndex(widthXHeight, Width);
@@ -335,7 +315,7 @@ namespace FastNoise2.NativeTexture
 		/// Returns the underlying texture data as a NativeArray.
 		/// </summary>
 		/// <returns>A NativeArray containing the texture data.</returns>
-		public unsafe readonly NativeArray<T> AsArray()
+		public readonly unsafe NativeArray<T> AsArray()
 		{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
@@ -394,7 +374,9 @@ namespace FastNoise2.NativeTexture
 		[BurstDiscard]
 		public readonly unsafe Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
 
 			if (texture.GetNativeTexturePtr() != texturePtr)
 			{
@@ -416,9 +398,11 @@ namespace FastNoise2.NativeTexture
 		/// Gets an unsafe pointer to the underlying texture data.
 		/// </summary>
 		/// <returns>An unsafe pointer to the texture data.</returns>
-		public unsafe readonly void* GetUnsafePtr()
+		public readonly unsafe void* GetUnsafePtr()
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
 			return m_Buffer;
 		}
 
@@ -426,9 +410,11 @@ namespace FastNoise2.NativeTexture
 		/// Gets an unsafe read-only pointer to the underlying texture data.
 		/// </summary>
 		/// <returns>An unsafe read-only pointer to the texture data.</returns>
-		public unsafe readonly void* GetUnsafeReadOnlyPtr()
+		public readonly unsafe void* GetUnsafeReadOnlyPtr()
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+#endif
 			return m_Buffer;
 		}
 
@@ -442,11 +428,13 @@ namespace FastNoise2.NativeTexture
 		[WriteAccessRequired]
 		public unsafe void Dispose()
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			if (!AtomicSafetyHandle.IsDefaultValue(m_Safety))
 			{
 				AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
 				AtomicSafetyHandle.Release(m_Safety);
 			}
+#endif
 
 			if (!IsUnityTexture2DPointer && IsCreated && m_AllocatorLabel > Allocator.None)
 			{
@@ -464,10 +452,11 @@ namespace FastNoise2.NativeTexture
 		/// <param name="inputDeps">The JobHandle for any dependent jobs.</param>
 		/// <returns>A JobHandle for the scheduled dispose job.</returns>
 		[BurstCompile]
-		struct DisposeJob : IJob
+		private struct DisposeJob : IJob
 		{
 			[NativeDisableUnsafePtrRestriction]
 			internal unsafe void* buffer;
+
 			internal int length;
 			internal Allocator allocatorLabel;
 
@@ -482,9 +471,7 @@ namespace FastNoise2.NativeTexture
 			public unsafe void Execute()
 			{
 				if (texturePtr == IntPtr.Zero && buffer != null && allocatorLabel > Allocator.None)
-				{
 					UnsafeUtility.FreeTracked(buffer, allocatorLabel);
-				}
 			}
 		}
 
@@ -492,18 +479,14 @@ namespace FastNoise2.NativeTexture
 		{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			if (!AtomicSafetyHandle.IsDefaultValue(m_Safety))
-			{
 				AtomicSafetyHandle.CheckExistsAndThrow(m_Safety);
-			}
 #endif
 
 			if (!IsCreated)
-			{
 				return inputDeps;
-			}
 
 			// Schedule disposal job
-			DisposeJob jobData = new DisposeJob
+			DisposeJob jobData = new()
 			{
 				buffer = m_Buffer,
 				length = m_Length,
@@ -518,9 +501,7 @@ namespace FastNoise2.NativeTexture
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			if (!AtomicSafetyHandle.IsDefaultValue(m_Safety))
-			{
 				AtomicSafetyHandle.Release(m_Safety);
-			}
 #endif
 
 			// Ensure we don't double-dispose by clearing the reference
@@ -541,8 +522,12 @@ namespace FastNoise2.NativeTexture
 		{
 			[NativeDisableUnsafePtrRestriction]
 			internal readonly unsafe void* buffer;
-			internal readonly int length;
+
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			internal readonly AtomicSafetyHandle safety;
+#endif
+
+			internal readonly int length;
 			internal readonly int3 resolution;
 			internal readonly int widthXHeight;
 			internal readonly bool isUnityTexture2DPointer;
@@ -554,7 +539,9 @@ namespace FastNoise2.NativeTexture
 			{
 				buffer = texture.m_Buffer;
 				length = texture.Length;
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 				safety = texture.m_Safety;
+#endif
 				resolution = texture.Resolution;
 				widthXHeight = texture.widthXHeight;
 				isUnityTexture2DPointer = texture.IsUnityTexture2DPointer;
@@ -589,7 +576,9 @@ namespace FastNoise2.NativeTexture
 				[MethodImpl(MethodImplOptions.AggressiveInlining)]
 				get
 				{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 					AtomicSafetyHandle.CheckReadAndThrow(safety);
+#endif
 					if ((uint)index >= (uint)length)
 						throw new IndexOutOfRangeException(
 							$"Index {index} is out of range (must be between 0 and {length - 1})."
@@ -607,7 +596,9 @@ namespace FastNoise2.NativeTexture
 				get
 				{
 					int index = coord.ToIndex(widthXHeight, Width);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 					AtomicSafetyHandle.CheckReadAndThrow(safety);
+#endif
 					if ((uint)index >= (uint)length)
 						throw new IndexOutOfRangeException(
 							$"Index {index} is out of range (must be between 0 and {length - 1})."
@@ -622,7 +613,9 @@ namespace FastNoise2.NativeTexture
 			public unsafe T ReadPixel(int3 pixelCoord)
 			{
 				int index = pixelCoord.ToIndex(widthXHeight, Width);
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
+#endif
 				if ((uint)index >= (uint)length)
 					throw new IndexOutOfRangeException(
 						$"Index {index} is out of range (must be between 0 and {length - 1})."
@@ -633,7 +626,9 @@ namespace FastNoise2.NativeTexture
 
 			public unsafe T ReadPixel(int pixelIndex, out int3 coord)
 			{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
+#endif
 				if ((uint)pixelIndex >= (uint)length)
 					throw new IndexOutOfRangeException(
 						$"Index {pixelIndex} is out of range (must be between 0 and {length - 1})."
@@ -677,21 +672,19 @@ namespace FastNoise2.NativeTexture
 			/// Cannot be used from a ReadOnly view as it would modify the texture.
 			/// </summary>
 			[BurstDiscard]
-			public Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
-			{
+			public Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false) =>
 				throw new NotSupportedException("Cannot apply texture data from a ReadOnly view");
-			}
 
-			public unsafe void* GetUnsafePtr()
-			{
+			public unsafe void* GetUnsafePtr() =>
 				throw new NotSupportedException(
 					"Cannot get unsafe pointer from ReadOnly view, use GetUnsafeReadOnlyPtr instead"
 				);
-			}
 
 			public unsafe void* GetUnsafeReadOnlyPtr()
 			{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
+#endif
 				return buffer;
 			}
 		}
@@ -700,6 +693,6 @@ namespace FastNoise2.NativeTexture
 		/// Returns a read-only view of this texture.
 		/// </summary>
 		/// <returns>A read-only view of the texture.</returns>
-		public ReadOnly AsReadOnly() => new ReadOnly(this);
+		public ReadOnly AsReadOnly() => new(this);
 	}
 }

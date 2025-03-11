@@ -6,6 +6,6 @@ namespace FastNoise2.Authoring.NoiseGraph
 	public class FastNoiseGraphAsset : ScriptableObject
 	{
 		[SerializeField]
-		FastNoiseGraph savedGraph;
+		private FastNoiseGraph savedGraph;
 	}
 }

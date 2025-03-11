@@ -11,12 +11,12 @@
     {
         #region IEquatable
 
-        public override readonly int GetHashCode() => HashCode.Combine(mNodeHandle, m_MetadataId);
+        public readonly override int GetHashCode() => HashCode.Combine(mNodeHandle, m_MetadataId);
 
         public readonly bool Equals(FastNoise other) =>
             mNodeHandle == other.mNodeHandle && m_MetadataId == other.m_MetadataId;
 
-        public override readonly bool Equals(object obj) =>
+        public readonly override bool Equals(object obj) =>
             obj != null && obj is FastNoise other && Equals(other);
 
         public static bool operator ==(FastNoise left, FastNoise right) => left.Equals(right);
@@ -401,6 +401,7 @@
 
         [NativeDisableUnsafePtrRestriction]
         internal IntPtr mNodeHandle;
+
         private int m_MetadataId;
 
         public class Metadata
@@ -563,7 +564,8 @@
 
         [DllImport(NATIVE_LIB)]
         internal static extern IntPtr fnNewFromEncodedNodeTree(
-            [MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree,
+            [MarshalAs(UnmanagedType.LPStr)]
+            string encodedNodeTree,
             uint simdLevel = 0
         );
 

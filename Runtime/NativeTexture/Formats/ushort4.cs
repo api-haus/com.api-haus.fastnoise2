@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
@@ -210,7 +211,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float4(ushort4 v) => ToFloat4(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float4 ToFloat4(ushort4 u4) =>
+		private static float4 ToFloat4(ushort4 u4) =>
 			new(
 				(float)u4.x / ushort.MaxValue,
 				(float)u4.y / ushort.MaxValue,
@@ -530,13 +531,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly ushort4 xyzz => new(x, y, z, z);
 
 		/// <summary>Returns the ushort element at a specified index.</summary>
-		unsafe public ushort this[int index]
+		public unsafe ushort this[int index]
 		{
 			get
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 4)
-					throw new System.ArgumentException("index must be between[0...3]");
+					throw new ArgumentException("index must be between[0...3]");
 #endif
 				fixed (ushort4* array = &this)
 				{
@@ -547,7 +548,7 @@ namespace FastNoise2.NativeTexture.Formats
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 4)
-					throw new System.ArgumentException("index must be between[0...3]");
+					throw new ArgumentException("index must be between[0...3]");
 #endif
 				fixed (ushort* array = &x)
 				{
@@ -562,15 +563,15 @@ namespace FastNoise2.NativeTexture.Formats
 			x == other.x && y == other.y && z == other.z && w == other.w;
 
 		/// <summary>Returns true if the ushort4 is equal to a given ushort4, false otherwise.</summary>
-		public override readonly bool Equals(object obj) => obj is ushort4 other && Equals(other);
+		public readonly override bool Equals(object obj) => obj is ushort4 other && Equals(other);
 
 		/// <summary>Returns a hash code for the ushort4.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly int GetHashCode() => HashCode.Combine(x, y, z, w);
+		public readonly override int GetHashCode() => HashCode.Combine(x, y, z, w);
 
 		/// <summary>Returns a string representation of the ushort4.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly string ToString() => $"ushort4({x}, {y}, {z}, {w})";
+		public readonly override string ToString() => $"ushort4({x}, {y}, {z}, {w})";
 
 		/// <summary>Returns a string representation of the ushort4 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

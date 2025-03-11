@@ -19,14 +19,14 @@ namespace FastNoise2.Tests
 				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
 			);
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> noiseTexture2D = new NativeTexture2D<float>(
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> noiseTexture2D = new(
 				512,
 				Allocator.TempJob
 			);
 
 			// Create a bounds reference for tracking min/max values
-			using NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			using NativeReference<ValueBounds> boundsRef = new(
 				Allocator.Temp
 			);
 
@@ -58,11 +58,11 @@ namespace FastNoise2.Tests
 				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
 			);
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> noiseTexture2D = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// Create a bounds reference for tracking min/max values
-			using NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			using NativeReference<ValueBounds> boundsRef = new(
 				Allocator.Temp
 			);
 
@@ -94,11 +94,11 @@ namespace FastNoise2.Tests
 				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
 			);
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> noiseTexture2D = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// Create a bounds reference to track min/max values
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> boundsRef = new(
 				Allocator.Temp
 			);
 
@@ -122,10 +122,7 @@ namespace FastNoise2.Tests
 
 			// Normalize the texture using our bounds
 			NativeArray<float> textureData = noiseTexture2D.AsArray();
-			for (int i = 0; i < textureData.Length; i++)
-			{
-				textureData[i] = boundsRef.NormalizeValue(textureData[i]);
-			}
+			for (int i = 0; i < textureData.Length; i++) textureData[i] = boundsRef.NormalizeValue(textureData[i]);
 
 			noiseTexture2D.ApplyTo(texture);
 
@@ -141,11 +138,11 @@ namespace FastNoise2.Tests
 				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
 			);
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> noiseTexture2D = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// First, generate noise directly and track the actual bounds
-			NativeReference<ValueBounds> actualBoundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> actualBoundsRef = new(
 				Allocator.Temp
 			);
 
@@ -167,7 +164,7 @@ namespace FastNoise2.Tests
 			);
 
 			// Create a bounds reference with custom min/max values
-			NativeReference<ValueBounds> customBoundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> customBoundsRef = new(
 				Allocator.Temp
 			);
 
@@ -183,9 +180,7 @@ namespace FastNoise2.Tests
 			// Normalize with custom bounds (will clamp values outside the specified range)
 			NativeArray<float> textureData = noiseTexture2D.AsArray();
 			for (int i = 0; i < textureData.Length; i++)
-			{
 				textureData[i] = customBoundsRef.NormalizeValue(textureData[i]);
-			}
 
 			noiseTexture2D.ApplyTo(texture);
 

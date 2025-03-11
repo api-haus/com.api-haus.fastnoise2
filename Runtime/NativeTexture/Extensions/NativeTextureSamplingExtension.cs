@@ -364,7 +364,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PixelFloorCeil(float2 pixelCoord, out int4 pixelFloorCeil, out float2 ratio)
+		private static void PixelFloorCeil(float2 pixelCoord, out int4 pixelFloorCeil, out float2 ratio)
 		{
 			// Calculate floor and ceil coordinates for interpolation
 			pixelFloorCeil = new int4((int2)math.floor(pixelCoord), (int2)math.ceil(pixelCoord));
@@ -374,7 +374,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PixelCoord<T>(this NativeTexture2D<T> tex2D, ref float2 pixelCoord)
+		private static void PixelCoord<T>(this NativeTexture2D<T> tex2D, ref float2 pixelCoord)
 			where T : unmanaged
 		{
 			// Scale normalized coordinates to texture resolution
@@ -383,7 +383,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void PixelCoord<T>(this NativeTexture2D<T>.ReadOnly tex2D, ref float2 pixelCoord)
+		private static void PixelCoord<T>(this NativeTexture2D<T>.ReadOnly tex2D, ref float2 pixelCoord)
 			where T : unmanaged
 		{
 			// Scale normalized coordinates to texture resolution
@@ -392,7 +392,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float BilinearInterpolation(ref float4 samples, ref float2 ratio)
+		private static float BilinearInterpolation(ref float4 samples, ref float2 ratio)
 		{
 			// Perform bilinear interpolation
 			float f12 = samples.x + ((samples.y - samples.x) * ratio.x);
@@ -403,7 +403,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 BilinearInterpolation(ref float4x2 samples, ref float2 ratio) =>
+		private static float2 BilinearInterpolation(ref float4x2 samples, ref float2 ratio) =>
 			new(
 				BilinearInterpolation(ref samples.c0, ref ratio),
 				BilinearInterpolation(ref samples.c1, ref ratio)

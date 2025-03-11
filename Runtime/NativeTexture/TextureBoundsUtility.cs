@@ -1,8 +1,8 @@
 namespace FastNoise2.NativeTexture
 {
 	using System;
-	using FastNoise2.Bindings;
-	using FastNoise2.Jobs;
+	using Bindings;
+	using Jobs;
 	using Unity.Collections;
 	using Unity.Jobs;
 	using Unity.Mathematics;
@@ -19,7 +19,7 @@ namespace FastNoise2.NativeTexture
 		/// <returns>A NativeReference containing initialized value bounds.</returns>
 		public static NativeReference<ValueBounds> CreateBoundsReference(Allocator allocator)
 		{
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(allocator);
+			NativeReference<ValueBounds> boundsRef = new(allocator);
 			boundsRef.Reset();
 			return boundsRef;
 		}
@@ -35,10 +35,8 @@ namespace FastNoise2.NativeTexture
 			NativeTexture2D<float> texture,
 			NativeReference<ValueBounds> boundsRef,
 			JobHandle dependency = default
-		)
-		{
-			return texture.ScheduleNormalize(boundsRef, dependency);
-		}
+		) =>
+			texture.ScheduleNormalize(boundsRef, dependency);
 
 		/// <summary>
 		/// Sets explicit bounds values.

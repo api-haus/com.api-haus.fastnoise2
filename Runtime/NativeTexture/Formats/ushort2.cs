@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
@@ -134,7 +135,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float2(ushort2 v) => ToFloat2(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 ToFloat2(ushort2 u2) =>
+		private static float2 ToFloat2(ushort2 u2) =>
 			new((float)u2.x / ushort.MaxValue, (float)u2.y / ushort.MaxValue);
 
 		// Explicit conversions
@@ -300,13 +301,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly ushort2 yy => new(y, y);
 
 		/// <summary>Returns the ushort element at a specified index.</summary>
-		unsafe public ushort this[int index]
+		public unsafe ushort this[int index]
 		{
 			get
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 2)
-					throw new System.ArgumentException("index must be between[0...1]");
+					throw new ArgumentException("index must be between[0...1]");
 #endif
 				fixed (ushort2* array = &this)
 				{
@@ -317,7 +318,7 @@ namespace FastNoise2.NativeTexture.Formats
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 2)
-					throw new System.ArgumentException("index must be between[0...1]");
+					throw new ArgumentException("index must be between[0...1]");
 #endif
 				fixed (ushort* array = &x)
 				{
@@ -331,15 +332,15 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly bool Equals(ushort2 other) => x == other.x && y == other.y;
 
 		/// <summary>Returns true if the ushort2 is equal to a given ushort2, false otherwise.</summary>
-		public override readonly bool Equals(object obj) => obj is ushort2 other && Equals(other);
+		public readonly override bool Equals(object obj) => obj is ushort2 other && Equals(other);
 
 		/// <summary>Returns a hash code for the ushort2.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly int GetHashCode() => HashCode.Combine(x, y);
+		public readonly override int GetHashCode() => HashCode.Combine(x, y);
 
 		/// <summary>Returns a string representation of the ushort2.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly string ToString() => $"ushort2({x}, {y})";
+		public readonly override string ToString() => $"ushort2({x}, {y})";
 
 		/// <summary>Returns a string representation of the ushort2 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

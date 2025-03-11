@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
@@ -134,7 +135,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float2(byte2 v) => ToFloat2(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float2 ToFloat2(byte2 b2) =>
+		private static float2 ToFloat2(byte2 b2) =>
 			new((float)b2.x / byte.MaxValue, (float)b2.y / byte.MaxValue);
 
 		// Explicit conversions
@@ -303,13 +304,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly byte2 yy => new(y, y);
 
 		/// <summary>Returns the byte element at a specified index.</summary>
-		unsafe public byte this[int index]
+		public unsafe byte this[int index]
 		{
 			get
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 2)
-					throw new System.ArgumentException("index must be between[0...1]");
+					throw new ArgumentException("index must be between[0...1]");
 #endif
 				fixed (byte2* array = &this)
 				{
@@ -320,7 +321,7 @@ namespace FastNoise2.NativeTexture.Formats
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 2)
-					throw new System.ArgumentException("index must be between[0...1]");
+					throw new ArgumentException("index must be between[0...1]");
 #endif
 				fixed (byte* array = &x)
 				{
@@ -334,15 +335,15 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly bool Equals(byte2 other) => x == other.x && y == other.y;
 
 		/// <summary>Returns true if the byte2 is equal to a given byte2, false otherwise.</summary>
-		public override readonly bool Equals(object obj) => obj is byte2 other && Equals(other);
+		public readonly override bool Equals(object obj) => obj is byte2 other && Equals(other);
 
 		/// <summary>Returns a hash code for the byte2.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly int GetHashCode() => HashCode.Combine(x, y);
+		public readonly override int GetHashCode() => HashCode.Combine(x, y);
 
 		/// <summary>Returns a string representation of the byte2.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly string ToString() => $"byte2({x}, {y})";
+		public readonly override string ToString() => $"byte2({x}, {y})";
 
 		/// <summary>Returns a string representation of the byte2 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

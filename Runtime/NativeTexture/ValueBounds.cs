@@ -63,10 +63,7 @@ namespace FastNoise2.NativeTexture
 		/// <summary>
 		/// Normalizes a value to the range [0, 1] based on the calculated bounds.
 		/// </summary>
-		public float NormalizeValue(float value)
-		{
-			return (value - NormalizationOffset) * NormalizationScale;
-		}
+		public float NormalizeValue(float value) => (value - NormalizationOffset) * NormalizationScale;
 	}
 
 	/// <summary>
@@ -107,9 +104,7 @@ namespace FastNoise2.NativeTexture
 		/// <summary>
 		/// Normalizes a value using the bounds from a NativeReference.
 		/// </summary>
-		public static float NormalizeValue(this NativeReference<ValueBounds> boundsRef, float value)
-		{
-			return boundsRef.Value.NormalizeValue(value);
-		}
+		public static float NormalizeValue(this NativeReference<ValueBounds> boundsRef, float value) =>
+			boundsRef.Value.NormalizeValue(value);
 	}
 }

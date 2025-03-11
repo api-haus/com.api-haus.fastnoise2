@@ -9,8 +9,8 @@ using UnityEngine.Rendering;
 namespace FastNoise2.Editor.NoiseAssets
 {
 	using Bindings;
-	using FastNoise2.Authoring.NoiseAsset;
-	using FastNoise2.Authoring.NoiseGraph;
+	using Authoring.NoiseAsset;
+	using Authoring.NoiseGraph;
 
 	public static class NoiseAssetBaking
 	{
@@ -32,7 +32,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			EditorUtility.SetDirty(texture);
 		}
 
-		static void GenerateNoiseTexture(BakedNoiseTextureAsset noiseAsset, Texture texture)
+		private static void GenerateNoiseTexture(BakedNoiseTextureAsset noiseAsset, Texture texture)
 		{
 			switch (noiseAsset.textureOutput)
 			{
@@ -47,7 +47,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture2D(
+		private static unsafe void GenerateNoiseTexture2D(
 			BakedNoiseTextureAsset noiseAsset,
 			Texture2D texture
 		)
@@ -75,7 +75,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			texture.Apply(false);
 		}
 
-		static NativeArray<float> AllocateNative(
+		private static NativeArray<float> AllocateNative(
 			BakedNoiseTextureAsset noiseAsset,
 			Texture3D texture,
 			out NativeReference<float2> minMax
@@ -99,7 +99,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static NativeArray<float> AllocateNative(
+		private static NativeArray<float> AllocateNative(
 			BakedNoiseTextureAsset noiseAsset,
 			Texture2D texture,
 			out NativeReference<float2> minMax
@@ -123,7 +123,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			}
 		}
 
-		static unsafe void GenerateNoiseTexture3D(
+		private static unsafe void GenerateNoiseTexture3D(
 			BakedNoiseTextureAsset noiseAsset,
 			Texture3D texture
 		)
@@ -153,7 +153,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			texture.Apply(false);
 		}
 
-		static bool Validate(BakedNoiseTextureAsset noiseAsset, Texture existingTexture)
+		private static bool Validate(BakedNoiseTextureAsset noiseAsset, Texture existingTexture)
 		{
 			if (existingTexture == null || !existingTexture)
 				return false;

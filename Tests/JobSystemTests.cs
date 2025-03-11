@@ -18,8 +18,8 @@ namespace FastNoise2.Tests
 		{
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> nt = new(texture);
 
 			// Create bounds reference for tracking min/max values
 			NativeReference<ValueBounds> boundsRef =
@@ -62,11 +62,11 @@ namespace FastNoise2.Tests
 		{
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> nt = new(texture);
 
 			// Create a bounds reference to track min/max values during noise generation
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> boundsRef = new(
 				Allocator.TempJob
 			);
 
@@ -95,8 +95,8 @@ namespace FastNoise2.Tests
 		{
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new NativeTexture2D<float>(
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> nt = new(
 				new int2(512, 512),
 				Allocator.TempJob
 			);
@@ -134,11 +134,11 @@ namespace FastNoise2.Tests
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			// Create output texture
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new NativeTexture2D<float>(texture);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
+			NativeTexture2D<float> nt = new(texture);
 
 			// Create bounds reference for tracking
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> boundsRef = new(
 				Allocator.TempJob
 			);
 

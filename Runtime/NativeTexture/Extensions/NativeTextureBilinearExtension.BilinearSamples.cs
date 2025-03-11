@@ -7,7 +7,7 @@ namespace FastNoise2.NativeTexture
 	public static partial class NativeTextureSamplingExtension
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<float> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -21,7 +21,7 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<float>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -35,7 +35,7 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -49,7 +49,7 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -63,7 +63,7 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -78,7 +78,7 @@ namespace FastNoise2.NativeTexture
 
 		// Optional overload for when byte contains signed -1..1 data normalized to 0..255
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<byte> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4 samples
@@ -92,7 +92,7 @@ namespace FastNoise2.NativeTexture
 			);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte2> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -117,7 +117,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte2>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -143,7 +143,7 @@ namespace FastNoise2.NativeTexture
 
 		// For when byte2 contains signed -1..1 data normalized to 0..255
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<byte2> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -168,7 +168,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort2> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -193,7 +193,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort2>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -219,7 +219,7 @@ namespace FastNoise2.NativeTexture
 
 		// For when ushort2 contains signed -1..1 data normalized to 0..65535
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<ushort2> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x2 samples
@@ -245,7 +245,7 @@ namespace FastNoise2.NativeTexture
 
 		// For byte3 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte3> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -280,7 +280,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte3>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -316,7 +316,7 @@ namespace FastNoise2.NativeTexture
 
 		// For normalized byte3 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<byte3> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -352,7 +352,7 @@ namespace FastNoise2.NativeTexture
 
 		// For ushort3 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort3> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -387,7 +387,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort3>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -423,7 +423,7 @@ namespace FastNoise2.NativeTexture
 
 		// For normalized ushort3 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<ushort3> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x3 samples
@@ -459,15 +459,15 @@ namespace FastNoise2.NativeTexture
 
 		// Bilinear interpolation for float4x3 (used with byte3 and ushort3)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float3 BilinearInterpolation(ref float4x3 samples, ref float2 ratio)
+		private static float3 BilinearInterpolation(ref float4x3 samples, ref float2 ratio)
 		{
-			float3 f12 = new float3(
+			float3 f12 = new(
 				samples.c0.x + ((samples.c0.y - samples.c0.x) * ratio.x),
 				samples.c1.x + ((samples.c1.y - samples.c1.x) * ratio.x),
 				samples.c2.x + ((samples.c2.y - samples.c2.x) * ratio.x)
 			);
 
-			float3 f34 = new float3(
+			float3 f34 = new(
 				samples.c0.z + ((samples.c0.w - samples.c0.z) * ratio.x),
 				samples.c1.z + ((samples.c1.w - samples.c1.z) * ratio.x),
 				samples.c2.z + ((samples.c2.w - samples.c2.z) * ratio.x)
@@ -478,7 +478,7 @@ namespace FastNoise2.NativeTexture
 
 		// For byte4 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte4> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -517,7 +517,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<byte4>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -557,7 +557,7 @@ namespace FastNoise2.NativeTexture
 
 		// For normalized byte4 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<byte4> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -597,7 +597,7 @@ namespace FastNoise2.NativeTexture
 
 		// For ushort4 values
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort4> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -636,7 +636,7 @@ namespace FastNoise2.NativeTexture
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamples(
+		private static void BilinearSamples(
 			this NativeTexture2D<ushort4>.ReadOnly tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -676,7 +676,7 @@ namespace FastNoise2.NativeTexture
 
 		// For normalized ushort4 values (-1..1)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static void BilinearSamplesNormalized(
+		private static void BilinearSamplesNormalized(
 			this NativeTexture2D<ushort4> tex2D,
 			ref int4 pixelFloorCeil,
 			out float4x4 samples
@@ -716,16 +716,16 @@ namespace FastNoise2.NativeTexture
 
 		// Bilinear interpolation for float4x4 (used with byte4 and ushort4)
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float4 BilinearInterpolation(ref float4x4 samples, ref float2 ratio)
+		private static float4 BilinearInterpolation(ref float4x4 samples, ref float2 ratio)
 		{
-			float4 f12 = new float4(
+			float4 f12 = new(
 				samples.c0.x + ((samples.c0.y - samples.c0.x) * ratio.x),
 				samples.c1.x + ((samples.c1.y - samples.c1.x) * ratio.x),
 				samples.c2.x + ((samples.c2.y - samples.c2.x) * ratio.x),
 				samples.c3.x + ((samples.c3.y - samples.c3.x) * ratio.x)
 			);
 
-			float4 f34 = new float4(
+			float4 f34 = new(
 				samples.c0.z + ((samples.c0.w - samples.c0.z) * ratio.x),
 				samples.c1.z + ((samples.c1.w - samples.c1.z) * ratio.x),
 				samples.c2.z + ((samples.c2.w - samples.c2.z) * ratio.x),

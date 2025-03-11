@@ -1,4 +1,5 @@
 // ReSharper disable InconsistentNaming
+
 namespace FastNoise2.NativeTexture.Formats
 {
 	using System;
@@ -180,7 +181,7 @@ namespace FastNoise2.NativeTexture.Formats
 		public static implicit operator float3(ushort3 v) => ToFloat3(v);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		static float3 ToFloat3(ushort3 u3) =>
+		private static float3 ToFloat3(ushort3 u3) =>
 			new(
 				(float)u3.x / ushort.MaxValue,
 				(float)u3.y / ushort.MaxValue,
@@ -429,13 +430,13 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly ushort3 zzz => new(z, z, z);
 
 		/// <summary>Returns the ushort element at a specified index.</summary>
-		unsafe public ushort this[int index]
+		public unsafe ushort this[int index]
 		{
 			get
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 3)
-					throw new System.ArgumentException("index must be between[0...2]");
+					throw new ArgumentException("index must be between[0...2]");
 #endif
 				fixed (ushort3* array = &this)
 				{
@@ -446,7 +447,7 @@ namespace FastNoise2.NativeTexture.Formats
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				if ((uint)index >= 3)
-					throw new System.ArgumentException("index must be between[0...2]");
+					throw new ArgumentException("index must be between[0...2]");
 #endif
 				fixed (ushort* array = &x)
 				{
@@ -460,15 +461,15 @@ namespace FastNoise2.NativeTexture.Formats
 		public readonly bool Equals(ushort3 other) => x == other.x && y == other.y && z == other.z;
 
 		/// <summary>Returns true if the ushort3 is equal to a given ushort3, false otherwise.</summary>
-		public override readonly bool Equals(object obj) => obj is ushort3 other && Equals(other);
+		public readonly override bool Equals(object obj) => obj is ushort3 other && Equals(other);
 
 		/// <summary>Returns a hash code for the ushort3.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly int GetHashCode() => HashCode.Combine(x, y, z);
+		public readonly override int GetHashCode() => HashCode.Combine(x, y, z);
 
 		/// <summary>Returns a string representation of the ushort3.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override readonly string ToString() => $"ushort3({x}, {y}, {z})";
+		public readonly override string ToString() => $"ushort3({x}, {y}, {z})";
 
 		/// <summary>Returns a string representation of the ushort3 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

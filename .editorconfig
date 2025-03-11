@@ -108,7 +108,7 @@ dotnet_naming_rule.private_fields_naming.severity = warning
 
 dotnet_naming_symbols.private_fields.applicable_kinds = field
 dotnet_naming_symbols.private_fields.applicable_accessibilities = private
-dotnet_naming_symbols.private_fields.required_modifiers = 
+dotnet_naming_symbols.private_fields.required_modifiers =
 
 dotnet_naming_style.prefix_m_upper_camel_case_style.required_prefix = m_
 dotnet_naming_style.prefix_m_upper_camel_case_style.capitalization = pascal_case

@@ -22,15 +22,15 @@ namespace FastNoise2.Tests
 			);
 
 			// Create output texture
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			int width = texture.width;
 			int height = texture.height;
 
 			// Create native texture from Unity texture
-			NativeTexture2D<float> nativeTexture = new NativeTexture2D<float>(texture);
+			NativeTexture2D<float> nativeTexture = new(texture);
 
 			// Create a separate bounds reference to track min/max values
-			NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> boundsRef = new(
 				Allocator.TempJob
 			);
 
@@ -62,10 +62,7 @@ namespace FastNoise2.Tests
 
 			// Normalize the texture using our bounds
 			NativeArray<float> textureData = nativeTexture.AsArray();
-			for (int i = 0; i < textureData.Length; i++)
-			{
-				textureData[i] = boundsRef.NormalizeValue(textureData[i]);
-			}
+			for (int i = 0; i < textureData.Length; i++) textureData[i] = boundsRef.NormalizeValue(textureData[i]);
 
 			// Check normalization is working correctly
 			foreach (float value in textureData)
@@ -94,15 +91,15 @@ namespace FastNoise2.Tests
 			);
 
 			// Create output texture
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			int width = texture.width;
 			int height = texture.height;
 
 			// Create native texture from Unity texture
-			NativeTexture2D<float> nativeTexture = new NativeTexture2D<float>(texture);
+			NativeTexture2D<float> nativeTexture = new(texture);
 
 			// Create a temporary bounds reference for capturing actual noise bounds
-			NativeReference<ValueBounds> tmpBoundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> tmpBoundsRef = new(
 				Allocator.TempJob
 			);
 			tmpBoundsRef.Reset();
@@ -128,7 +125,7 @@ namespace FastNoise2.Tests
 			Debug.Log($"Actual noise range: Min={actualMin}, Max={actualMax}");
 
 			// Create the custom bounds reference with our custom values
-			NativeReference<ValueBounds> customBoundsRef = new NativeReference<ValueBounds>(
+			NativeReference<ValueBounds> customBoundsRef = new(
 				Allocator.TempJob
 			);
 
@@ -147,9 +144,7 @@ namespace FastNoise2.Tests
 			// Normalize with custom bounds
 			NativeArray<float> textureData = nativeTexture.AsArray();
 			for (int i = 0; i < textureData.Length; i++)
-			{
 				textureData[i] = customBoundsRef.NormalizeValue(textureData[i]);
-			}
 
 			Debug.Log($"Custom bounds: Min={minValue}, Max={maxValue}");
 
@@ -174,12 +169,12 @@ namespace FastNoise2.Tests
 			);
 
 			// Create output texture
-			Texture2D texture = new Texture2D(512, 512, TextureFormat.RFloat, false);
+			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			int width = texture.width;
 			int height = texture.height;
 
 			// Create a native texture with its own memory
-			NativeTexture2D<float> nativeTexture = new NativeTexture2D<float>(
+			NativeTexture2D<float> nativeTexture = new(
 				new int2(width, height),
 				Allocator.TempJob
 			);

@@ -8,14 +8,14 @@ namespace FastNoise2.Editor
 	[CustomPropertyDrawer(typeof(FastNoiseGraph))]
 	public class FastNoiseGraphPropertyDrawer : PropertyDrawer
 	{
-		const int EDIT_BUTTON_WIDTH = 60;
-		const int PADDING = 5;
-		const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
+		private const int EDIT_BUTTON_WIDTH = 60;
+		private const int PADDING = 5;
+		private const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
 
-		static Action<FastNoiseGraphPropertyDrawer, bool> s_editorWasActivatedAction;
+		private static Action<FastNoiseGraphPropertyDrawer, bool> s_editorWasActivatedAction;
 
-		bool m_IsEditing;
-		SerializedProperty m_Property;
+		private bool m_IsEditing;
+		private SerializedProperty m_Property;
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -37,13 +37,13 @@ namespace FastNoise2.Editor
 			EditorGUI.indentLevel = 0;
 
 			// Calculate rects
-			Rect encodedValueRect = new Rect(
+			Rect encodedValueRect = new(
 				position.x,
 				position.y,
 				position.width - EDIT_BUTTON_WIDTH - PADDING,
 				position.height
 			);
-			Rect buttonRect = new Rect(
+			Rect buttonRect = new(
 				position.x + (position.width - EDIT_BUTTON_WIDTH),
 				position.y,
 				EDIT_BUTTON_WIDTH,
@@ -58,10 +58,7 @@ namespace FastNoise2.Editor
 			);
 			bool isButtonClicked = EditorGUI.LinkButton(buttonRect, "Edit Noise");
 
-			if (isButtonClicked)
-			{
-				OnEditButtonClicked();
-			}
+			if (isButtonClicked) OnEditButtonClicked();
 
 			// Set indent back to what it was
 			EditorGUI.indentLevel = indent;
@@ -72,13 +69,13 @@ namespace FastNoise2.Editor
 			EditorGUI.EndProperty();
 		}
 
-		void OnEditorWasActivated(FastNoiseGraphPropertyDrawer editor, bool wasActivated)
+		private void OnEditorWasActivated(FastNoiseGraphPropertyDrawer editor, bool wasActivated)
 		{
 			if (wasActivated && editor != this)
 				OnDeactivate();
 		}
 
-		void OnEditButtonClicked()
+		private void OnEditButtonClicked()
 		{
 			if (m_IsEditing)
 				OnDeactivate();
@@ -86,7 +83,7 @@ namespace FastNoise2.Editor
 				OnActivate();
 		}
 
-		void OnActivate()
+		private void OnActivate()
 		{
 			if (m_IsEditing)
 				return;
@@ -103,13 +100,13 @@ namespace FastNoise2.Editor
 			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings += OnCopiedNodeSettings;
 		}
 
-		void OnCopiedNodeSettings(string encodedNode)
+		private void OnCopiedNodeSettings(string encodedNode)
 		{
 			m_Property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH).stringValue = encodedNode;
 			m_Property.serializedObject.ApplyModifiedProperties();
 		}
 
-		void OnDeactivate(bool force = false)
+		private void OnDeactivate(bool force = false)
 		{
 			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings -= OnCopiedNodeSettings;
 

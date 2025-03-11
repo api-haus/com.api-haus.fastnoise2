@@ -14,7 +14,7 @@ namespace FastNoise2.Jobs
 		/// Creates a bounds reference for texture normalization.
 		/// </summary>
 		public static NativeReference<ValueBounds> CreateBoundsReference(Allocator allocator) =>
-			new NativeReference<ValueBounds>(allocator);
+			new(allocator);
 
 		/// <summary>
 		/// Schedules texture normalization as a job.

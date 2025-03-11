@@ -14,22 +14,22 @@ namespace FastNoise2.Tests
 		[Test]
 		public void GenerateBitmapTestSafe()
 		{
-			using FastNoise cellular = new FastNoise("CellularDistance");
+			using FastNoise cellular = new("CellularDistance");
 			cellular.Set("ReturnType", "Index0Add1");
 			cellular.Set("DistanceIndex0", 2);
 
-			using FastNoise fractal = new FastNoise("FractalFBm");
+			using FastNoise fractal = new("FractalFBm");
 			fractal.Set("Source", new FastNoise("Simplex"));
 			fractal.Set("Gain", 0.3f);
 			fractal.Set("Lacunarity", 0.6f);
 
-			using FastNoise addDim = new FastNoise("AddDimension");
+			using FastNoise addDim = new("AddDimension");
 			addDim.Set("Source", cellular);
 			addDim.Set("NewDimensionPosition", 0.5f);
 			// or
 			// addDim.Set("NewDimensionPosition", new FastNoise("Perlin"));
 
-			using FastNoise maxSmooth = new FastNoise("MaxSmooth");
+			using FastNoise maxSmooth = new("MaxSmooth");
 			maxSmooth.Set("LHS", fractal);
 			maxSmooth.Set("RHS", addDim);
 
@@ -43,10 +43,7 @@ namespace FastNoise2.Tests
 			);
 
 			// Encoded node trees can be invalid and return null
-			if (nodeTree != FastNoise.Invalid)
-			{
-				GenerateBitmap(nodeTree, "testENT");
-			}
+			if (nodeTree != FastNoise.Invalid) GenerateBitmap(nodeTree, "testENT");
 		}
 
 		[Test]
@@ -57,16 +54,13 @@ namespace FastNoise2.Tests
 			);
 
 			// Encoded node trees can be invalid and return null
-			if (nodeTree != FastNoise.Invalid)
-			{
-				GenerateBitmapWithTrackedBounds(nodeTree, "testWithValueBounds");
-			}
+			if (nodeTree != FastNoise.Invalid) GenerateBitmapWithTrackedBounds(nodeTree, "testWithValueBounds");
 		}
 
-		static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)
+		private static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)
 		{
 			using (
-				BinaryWriter writer = new BinaryWriter(
+				BinaryWriter writer = new(
 					File.Open(filename + ".bmp", FileMode.Create)
 				)
 			)
@@ -117,14 +111,14 @@ namespace FastNoise2.Tests
 			}
 		}
 
-		static void GenerateBitmapWithTrackedBounds(
+		private static void GenerateBitmapWithTrackedBounds(
 			FastNoise fastNoise,
 			string filename,
 			ushort size = 512
 		)
 		{
 			using (
-				BinaryWriter writer = new BinaryWriter(
+				BinaryWriter writer = new(
 					File.Open(filename + ".bmp", FileMode.Create)
 				)
 			)
@@ -152,14 +146,14 @@ namespace FastNoise2.Tests
 				}
 
 				// Image data - use NativeTexture2D and ValueBounds
-				NativeTexture2D<float> noiseTexture = new NativeTexture2D<float>(
+				NativeTexture2D<float> noiseTexture = new(
 					new int2(size, size),
 					Allocator.Temp
 				);
 
 				// Create a bounds reference to track min/max values
 				using (
-					NativeReference<ValueBounds> boundsRef = new NativeReference<ValueBounds>(
+					NativeReference<ValueBounds> boundsRef = new(
 						Allocator.Temp
 					)
 				)
