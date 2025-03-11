@@ -59,9 +59,9 @@ namespace FastNoise2.NativeTexture
 			result.texturePtr = IntPtr.Zero;
 
 			// Initialize safety handle
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			result.m_Safety = AtomicSafetyHandle.Create();
 
-			// Set static safety ID
 			if (NativeTexture2D<T>.s_staticSafetyId.Data == 0)
 				NativeTexture2D<T>.s_staticSafetyId.Data = AtomicSafetyHandle.NewStaticSafetyId<
 					NativeTexture2D<T>
@@ -70,6 +70,7 @@ namespace FastNoise2.NativeTexture
 				ref result.m_Safety,
 				NativeTexture2D<T>.s_staticSafetyId.Data
 			);
+#endif
 
 			return result;
 		}
@@ -83,7 +84,9 @@ namespace FastNoise2.NativeTexture
 		public static unsafe void* GetUnsafePtr<T>(this NativeTexture2D<T> texture)
 			where T : unmanaged
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckWriteAndThrow(texture.m_Safety);
+#endif
 			return texture.m_Buffer;
 		}
 
@@ -96,7 +99,9 @@ namespace FastNoise2.NativeTexture
 		public static unsafe void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T> texture)
 			where T : unmanaged
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(texture.m_Safety);
+#endif
 			return texture.m_Buffer;
 		}
 
@@ -109,7 +114,9 @@ namespace FastNoise2.NativeTexture
 		public static unsafe void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T>.ReadOnly texture)
 			where T : unmanaged
 		{
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(texture.safety);
+#endif
 			return texture.buffer;
 		}
 
@@ -122,7 +129,6 @@ namespace FastNoise2.NativeTexture
 		public static unsafe void* GetUnsafeBufferPointerWithoutChecks<T>(
 			NativeTexture2D<T> texture
 		)
-			where T : unmanaged =>
-			texture.m_Buffer;
+			where T : unmanaged => texture.m_Buffer;
 	}
 }

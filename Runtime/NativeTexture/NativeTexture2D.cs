@@ -307,8 +307,6 @@ namespace FastNoise2.NativeTexture
 			AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
 			AtomicSafetyHandle arraySafety = m_Safety;
 			AtomicSafetyHandle.UseSecondaryVersion(ref arraySafety);
-#else
-			AtomicSafetyHandle arraySafety = m_Safety;
 #endif
 
 			// Create a NativeArray that references the same memory
@@ -636,8 +634,6 @@ namespace FastNoise2.NativeTexture
 				AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(safety);
 				AtomicSafetyHandle arraySafety = safety;
 				AtomicSafetyHandle.UseSecondaryVersion(ref arraySafety);
-#else
-				AtomicSafetyHandle arraySafety = safety;
 #endif
 
 				// Create a NativeArray from our buffer
