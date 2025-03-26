@@ -1,11 +1,9 @@
 namespace FastNoise2.NativeTexture
 {
-	using System;
 	using Bindings;
 	using Jobs;
 	using Unity.Collections;
 	using Unity.Jobs;
-	using Unity.Mathematics;
 
 	/// <summary>
 	/// Utility methods for working with texture value bounds and normalization.

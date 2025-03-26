@@ -547,11 +547,11 @@ namespace FastNoise2.NativeTexture.Formats
 
 		/// <summary>Returns a hash code for the byte4.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly override int GetHashCode() => HashCode.Combine(x, y, z, w);
+		public override readonly int GetHashCode() => HashCode.Combine(x, y, z, w);
 
 		/// <summary>Returns a string representation of the byte4.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public readonly override string ToString() => $"byte4({x}, {y}, {z}, {w})";
+		public override readonly string ToString() => $"byte4({x}, {y}, {z}, {w})";
 
 		/// <summary>Returns a string representation of the byte4 using a specified format and culture-specific format information.</summary>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

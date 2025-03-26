@@ -83,36 +83,35 @@ namespace FastNoise2.Editor.NoiseToolProxy
 			NoiseToolProcess = null;
 		}
 
-		public static string GetPackageRoot() => Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
+		public static string GetPackageRoot() =>
+			Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
 
 		/// <summary>
 		/// NoiseTool writes a file named NoiseTool.ini here.
 		/// It contains saved node graph.
 		/// </summary>
-		public static string GetWorkingDir() => Path.Join(Application.dataPath, "../Library/com.auburn.fastnoise2/");
+		public static string GetWorkingDir() =>
+			Path.Join(Application.dataPath, "../Library/com.auburn.fastnoise2/");
 
-		public static string GetAbsoluteToolPath() => Path.Join(GetPackageRoot(), GetPlatformToolPath());
+		public static string GetAbsoluteToolPath() =>
+			Path.Join(GetPackageRoot(), GetPlatformToolPath());
 
 		public static string GetPlatformToolPath()
 		{
-			switch (Application.platform)
+			return Application.platform switch
 			{
-				case RuntimePlatform.OSXEditor:
-				case RuntimePlatform.OSXPlayer:
-				case RuntimePlatform.OSXServer:
-					return "Plugins/macos/bin/NoiseTool";
-				case RuntimePlatform.WindowsPlayer:
-				case RuntimePlatform.WindowsEditor:
-				case RuntimePlatform.WindowsServer:
-					return "Plugins/windows/bin/NoiseTool.exe";
-				case RuntimePlatform.Android:
-				case RuntimePlatform.LinuxPlayer:
-				case RuntimePlatform.LinuxEditor:
-				case RuntimePlatform.LinuxServer:
-					return "Plugins/linux/bin/NoiseTool";
-				default:
-					throw new ArgumentOutOfRangeException();
-			}
+				RuntimePlatform.OSXEditor
+				or RuntimePlatform.OSXPlayer
+				or RuntimePlatform.OSXServer => "Plugins/macos/bin/NoiseTool",
+				RuntimePlatform.WindowsPlayer
+				or RuntimePlatform.WindowsEditor
+				or RuntimePlatform.WindowsServer => "Plugins/windows/bin/NoiseTool.exe",
+				RuntimePlatform.Android
+				or RuntimePlatform.LinuxPlayer
+				or RuntimePlatform.LinuxEditor
+				or RuntimePlatform.LinuxServer => "Plugins/linux/bin/NoiseTool",
+				_ => throw new ArgumentOutOfRangeException(),
+			};
 		}
 
 		internal delegate void CopiedNodeSettingsDelegate(string nodeSettings);

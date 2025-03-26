@@ -1,9 +1,6 @@
 namespace FastNoise2.NativeTexture
 {
-	using System;
-	using Unity.Burst;
 	using Unity.Collections;
-	using Unity.Mathematics;
 
 	/// <summary>
 	/// Structure that tracks the minimum and maximum values of a float data set.

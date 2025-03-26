@@ -289,11 +289,11 @@ namespace FastNoise2.NativeTexture
 		/// <summary>
 		/// Reads the texture value at the specified 3D coordinate.
 		/// </summary>
-		/// <param name="pixelCoord">The 3D coordinate of the voxel.</param>
+		/// <param name="coord">The 3D coordinate of the voxel.</param>
 		/// <returns>The value at the specified coordinate.</returns>
-		public unsafe T ReadPixel(int3 pixelCoord)
+		public unsafe T Load(int3 coord)
 		{
-			int index = pixelCoord.ToIndex(widthXHeight, Width);
+			int index = coord.ToIndex(widthXHeight, Width);
 			CheckElementReadAccess(index);
 			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
 		}
@@ -304,7 +304,7 @@ namespace FastNoise2.NativeTexture
 		/// <param name="index">The linear index of the voxel.</param>
 		/// <param name="coord">Outputs the 3D coordinate corresponding to the linear index.</param>
 		/// <returns>The value at the specified index.</returns>
-		public unsafe T ReadPixel(int index, out int3 coord)
+		public unsafe T Load(int index, out int3 coord)
 		{
 			CheckElementReadAccess(index);
 			coord = index.ToCoord(widthXHeight, Width);
@@ -608,9 +608,9 @@ namespace FastNoise2.NativeTexture
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
 			}
 
-			public unsafe T ReadPixel(int3 pixelCoord)
+			public unsafe T Load(int3 coord)
 			{
-				int index = pixelCoord.ToIndex(widthXHeight, Width);
+				int index = coord.ToIndex(widthXHeight, Width);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
 #endif
@@ -622,7 +622,7 @@ namespace FastNoise2.NativeTexture
 				return UnsafeUtility.ReadArrayElement<T>(buffer, index);
 			}
 
-			public unsafe T ReadPixel(int pixelIndex, out int3 coord)
+			public unsafe T Load(int pixelIndex, out int3 coord)
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);

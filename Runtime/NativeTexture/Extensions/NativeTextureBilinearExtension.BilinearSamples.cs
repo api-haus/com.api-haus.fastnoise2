@@ -1,4 +1,4 @@
-namespace FastNoise2.NativeTexture
+namespace FastNoise2.NativeTexture.Extensions
 {
 	using System.Runtime.CompilerServices;
 	using Formats;

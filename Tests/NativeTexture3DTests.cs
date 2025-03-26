@@ -25,10 +25,7 @@ namespace FastNoise2.Tests
 			Texture2D texture = new(size, size * depth, TextureFormat.RFloat, false);
 
 			// Create the NativeTexture3D wrapper
-			using NativeTexture3D<float> texture3D = new(
-				texture,
-				resolution
-			);
+			using NativeTexture3D<float> texture3D = new(texture, resolution);
 
 			// Verify the texture dimensions
 			Assert.AreEqual(size, texture3D.Width);
@@ -48,10 +45,7 @@ namespace FastNoise2.Tests
 		{
 			// Create a standalone NativeTexture3D
 			int3 resolution = new(32, 32, 16);
-			using NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			using NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			// Verify the texture dimensions
 			Assert.AreEqual(32, texture3D.Width);
@@ -67,10 +61,7 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_DataAccessTests()
 		{
 			int3 resolution = new(4, 4, 4);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			try
 			{
@@ -95,7 +86,7 @@ namespace FastNoise2.Tests
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
 					// Also test ReadPixel method
-					actualValue = texture3D.ReadPixel(new int3(x, y, z));
+					actualValue = texture3D.Load(new int3(x, y, z));
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 				}
 
@@ -106,12 +97,13 @@ namespace FastNoise2.Tests
 					int y = i / resolution.x % resolution.y;
 					int z = i / (resolution.x * resolution.y);
 
-					float expectedValue = x + (y * resolution.x) + (z * resolution.x * resolution.y);
+					float expectedValue =
+						x + (y * resolution.x) + (z * resolution.x * resolution.y);
 					float actualValue = texture3D[i];
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
 					// Test linear index ReadPixel with coordinate output
-					actualValue = texture3D.ReadPixel(i, out int3 coord);
+					actualValue = texture3D.Load(i, out int3 coord);
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 					Assert.AreEqual(new int3(x, y, z), coord);
 				}
@@ -128,10 +120,7 @@ namespace FastNoise2.Tests
 		{
 			// Create a 3D texture
 			int3 resolution = new(16, 16, 8);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 			Texture2D texture = null;
 
 			try
@@ -179,15 +168,13 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_AsArray()
 		{
 			int3 resolution = new(4, 4, 4);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			try
 			{
 				// Fill with test values
-				for (int i = 0; i < texture3D.Length; i++) texture3D[i] = i;
+				for (int i = 0; i < texture3D.Length; i++)
+					texture3D[i] = i;
 
 				// Get array view
 				NativeArray<float> array = texture3D.AsArray();
@@ -203,7 +190,8 @@ namespace FastNoise2.Tests
 				}
 
 				// Verify changes are reflected in the texture
-				for (int i = 0; i < texture3D.Length; i++) Assert.AreEqual(i * 2, texture3D[i]);
+				for (int i = 0; i < texture3D.Length; i++)
+					Assert.AreEqual(i * 2, texture3D[i]);
 			}
 			finally
 			{
@@ -216,21 +204,20 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_ReadOnlyView()
 		{
 			int3 resolution = new(4, 4, 4);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			try
 			{
 				// Fill with test values
-				for (int i = 0; i < texture3D.Length; i++) texture3D[i] = i;
+				for (int i = 0; i < texture3D.Length; i++)
+					texture3D[i] = i;
 
 				// Create read-only view
 				NativeTexture3D<float>.ReadOnly readOnlyView = texture3D.AsReadOnly();
 
 				// Verify read access works
-				for (int i = 0; i < readOnlyView.Length; i++) Assert.AreEqual(i, readOnlyView[i]);
+				for (int i = 0; i < readOnlyView.Length; i++)
+					Assert.AreEqual(i, readOnlyView[i]);
 
 				// Verify write access is prevented (should throw exception)
 				Assert.Throws<NotSupportedException>(() => readOnlyView[0] = 100);
@@ -256,22 +243,19 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_JobSystemIntegration()
 		{
 			int3 resolution = new(16, 16, 16);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			try
 			{
 				// Schedule a job to fill the texture
-				NativeTexture3DJobTest job = new()
-					{ texture = texture3D };
+				NativeTexture3DJobTest job = new() { texture = texture3D };
 
 				JobHandle handle = job.Schedule(texture3D.Length, 32);
 				handle.Complete();
 
 				// Verify job results
-				for (int i = 0; i < texture3D.Length; i++) Assert.AreEqual(i * 2, texture3D[i]);
+				for (int i = 0; i < texture3D.Length; i++)
+					Assert.AreEqual(i * 2, texture3D[i]);
 			}
 			finally
 			{
@@ -295,19 +279,14 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_AsDeferredJobArray()
 		{
 			int3 resolution = new(8, 8, 8);
-			NativeTexture3D<float> inputTexture = new(
-				resolution,
-				Allocator.TempJob
-			);
-			NativeTexture3D<float> outputTexture = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> inputTexture = new(resolution, Allocator.TempJob);
+			NativeTexture3D<float> outputTexture = new(resolution, Allocator.TempJob);
 
 			try
 			{
 				// Initialize input texture
-				for (int i = 0; i < inputTexture.Length; i++) inputTexture[i] = i;
+				for (int i = 0; i < inputTexture.Length; i++)
+					inputTexture[i] = i;
 
 				// Create a job that reads from input and writes to output
 				NativeTexture3DDeferredJobTest job = new()
@@ -320,7 +299,8 @@ namespace FastNoise2.Tests
 				handle.Complete();
 
 				// Verify job results
-				for (int i = 0; i < outputTexture.Length; i++) Assert.AreEqual(i * 3, outputTexture[i]);
+				for (int i = 0; i < outputTexture.Length; i++)
+					Assert.AreEqual(i * 3, outputTexture[i]);
 			}
 			finally
 			{
@@ -334,15 +314,13 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_UnsafePointerAccess()
 		{
 			int3 resolution = new(4, 4, 4);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			try
 			{
 				// Fill with test values
-				for (int i = 0; i < texture3D.Length; i++) texture3D[i] = i;
+				for (int i = 0; i < texture3D.Length; i++)
+					texture3D[i] = i;
 
 				// Test GetUnsafePtr and GetUnsafeReadOnlyPtr
 				unsafe
@@ -352,13 +330,16 @@ namespace FastNoise2.Tests
 					float* readPtr = (float*)texture3D.GetUnsafeReadOnlyPtr();
 
 					// Modify via write pointer
-					for (int i = 0; i < texture3D.Length; i++) writePtr[i] = i * 4;
+					for (int i = 0; i < texture3D.Length; i++)
+						writePtr[i] = i * 4;
 
 					// Verify via read pointer
-					for (int i = 0; i < texture3D.Length; i++) Assert.AreEqual(i * 4, readPtr[i]);
+					for (int i = 0; i < texture3D.Length; i++)
+						Assert.AreEqual(i * 4, readPtr[i]);
 
 					// Verify the changes are reflected in the texture
-					for (int i = 0; i < texture3D.Length; i++) Assert.AreEqual(i * 4, texture3D[i]);
+					for (int i = 0; i < texture3D.Length; i++)
+						Assert.AreEqual(i * 4, texture3D[i]);
 				}
 			}
 			finally
@@ -376,10 +357,7 @@ namespace FastNoise2.Tests
 			);
 
 			int3 resolution = new(32, 32, 32);
-			NativeTexture3D<float> noiseTexture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> noiseTexture3D = new(resolution, Allocator.TempJob);
 			Texture2D texture = null;
 
 			try
@@ -428,7 +406,8 @@ namespace FastNoise2.Tests
 					Assert.IsTrue(value >= -1.0f && value <= 1.0f);
 
 					// Check that we don't just have all zeros
-					if (Mathf.Abs(value) > 0.01f) hasValues = true;
+					if (Mathf.Abs(value) > 0.01f)
+						hasValues = true;
 				}
 
 				Assert.IsTrue(hasValues, "Noise texture should contain non-zero values");
@@ -446,17 +425,14 @@ namespace FastNoise2.Tests
 		public void NativeTexture3D_Dispose_JobHandle()
 		{
 			int3 resolution = new(16, 16, 16);
-			NativeTexture3D<float> texture3D = new(
-				resolution,
-				Allocator.TempJob
-			);
+			NativeTexture3D<float> texture3D = new(resolution, Allocator.TempJob);
 
 			// Fill with values
-			for (int i = 0; i < texture3D.Length; i++) texture3D[i] = i;
+			for (int i = 0; i < texture3D.Length; i++)
+				texture3D[i] = i;
 
 			// Schedule a job
-			NativeTexture3DJobTest job = new()
-				{ texture = texture3D };
+			NativeTexture3DJobTest job = new() { texture = texture3D };
 
 			JobHandle jobHandle = job.Schedule(texture3D.Length, 32);
 

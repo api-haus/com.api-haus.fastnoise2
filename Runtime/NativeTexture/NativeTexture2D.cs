@@ -121,11 +121,14 @@ namespace FastNoise2.NativeTexture
 			m_Buffer = UnsafeUtility.MallocTracked(size, UnsafeUtility.AlignOf<T>(), allocator, 0);
 			m_AllocatorLabel = allocator;
 
+			UnsafeUtility.MemClear(m_Buffer, (long)length * (long)UnsafeUtility.SizeOf<T>());
+
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			// Initialize safety handles
 			m_Safety = AtomicSafetyHandle.Create();
 			InitStaticSafetyId(ref m_Safety);
 #endif
+
 			// Set min/max indices for job system
 			m_MinIndex = 0;
 			m_MaxIndex = length - 1;
@@ -140,10 +143,7 @@ namespace FastNoise2.NativeTexture
 		private static void CheckAllocateArguments(int length, Allocator allocator)
 		{
 			if (allocator <= Allocator.None)
-				throw new ArgumentException(
-					"Allocator must be Temp, TempJob or Persistent",
-					"allocator"
-				);
+				throw new ArgumentException("Allocator must be Temp, TempJob or Persistent", "allocator");
 
 			if (allocator >= Allocator.FirstUserIndex)
 				throw new ArgumentException(
@@ -203,9 +203,7 @@ namespace FastNoise2.NativeTexture
 						+ "NativeTexture2D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job."
 				);
 
-			throw new IndexOutOfRangeException(
-				$"Index {index} is out of range of '{Length}' Length."
-			);
+			throw new IndexOutOfRangeException($"Index {index} is out of range of '{Length}' Length.");
 		}
 
 		#endregion
@@ -269,13 +267,29 @@ namespace FastNoise2.NativeTexture
 		}
 
 		/// <summary>
+		/// Gets or sets the texture value at the specified 2D coordinate.
+		/// </summary>
+		/// <param name="x">The 2D coordinate (x) of the pixel</param>
+		/// <param name="y">The 2D coordinate (y) of the pixel</param>
+		/// <returns>The value at the specified coordinate.</returns>
+		public T this[int x, int y]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => this[new int2(x, y)];
+			[WriteAccessRequired]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set => this[new int2(x, y)] = value;
+		}
+
+		/// <summary>
 		/// Reads the texture value at the specified 2D coordinate.
 		/// </summary>
-		/// <param name="pixelCoord">The 2D coordinate of the pixel.</param>
+		/// <param name="coord">The 2D coordinate of the pixel.</param>
 		/// <returns>The value at the specified coordinate.</returns>
-		public unsafe T ReadPixel(int2 pixelCoord)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe T Load(int2 coord)
 		{
-			int index = pixelCoord.ToIndex(Width);
+			int index = coord.ToIndex(Width);
 			CheckElementReadAccess(index);
 			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
 		}
@@ -286,7 +300,8 @@ namespace FastNoise2.NativeTexture
 		/// <param name="pixelIndex">The linear index of the pixel.</param>
 		/// <param name="coord">Outputs the 2D coordinate corresponding to the linear index.</param>
 		/// <returns>The value at the specified index.</returns>
-		public unsafe T ReadPixel(int pixelIndex, out int2 coord)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public unsafe T Load(int pixelIndex, out int2 coord)
 		{
 			CheckElementReadAccess(pixelIndex);
 			coord = pixelIndex.ToCoord(Width);
@@ -590,9 +605,9 @@ namespace FastNoise2.NativeTexture
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
 			}
 
-			public unsafe T ReadPixel(int2 pixelCoord)
+			public unsafe T Load(int2 coord)
 			{
-				int index = pixelCoord.ToIndex(Width);
+				int index = coord.ToIndex(Width);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
 #endif
@@ -604,7 +619,7 @@ namespace FastNoise2.NativeTexture
 				return UnsafeUtility.ReadArrayElement<T>(buffer, index);
 			}
 
-			public unsafe T ReadPixel(int pixelIndex, out int2 coord)
+			public unsafe T Load(int pixelIndex, out int2 coord)
 			{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				AtomicSafetyHandle.CheckReadAndThrow(safety);
@@ -627,9 +642,7 @@ namespace FastNoise2.NativeTexture
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				// Check if buffer is valid before proceeding
 				if (buffer == null)
-					throw new InvalidOperationException(
-						"Cannot create NativeArray from null buffer"
-					);
+					throw new InvalidOperationException("Cannot create NativeArray from null buffer");
 
 				AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(safety);
 				AtomicSafetyHandle arraySafety = safety;
@@ -637,12 +650,11 @@ namespace FastNoise2.NativeTexture
 #endif
 
 				// Create a NativeArray from our buffer
-				NativeArray<T> tempArray =
-					NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-						buffer,
-						length,
-						Allocator.None
-					);
+				NativeArray<T> tempArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+					buffer,
+					length,
+					Allocator.None
+				);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tempArray, arraySafety);
