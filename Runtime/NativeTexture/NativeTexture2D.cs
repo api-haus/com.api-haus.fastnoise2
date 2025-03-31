@@ -29,7 +29,7 @@ namespace FastNoise2.NativeTexture
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 		internal AtomicSafetyHandle m_Safety;
 		internal static readonly SharedStatic<int> s_staticSafetyId = SharedStatic<int>.GetOrCreate<
-			NativeList<T>
+			NativeTexture2D<T>
 		>();
 #endif
 
@@ -374,7 +374,7 @@ namespace FastNoise2.NativeTexture
 		public readonly unsafe Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false)
 		{
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-			AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
+			// AtomicSafetyHandle.CheckReadAndThrow(m_Safety);
 #endif
 
 			if (texture.GetNativeTexturePtr() != texturePtr)

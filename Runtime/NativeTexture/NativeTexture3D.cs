@@ -29,7 +29,7 @@ namespace FastNoise2.NativeTexture
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 		internal AtomicSafetyHandle m_Safety;
 		internal static readonly SharedStatic<int> s_staticSafetyId = SharedStatic<int>.GetOrCreate<
-			NativeList<T>
+			NativeTexture3D<T>
 		>();
 #endif
 
@@ -149,10 +149,7 @@ namespace FastNoise2.NativeTexture
 		private static void CheckAllocateArguments(int length, Allocator allocator)
 		{
 			if (allocator <= Allocator.None)
-				throw new ArgumentException(
-					"Allocator must be Temp, TempJob or Persistent",
-					"allocator"
-				);
+				throw new ArgumentException("Allocator must be Temp, TempJob or Persistent", "allocator");
 
 			if (allocator >= Allocator.FirstUserIndex)
 				throw new ArgumentException(
@@ -212,9 +209,7 @@ namespace FastNoise2.NativeTexture
 						+ "NativeTexture3D are restricted to only read & write the element at the job index. You can use double buffering strategies to avoid race conditions due to reading & writing in parallel to the same elements from a job."
 				);
 
-			throw new IndexOutOfRangeException(
-				$"Index {index} is out of range of '{m_Length}' Length."
-			);
+			throw new IndexOutOfRangeException($"Index {index} is out of range of '{m_Length}' Length.");
 		}
 
 		#endregion
@@ -649,12 +644,11 @@ namespace FastNoise2.NativeTexture
 #endif
 
 				// Create a NativeArray from our buffer
-				NativeArray<T> tempArray =
-					NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
-						buffer,
-						length,
-						Allocator.None
-					);
+				NativeArray<T> tempArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+					buffer,
+					length,
+					Allocator.None
+				);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 				NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tempArray, arraySafety);

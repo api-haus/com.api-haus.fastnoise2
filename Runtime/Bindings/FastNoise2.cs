@@ -4,10 +4,12 @@
     using System.Collections.Generic;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
+    using Unity.Jobs;
     using Unity.Mathematics;
 
-    public struct FastNoise : IDisposable, IEquatable<FastNoise>
+    public struct FastNoise : INativeDisposable, IEquatable<FastNoise>
     {
         #region IEquatable
 
@@ -16,7 +18,7 @@
         public readonly bool Equals(FastNoise other) =>
             mNodeHandle == other.mNodeHandle && m_MetadataId == other.m_MetadataId;
 
-        public readonly override bool Equals(object obj) =>
+        public override readonly bool Equals(object obj) =>
             obj != null && obj is FastNoise other && Equals(other);
 
         public static bool operator ==(FastNoise left, FastNoise right) => left.Equals(right);
@@ -72,7 +74,24 @@
             m_MetadataId = fnGetMetadataID(nodeHandle);
         }
 
+        private readonly struct DisposeNoiseJob : IJob
+        {
+            private readonly FastNoise m_Noise;
+
+            public DisposeNoiseJob(FastNoise fastNoise)
+            {
+                m_Noise = fastNoise;
+            }
+
+            public void Execute() => m_Noise.Dispose();
+        }
+
         public readonly void Dispose() => fnDeleteNodeRef(mNodeHandle);
+
+        public JobHandle Dispose(JobHandle inputDeps) =>
+            IsCreated //
+                ? new DisposeNoiseJob(this).Schedule(inputDeps)
+                : inputDeps;
 
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
@@ -564,8 +583,7 @@
 
         [DllImport(NATIVE_LIB)]
         internal static extern IntPtr fnNewFromEncodedNodeTree(
-            [MarshalAs(UnmanagedType.LPStr)]
-            string encodedNodeTree,
+            [MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree,
             uint simdLevel = 0
         );
 
