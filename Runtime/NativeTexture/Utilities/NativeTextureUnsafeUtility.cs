@@ -1,4 +1,4 @@
-namespace FastNoise2.NativeTexture
+namespace FastNoise2.NativeTexture.Utilities
 {
 	using System;
 	using System.Diagnostics;
@@ -17,10 +17,7 @@ namespace FastNoise2.NativeTexture
 			where T : unmanaged
 		{
 			if (resolution.x < 0 || resolution.y < 0)
-				throw new ArgumentOutOfRangeException(
-					"resolution",
-					"Resolution dimensions must be >= 0"
-				);
+				throw new ArgumentOutOfRangeException("resolution", "Resolution dimensions must be >= 0");
 
 			// Verify T is unmanaged
 			if (!UnsafeUtility.IsUnmanaged<T>())
@@ -40,6 +37,7 @@ namespace FastNoise2.NativeTexture
 		public static unsafe NativeTexture2D<T> ConvertExistingDataToNativeTexture2D<T>(
 			void* dataPointer,
 			int2 resolution,
+			int mipCount = 1,
 			Allocator allocator = Allocator.None
 		)
 			where T : unmanaged
@@ -57,6 +55,7 @@ namespace FastNoise2.NativeTexture
 			result.m_MinIndex = 0;
 			result.m_MaxIndex = result.m_Length - 1;
 			result.texturePtr = IntPtr.Zero;
+			result.MipCount = mipCount;
 
 			// Initialize safety handle
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -126,9 +125,7 @@ namespace FastNoise2.NativeTexture
 		/// <typeparam name="T">The type of elements in the texture.</typeparam>
 		/// <param name="texture">The texture to get the pointer from.</param>
 		/// <returns>An unsafe pointer to the texture data without any safety checks.</returns>
-		public static unsafe void* GetUnsafeBufferPointerWithoutChecks<T>(
-			NativeTexture2D<T> texture
-		)
+		public static unsafe void* GetUnsafeBufferPointerWithoutChecks<T>(NativeTexture2D<T> texture)
 			where T : unmanaged => texture.m_Buffer;
 	}
 }

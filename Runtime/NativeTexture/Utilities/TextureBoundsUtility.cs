@@ -1,7 +1,7 @@
-namespace FastNoise2.NativeTexture
+namespace FastNoise2.NativeTexture.Utilities
 {
-	using Bindings;
-	using Jobs;
+	using FastNoise2.Bindings;
+	using FastNoise2.Jobs;
 	using Unity.Collections;
 	using Unity.Jobs;
 
@@ -15,7 +15,7 @@ namespace FastNoise2.NativeTexture
 		/// </summary>
 		/// <param name="allocator">The allocator to use for the reference.</param>
 		/// <returns>A NativeReference containing initialized value bounds.</returns>
-		public static NativeReference<ValueBounds> CreateBoundsReference(Allocator allocator)
+		public static NativeReference<ValueBounds> CreateValueBounds(Allocator allocator)
 		{
 			NativeReference<ValueBounds> boundsRef = new(allocator);
 			boundsRef.Reset();
@@ -33,8 +33,7 @@ namespace FastNoise2.NativeTexture
 			NativeTexture2D<float> texture,
 			NativeReference<ValueBounds> boundsRef,
 			JobHandle dependency = default
-		) =>
-			texture.ScheduleNormalize(boundsRef, dependency);
+		) => texture.ScheduleNormalize(boundsRef, dependency);
 
 		/// <summary>
 		/// Sets explicit bounds values.

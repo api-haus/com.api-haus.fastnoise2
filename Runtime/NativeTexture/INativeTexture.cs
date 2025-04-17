@@ -31,21 +31,6 @@ namespace FastNoise2.NativeTexture
 		TValue this[int pixelIndex] { get; set; }
 
 		/// <summary>
-		/// Reads the texture value at the specified coordinate.
-		/// </summary>
-		/// <param name="coord">The coordinate of the pixel.</param>
-		/// <returns>The value at the specified coordinate.</returns>
-		TValue Load(TCoord coord);
-
-		/// <summary>
-		/// Reads the texture value at the specified linear index and outputs the corresponding coordinate.
-		/// </summary>
-		/// <param name="index">The linear index of the pixel.</param>
-		/// <param name="coord">Outputs the coordinate corresponding to the linear index.</param>
-		/// <returns>The value at the specified index.</returns>
-		TValue Load(int index, out TCoord coord);
-
-		/// <summary>
 		/// Indicates whether the native texture has been created and initialized.
 		/// </summary>
 		bool IsCreated { get; }

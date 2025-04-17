@@ -9,6 +9,7 @@ namespace FastNoise2.NativeTexture
 	using Unity.Jobs;
 	using Unity.Mathematics;
 	using UnityEngine;
+	using Utilities;
 
 	/// <summary>
 	/// A native wrapper for Unity's Texture2D that provides 3D texture functionality with efficient memory management and direct data access.

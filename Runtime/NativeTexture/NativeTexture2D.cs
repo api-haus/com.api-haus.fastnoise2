@@ -9,6 +9,13 @@ namespace FastNoise2.NativeTexture
 	using Unity.Jobs;
 	using Unity.Mathematics;
 	using UnityEngine;
+	using Utilities;
+	using static Unity.Collections.LowLevel.Unsafe.NativeArrayUnsafeUtility;
+	using static Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
+	using static UnityEngine.Experimental.Rendering.GraphicsFormatUtility;
+	using static Utilities.MipUtility;
+	using static Utilities.NativeTextureUnsafeUtility;
+	using Debug = UnityEngine.Debug;
 
 	/// <summary>
 	/// A native wrapper for Unity's Texture2D that provides efficient memory management and direct texture data access.
@@ -72,6 +79,13 @@ namespace FastNoise2.NativeTexture
 		/// </summary>
 		public int2 Resolution { get; internal set; }
 
+		/// <summary>
+		/// Gets the mip count.
+		/// </summary>
+		public int MipCount { get; internal set; }
+
+		TextureFormat m_TextureFormat;
+
 		#region Constructors
 
 		/// <summary>
@@ -81,7 +95,9 @@ namespace FastNoise2.NativeTexture
 		public unsafe NativeTexture2D(Texture2D texture)
 		{
 			Resolution = new int2(texture.width, texture.height);
+			MipCount = texture.mipmapCount;
 			texturePtr = texture.GetNativeTexturePtr();
+			m_TextureFormat = texture.format;
 
 			// Get the raw texture data
 			NativeArray<T> textureData = texture.GetRawTextureData<T>();
@@ -96,32 +112,43 @@ namespace FastNoise2.NativeTexture
 			InitStaticSafetyId(ref m_Safety);
 #endif
 
+			int length = TexelLength(Resolution, MipCount);
+
 			// Set min/max indices for job system
 			m_MinIndex = 0;
-			m_MaxIndex = (Resolution.x * Resolution.y) - 1;
-			m_Length = Resolution.x * Resolution.y;
+			m_MaxIndex = length - 1;
+			m_Length = length;
 		}
 
 		/// <summary>
 		/// Creates a new NativeTexture2D with the specified resolution.
 		/// </summary>
 		/// <param name="resolution">The dimensions of the texture (width, height).</param>
+		/// <param name="mipCount">Mip count.</param>
+		/// <param name="textureFormat">Texture format.</param>
 		/// <param name="allocator">The allocator to use for the texture data.</param>
-		public unsafe NativeTexture2D(int2 resolution, Allocator allocator)
+		public unsafe NativeTexture2D(
+			int2 resolution,
+			int mipCount,
+			TextureFormat textureFormat,
+			Allocator allocator
+		)
 		{
 			Resolution = resolution;
+			MipCount = mipCount;
 			texturePtr = IntPtr.Zero;
+			m_TextureFormat = textureFormat;
 
 			// Allocate memory directly
-			int length = resolution.x * resolution.y;
-			long size = (long)UnsafeUtility.SizeOf<T>() * length;
+			int length = TexelLength(Resolution, MipCount);
+			long size = (long)SizeOf<T>() * length;
 
 			CheckAllocateArguments(length, allocator);
 
-			m_Buffer = UnsafeUtility.MallocTracked(size, UnsafeUtility.AlignOf<T>(), allocator, 0);
+			m_Buffer = MallocTracked(size, AlignOf<T>(), allocator, 0);
 			m_AllocatorLabel = allocator;
 
-			UnsafeUtility.MemClear(m_Buffer, (long)length * (long)UnsafeUtility.SizeOf<T>());
+			MemClear(m_Buffer, (long)length * (long)SizeOf<T>());
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			// Initialize safety handles
@@ -134,6 +161,12 @@ namespace FastNoise2.NativeTexture
 			m_MaxIndex = length - 1;
 			m_Length = length;
 		}
+
+		public NativeTexture2D(int2 resolution, TextureFormat textureFormat, Allocator allocator)
+			: this(resolution, 1, textureFormat, allocator) { }
+
+		public NativeTexture2D(int2 resolution, Allocator allocator)
+			: this(resolution, 1, (TextureFormat)0, allocator) { }
 
 		#endregion
 
@@ -231,14 +264,14 @@ namespace FastNoise2.NativeTexture
 			get
 			{
 				CheckElementReadAccess(index);
-				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
+				return ReadArrayElement<T>(m_Buffer, index);
 			}
 			[WriteAccessRequired]
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			set
 			{
 				CheckElementWriteAccess(index);
-				UnsafeUtility.WriteArrayElement(m_Buffer, index, value);
+				WriteArrayElement(m_Buffer, index, value);
 			}
 		}
 
@@ -254,7 +287,7 @@ namespace FastNoise2.NativeTexture
 			{
 				int index = coord.ToIndex(Width);
 				CheckElementReadAccess(index);
-				return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
+				return ReadArrayElement<T>(m_Buffer, index);
 			}
 			[WriteAccessRequired]
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -262,7 +295,31 @@ namespace FastNoise2.NativeTexture
 			{
 				int index = coord.ToIndex(Width);
 				CheckElementWriteAccess(index);
-				UnsafeUtility.WriteArrayElement(m_Buffer, index, value);
+				WriteArrayElement(m_Buffer, index, value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the texture value at the specified 2D coordinate.
+		/// </summary>
+		/// <param name="coord">The 2D coordinate (x, y) of the pixel and MIP level.</param>
+		/// <returns>The value at the specified coordinate.</returns>
+		public unsafe T this[int3 coord]
+		{
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
+			{
+				int index = coord.ToIndex(Width, Height, MipCount);
+				CheckElementReadAccess(index);
+				return ReadArrayElement<T>(m_Buffer, index);
+			}
+			[WriteAccessRequired]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set
+			{
+				int index = coord.ToIndex(Width, Height, MipCount);
+				CheckElementWriteAccess(index);
+				WriteArrayElement(m_Buffer, index, value);
 			}
 		}
 
@@ -275,37 +332,26 @@ namespace FastNoise2.NativeTexture
 		public T this[int x, int y]
 		{
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => this[new int2(x, y)];
+			get => this[new int3(x, y, 0)];
 			[WriteAccessRequired]
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			set => this[new int2(x, y)] = value;
+			set => this[new int3(x, y, 0)] = value;
 		}
 
 		/// <summary>
-		/// Reads the texture value at the specified 2D coordinate.
+		/// Gets or sets the texture value at the specified 2D coordinate with MIP.
 		/// </summary>
-		/// <param name="coord">The 2D coordinate of the pixel.</param>
+		/// <param name="x">The 2D coordinate (x) of the pixel</param>
+		/// <param name="y">The 2D coordinate (y) of the pixel</param>
+		/// <param name="mip">Mip</param>
 		/// <returns>The value at the specified coordinate.</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public unsafe T Load(int2 coord)
+		public T this[int x, int y, int mip]
 		{
-			int index = coord.ToIndex(Width);
-			CheckElementReadAccess(index);
-			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, index);
-		}
-
-		/// <summary>
-		/// Reads the texture value at the specified linear index and outputs the corresponding 2D coordinate.
-		/// </summary>
-		/// <param name="pixelIndex">The linear index of the pixel.</param>
-		/// <param name="coord">Outputs the 2D coordinate corresponding to the linear index.</param>
-		/// <returns>The value at the specified index.</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public unsafe T Load(int pixelIndex, out int2 coord)
-		{
-			CheckElementReadAccess(pixelIndex);
-			coord = pixelIndex.ToCoord(Width);
-			return UnsafeUtility.ReadArrayElement<T>(m_Buffer, pixelIndex);
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get => this[new int3(x, y, mip)];
+			[WriteAccessRequired]
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set => this[new int3(x, y, mip)] = value;
 		}
 
 		/// <summary>
@@ -325,14 +371,14 @@ namespace FastNoise2.NativeTexture
 #endif
 
 			// Create a NativeArray that references the same memory
-			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+			NativeArray<T> array = ConvertExistingDataToNativeArray<T>(
 				m_Buffer,
 				m_Length,
 				Allocator.None
 			);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, arraySafety);
+			SetAtomicSafetyHandle(ref array, arraySafety);
 #endif
 
 			return array;
@@ -350,14 +396,14 @@ namespace FastNoise2.NativeTexture
 #endif
 
 			// Create a NativeArray that references the same memory
-			NativeArray<T> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+			NativeArray<T> array = ConvertExistingDataToNativeArray<T>(
 				m_Buffer,
 				m_Length,
 				Allocator.None
 			);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-			NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, m_Safety);
+			SetAtomicSafetyHandle(ref array, m_Safety);
 #endif
 
 			return array;
@@ -382,11 +428,7 @@ namespace FastNoise2.NativeTexture
 				NativeArray<T> writeableTextureMemory = texture.GetRawTextureData<T>();
 
 				// Copy our memory to the texture's memory
-				UnsafeUtility.MemCpy(
-					writeableTextureMemory.GetUnsafePtr(),
-					m_Buffer,
-					(long)UnsafeUtility.SizeOf<T>() * m_Length
-				);
+				MemCpy(writeableTextureMemory.GetUnsafePtr(), m_Buffer, (long)SizeOf<T>() * m_Length);
 			}
 
 			texture.Apply(updateMipmaps);
@@ -438,7 +480,7 @@ namespace FastNoise2.NativeTexture
 
 			if (!IsUnityTexture2DPointer && IsCreated && m_AllocatorLabel > Allocator.None)
 			{
-				UnsafeUtility.FreeTracked(m_Buffer, m_AllocatorLabel);
+				FreeTracked(m_Buffer, m_AllocatorLabel);
 				m_AllocatorLabel = Allocator.Invalid;
 			}
 
@@ -470,7 +512,7 @@ namespace FastNoise2.NativeTexture
 			public unsafe void Execute()
 			{
 				if (texturePtr == IntPtr.Zero && buffer != null && allocatorLabel > Allocator.None)
-					UnsafeUtility.FreeTracked(buffer, allocatorLabel);
+					FreeTracked(buffer, allocatorLabel);
 			}
 		}
 
@@ -579,7 +621,7 @@ namespace FastNoise2.NativeTexture
 							$"Index {index} is out of range (must be between 0 and {length - 1})."
 						);
 
-					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+					return ReadArrayElement<T>(buffer, index);
 				}
 				[WriteAccessRequired]
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
@@ -599,7 +641,7 @@ namespace FastNoise2.NativeTexture
 							$"Index {index} is out of range (must be between 0 and {length - 1})."
 						);
 
-					return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+					return ReadArrayElement<T>(buffer, index);
 				}
 				[WriteAccessRequired]
 				set => throw new NotSupportedException("Cannot write to a ReadOnly view");
@@ -616,7 +658,7 @@ namespace FastNoise2.NativeTexture
 						$"Index {index} is out of range (must be between 0 and {length - 1})."
 					);
 
-				return UnsafeUtility.ReadArrayElement<T>(buffer, index);
+				return ReadArrayElement<T>(buffer, index);
 			}
 
 			public unsafe T Load(int pixelIndex, out int2 coord)
@@ -630,7 +672,7 @@ namespace FastNoise2.NativeTexture
 					);
 
 				coord = pixelIndex.ToCoord(Width);
-				return UnsafeUtility.ReadArrayElement<T>(buffer, pixelIndex);
+				return ReadArrayElement<T>(buffer, pixelIndex);
 			}
 
 			/// <summary>
@@ -650,14 +692,14 @@ namespace FastNoise2.NativeTexture
 #endif
 
 				// Create a NativeArray from our buffer
-				NativeArray<T> tempArray = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<T>(
+				NativeArray<T> tempArray = ConvertExistingDataToNativeArray<T>(
 					buffer,
 					length,
 					Allocator.None
 				);
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-				NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref tempArray, arraySafety);
+				SetAtomicSafetyHandle(ref tempArray, arraySafety);
 #endif
 
 				return tempArray;
@@ -690,5 +732,35 @@ namespace FastNoise2.NativeTexture
 		/// </summary>
 		/// <returns>A read-only view of the texture.</returns>
 		public ReadOnly AsReadOnly() => new(this);
+
+		public unsafe NativeTexture2D<T> SliceMip(int mipLevel)
+		{
+			if (mipLevel < 0 || mipLevel >= MipCount)
+				throw new ArgumentOutOfRangeException(nameof(mipLevel), $"0 <= mipLevel < {MipCount}");
+
+			int mipStart = 0;
+			for (int currentLevel = 0; currentLevel < mipLevel; currentLevel++)
+			{
+				int2 resolutionAtLevel = Resolution / (1 << (currentLevel));
+				int lengthAtLevel = (int)(
+					ComputeMipmapSize(resolutionAtLevel.x, resolutionAtLevel.y, m_TextureFormat)
+					/ (uint)SizeOf<T>()
+				);
+
+				mipStart += lengthAtLevel;
+			}
+
+			int2 resolutionAtMip = Resolution / (1 << mipLevel);
+			int mipLength = (int)(
+				ComputeMipmapSize(resolutionAtMip.x, resolutionAtMip.y, m_TextureFormat) / (uint)SizeOf<T>()
+			);
+
+			return ConvertExistingDataToNativeTexture2D<T>(
+				AsArray().Slice(mipStart, mipLength).GetUnsafePtr(),
+				resolutionAtMip,
+				1,
+				m_AllocatorLabel
+			);
+		}
 	}
 }

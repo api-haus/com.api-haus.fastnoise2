@@ -1,4 +1,4 @@
-namespace FastNoise2.NativeTexture
+namespace FastNoise2.NativeTexture.Utilities
 {
 	using System.Runtime.CompilerServices;
 	using Unity.Mathematics;
@@ -60,5 +60,10 @@ namespace FastNoise2.NativeTexture
 		/// <returns>The corresponding linear pixel index.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int ToIndex(this int2 id, int width) => (id.y * width) + id.x;
+
+		public static int ToIndex(this int3 idMip, int width, int height, int mipLevels)
+		{
+			throw new System.NotImplementedException();
+		}
 	}
 }
