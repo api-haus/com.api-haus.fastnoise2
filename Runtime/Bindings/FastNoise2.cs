@@ -65,18 +65,20 @@
                 throw new ArgumentException("Failed to find metadata name: " + metadataName);
             }
 
+            m_IsDisposed = false;
             mNodeHandle = fnNewFromMetadata(m_MetadataId);
         }
 
         private FastNoise(IntPtr nodeHandle)
         {
             mNodeHandle = nodeHandle;
+            m_IsDisposed = false;
             m_MetadataId = fnGetMetadataID(nodeHandle);
         }
 
-        private readonly struct DisposeNoiseJob : IJob
+        private struct DisposeNoiseJob : IJob
         {
-            private readonly FastNoise m_Noise;
+            private FastNoise m_Noise;
 
             public DisposeNoiseJob(FastNoise fastNoise)
             {
@@ -86,7 +88,15 @@
             public void Execute() => m_Noise.Dispose();
         }
 
-        public readonly void Dispose() => fnDeleteNodeRef(mNodeHandle);
+        public void Dispose()
+        {
+            if (m_IsDisposed)
+            {
+                return;
+            }
+            fnDeleteNodeRef(mNodeHandle);
+            m_IsDisposed = true;
+        }
 
         public JobHandle Dispose(JobHandle inputDeps) =>
             IsCreated //
@@ -908,6 +918,7 @@
             float value
         );
 
-        public readonly bool IsCreated => Invalid != this;
+        private bool m_IsDisposed;
+        public readonly bool IsCreated => !m_IsDisposed && Invalid != this;
     }
 }
