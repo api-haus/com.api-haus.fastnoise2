@@ -4,6 +4,10 @@
 	"version": "0.1.0",
 	"description": "FastNoise2 in UPM",
 	"dependencies": {
-		"com.unity.editorcoroutines": "1.0.0"
-	}
+		"com.unity.editorcoroutines": "1.0.0",
+		"com.unity.collections": "2.5.7",
+		"com.unity.mathematics": "1.3.2",
+		"com.unity.burst": "1.8.24"
+	},
+	"hideInEditor": false
 }

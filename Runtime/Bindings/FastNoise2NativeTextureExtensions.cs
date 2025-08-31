@@ -28,7 +28,6 @@ namespace FastNoise2.Bindings
                 yStart,
                 xSize,
                 ySize,
-                frequency,
                 seed,
                 boundsRef.GetUnsafePtr()
             );
@@ -59,7 +58,6 @@ namespace FastNoise2.Bindings
                 xSize,
                 ySize,
                 zSize,
-                frequency,
                 seed,
                 boundsRef.GetUnsafePtr()
             );
@@ -82,7 +80,6 @@ namespace FastNoise2.Bindings
                 nativeTexture.GetUnsafePtr(),
                 xSize,
                 ySize,
-                frequency,
                 seed,
                 boundsRef.GetUnsafePtr()
             );

@@ -80,8 +80,7 @@ namespace FastNoise2.Tests
 				for (int y = 0; y < resolution.y; y++)
 				for (int x = 0; x < resolution.x; x++)
 				{
-					float expectedValue =
-						x + (y * resolution.x) + (z * resolution.x * resolution.y);
+					float expectedValue = x + (y * resolution.x) + (z * resolution.x * resolution.y);
 					float actualValue = texture3D[new int3(x, y, z)];
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
@@ -97,8 +96,7 @@ namespace FastNoise2.Tests
 					int y = i / resolution.x % resolution.y;
 					int z = i / (resolution.x * resolution.y);
 
-					float expectedValue =
-						x + (y * resolution.x) + (z * resolution.x * resolution.y);
+					float expectedValue = x + (y * resolution.x) + (z * resolution.x * resolution.y);
 					float actualValue = texture3D[i];
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
@@ -132,9 +130,7 @@ namespace FastNoise2.Tests
 				{
 					// Create a normalized gradient [0-1]
 					float value =
-						((float)x / resolution.x)
-						+ ((float)y / resolution.y)
-						+ ((float)z / resolution.z);
+						((float)x / resolution.x) + ((float)y / resolution.y) + ((float)z / resolution.z);
 					value /= 3.0f; // Normalize to [0-1]
 					texture3D[new int3(x, y, z)] = value;
 				}
@@ -352,9 +348,8 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture3D()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			TestGuards.RequireFastNoiseNative();
+			using FastNoise nodeTree = TestGuards.CreateTestNoiseOrSkip();
 
 			int3 resolution = new(32, 32, 32);
 			NativeTexture3D<float> noiseTexture3D = new(resolution, Allocator.TempJob);
@@ -365,18 +360,27 @@ namespace FastNoise2.Tests
 				// Create a Texture2D for visualization (slice visualization)
 				texture = new Texture2D(resolution.x, resolution.y, TextureFormat.RFloat, false);
 
-				// Generate 3D noise (using 3D coordinates)
+				// Generate 3D noise using the uniform grid API for stability
+				int len = resolution.x * resolution.y * resolution.z;
+				float[] data = new float[len];
+				_ = nodeTree.GenUniformGrid3D(
+					data,
+					0,
+					0,
+					0,
+					resolution.x,
+					resolution.y,
+					resolution.z,
+					0.02f,
+					1337
+				);
+
 				for (int z = 0; z < resolution.z; z++)
 				for (int y = 0; y < resolution.y; y++)
 				for (int x = 0; x < resolution.x; x++)
 				{
-					float nx = x * 0.05f;
-					float ny = y * 0.05f;
-					float nz = z * 0.05f;
-
-					// Generate a 3D noise value at this coordinate
-					float noiseValue = nodeTree.GenSingle3D(nx, ny, nz, 1337);
-					noiseTexture3D[new int3(x, y, z)] = noiseValue;
+					int idx = x + y * resolution.x + z * resolution.x * resolution.y;
+					noiseTexture3D[new int3(x, y, z)] = data[idx];
 				}
 
 				// Verify a middle slice of the 3D texture

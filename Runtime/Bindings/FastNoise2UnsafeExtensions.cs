@@ -22,7 +22,6 @@ namespace FastNoise2.Bindings
                 yStart,
                 xSize,
                 ySize,
-                frequency,
                 seed,
                 outputMinMax
             );
@@ -49,7 +48,6 @@ namespace FastNoise2.Bindings
                 xSize,
                 ySize,
                 zSize,
-                frequency,
                 seed,
                 outputMinMax
             );
@@ -80,7 +78,6 @@ namespace FastNoise2.Bindings
                 ySize,
                 zSize,
                 wSize,
-                frequency,
                 seed,
                 outputMinMax
             );
@@ -93,7 +90,7 @@ namespace FastNoise2.Bindings
             int ySize,
             float frequency,
             int seed
-        ) => fnGenTileable2D(fn.mNodeHandle, noiseOut, xSize, ySize, frequency, seed, outputMinMax);
+        ) => fnGenTileable2D(fn.mNodeHandle, noiseOut, xSize, ySize, seed, outputMinMax);
 
         public static unsafe void GenPositionArray2D(
             this FastNoise fn,

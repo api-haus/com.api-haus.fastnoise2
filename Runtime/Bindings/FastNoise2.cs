@@ -90,10 +90,11 @@
 
         public void Dispose()
         {
-            if (m_IsDisposed)
+            if (m_IsDisposed || mNodeHandle == IntPtr.Zero || this == Invalid)
             {
                 return;
             }
+
             fnDeleteNodeRef(mNodeHandle);
             m_IsDisposed = true;
         }
@@ -246,17 +247,7 @@
         )
         {
             float[] minMax = new float[2];
-            fnGenUniformGrid2D(
-                mNodeHandle,
-                noiseOut,
-                xStart,
-                yStart,
-                xSize,
-                ySize,
-                frequency,
-                seed,
-                minMax
-            );
+            fnGenUniformGrid2D(mNodeHandle, noiseOut, xStart, yStart, xSize, ySize, seed, minMax);
             return new OutputMinMax(minMax);
         }
 
@@ -282,7 +273,6 @@
                 xSize,
                 ySize,
                 zSize,
-                frequency,
                 seed,
                 minMax
             );
@@ -315,7 +305,6 @@
                 ySize,
                 zSize,
                 wSize,
-                frequency,
                 seed,
                 minMax
             );
@@ -331,7 +320,7 @@
         )
         {
             float[] minMax = new float[2];
-            fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, frequency, seed, minMax);
+            fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, seed, minMax);
             return new OutputMinMax(minMax);
         }
 
@@ -435,6 +424,10 @@
 
         public class Metadata
         {
+            public int id;
+            public Dictionary<string, Member> members;
+            public string name;
+
             public struct Member
             {
                 public enum Type
@@ -451,10 +444,6 @@
                 public int index;
                 public Dictionary<string, int> enumNames;
             }
-
-            public int id;
-            public string name;
-            public Dictionary<string, Member> members;
         }
 
         static FastNoise()
@@ -566,7 +555,7 @@
         {
             if (dimIdx >= 0)
             {
-                char[] dimSuffix = new char[] { 'x', 'y', 'z', 'w' };
+                char[] dimSuffix = { 'x', 'y', 'z', 'w' };
                 name += dimSuffix[dimIdx];
             }
 
@@ -579,13 +568,13 @@
         private static readonly Dictionary<string, int> s_metadataNameLookup;
         private static readonly Metadata[] s_nodeMetadata;
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX || UNITY_EMBEDDED_LINUX || UNITY_STANDALONE_LINUX || UNITY_ANDROID
-        private const string NATIVE_LIB = "FastNoise";
-#elif UNITY_IOS
+#if UNITY_IOS && !UNITY_EDITOR
         // On iOS plugins are statically linked into
         // the executable, so we have to use __Internal as the
         // library name.
         private const string NATIVE_LIB = "__Internal";
+#else
+        private const string NATIVE_LIB = "FastNoise";
 #endif
 
         [DllImport(NATIVE_LIB)]
@@ -607,20 +596,19 @@
         internal static extern int fnGetMetadataID(IntPtr nodeHandle);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid2D(
+        internal static extern void fnGenUniformGrid2D(
             IntPtr nodeHandle,
             float[] noiseOut,
             int xStart,
             int yStart,
             int xSize,
             int ySize,
-            float frequency,
             int seed,
             float[] outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid3D(
+        internal static extern void fnGenUniformGrid3D(
             IntPtr nodeHandle,
             float[] noiseOut,
             int xStart,
@@ -629,13 +617,12 @@
             int xSize,
             int ySize,
             int zSize,
-            float frequency,
             int seed,
             float[] outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid4D(
+        internal static extern void fnGenUniformGrid4D(
             IntPtr nodeHandle,
             float[] noiseOut,
             int xStart,
@@ -646,7 +633,6 @@
             int ySize,
             int zSize,
             int wSize,
-            float frequency,
             int seed,
             float[] outputMinMax
         );
@@ -657,7 +643,6 @@
             float[] noiseOut,
             int xSize,
             int ySize,
-            float frequency,
             int seed,
             float[] outputMinMax
         );
@@ -710,20 +695,19 @@
         #region Unsafe versions
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid2D(
+        internal static extern unsafe void fnGenUniformGrid2D(
             IntPtr nodeHandle,
             void* noiseOut,
             int xStart,
             int yStart,
             int xSize,
             int ySize,
-            float frequency,
             int seed,
             void* outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid3D(
+        internal static extern unsafe void fnGenUniformGrid3D(
             IntPtr nodeHandle,
             void* noiseOut,
             int xStart,
@@ -732,13 +716,12 @@
             int xSize,
             int ySize,
             int zSize,
-            float frequency,
             int seed,
             void* outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid4D(
+        internal static extern unsafe void fnGenUniformGrid4D(
             IntPtr nodeHandle,
             void* noiseOut,
             int xStart,
@@ -749,7 +732,6 @@
             int ySize,
             int zSize,
             int wSize,
-            float frequency,
             int seed,
             void* outputMinMax
         );
@@ -760,7 +742,6 @@
             void* noiseOut,
             int xSize,
             int ySize,
-            float frequency,
             int seed,
             void* outputMinMax
         );

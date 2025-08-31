@@ -1,6 +1,6 @@
 {
 	"name": "FastNoise2.Tests",
-	"rootNamespace": "FastNoise2.Tests",
+	"rootNamespace": "FastNoise2",
 	"references": [
 		"FastNoise2.Runtime",
 		"GUID:2665a8d13d1b3f18800f46e256720795",
