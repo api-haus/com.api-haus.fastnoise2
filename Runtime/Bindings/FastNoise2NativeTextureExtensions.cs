@@ -7,9 +7,9 @@ namespace FastNoise2.Bindings
 
     public static class FastNoise2NativeTextureExtensions
     {
-        public static unsafe void GenUniformGrid2D(
+        public static unsafe void GenUniformGrid2D<T>(
             this FastNoise fn,
-            NativeTexture2D<float> nativeTexture,
+            NativeTexture2D<T> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
             int xStart,
             int yStart,
@@ -18,6 +18,7 @@ namespace FastNoise2.Bindings
             float frequency,
             int seed
         )
+            where T : unmanaged
         {
             boundsRef.Reset();
 
@@ -34,9 +35,9 @@ namespace FastNoise2.Bindings
             );
         }
 
-        public static unsafe void GenUniformGrid3D(
+        public static unsafe void GenUniformGrid3D<T>(
             this FastNoise fn,
-            NativeTexture3D<float> nativeTexture,
+            NativeTexture3D<T> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
             int xStart,
             int yStart,
@@ -47,6 +48,7 @@ namespace FastNoise2.Bindings
             float frequency,
             int seed
         )
+            where T : unmanaged
         {
             boundsRef.Reset();
 
@@ -65,15 +67,16 @@ namespace FastNoise2.Bindings
             );
         }
 
-        public static unsafe void GenTileable2D(
+        public static unsafe void GenTileable2D<T>(
             this FastNoise fn,
-            NativeTexture2D<float> nativeTexture,
+            NativeTexture2D<T> nativeTexture,
             NativeReference<ValueBounds> boundsRef,
             int xSize,
             int ySize,
             float frequency,
             int seed
         )
+            where T : unmanaged
         {
             boundsRef.Reset();
 
@@ -83,64 +86,6 @@ namespace FastNoise2.Bindings
                 xSize,
                 ySize,
                 frequency,
-                seed,
-                boundsRef.GetUnsafePtr()
-            );
-        }
-
-        public static unsafe void GenPositionArray2D(
-            this FastNoise fn,
-            NativeTexture2D<float> nativeTexture,
-            NativeReference<ValueBounds> boundsRef,
-            int positionCount,
-            NativeArray<float> xPosArray,
-            NativeArray<float> yPosArray,
-            float xOffset,
-            float yOffset,
-            int seed
-        )
-        {
-            boundsRef.Reset();
-
-            fnGenPositionArray2D(
-                fn.mNodeHandle,
-                nativeTexture.GetUnsafePtr(),
-                positionCount,
-                xPosArray.GetUnsafePtr(),
-                yPosArray.GetUnsafePtr(),
-                xOffset,
-                yOffset,
-                seed,
-                boundsRef.GetUnsafePtr()
-            );
-        }
-
-        public static unsafe void GenPositionArray3D(
-            this FastNoise fn,
-            NativeTexture3D<float> nativeTexture,
-            NativeReference<ValueBounds> boundsRef,
-            int positionCount,
-            NativeArray<float> xPosArray,
-            NativeArray<float> yPosArray,
-            NativeArray<float> zPosArray,
-            float xOffset,
-            float yOffset,
-            float zOffset,
-            int seed
-        )
-        {
-            boundsRef.Reset();
-
-            fnGenPositionArray3D(
-                fn.mNodeHandle,
-                nativeTexture.GetUnsafePtr(),
-                positionCount,
-                xPosArray.GetUnsafePtr(),
-                yPosArray.GetUnsafePtr(),
-                zPosArray.GetUnsafePtr(),
-                xOffset,
-                yOffset,
-                zOffset,
                 seed,
                 boundsRef.GetUnsafePtr()
             );

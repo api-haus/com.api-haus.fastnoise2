@@ -1,3 +1,5 @@
+using static Unity.Mathematics.math;
+
 namespace FastNoise2.NativeTexture.Extensions
 {
 	using System.Runtime.CompilerServices;
@@ -17,7 +19,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -31,7 +33,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -45,7 +47,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return (float)tex2D[(int2)math.floor(pixelCoord)] / ushort.MaxValue;
+			return (float)tex2D[(int2)floor(pixelCoord)] / ushort.MaxValue;
 		}
 
 		/// <summary>
@@ -55,14 +57,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float ReadPixel(
-			this NativeTexture2D<ushort>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float ReadPixel(this NativeTexture2D<ushort>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return (float)tex2D[(int2)math.floor(pixelCoord)] / ushort.MaxValue;
+			return (float)tex2D[(int2)floor(pixelCoord)] / ushort.MaxValue;
 		}
 
 		/// <summary>
@@ -76,7 +75,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -86,14 +85,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 ReadPixel(
-			this NativeTexture2D<byte2>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float2 ReadPixel(this NativeTexture2D<byte2>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -107,7 +103,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -117,14 +113,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float2 ReadPixel(
-			this NativeTexture2D<ushort2>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float2 ReadPixel(this NativeTexture2D<ushort2>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -138,7 +131,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -148,14 +141,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 ReadPixel(
-			this NativeTexture2D<byte3>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float3 ReadPixel(this NativeTexture2D<byte3>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -169,7 +159,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -179,14 +169,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float3 ReadPixel(
-			this NativeTexture2D<ushort3>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float3 ReadPixel(this NativeTexture2D<ushort3>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -200,7 +187,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -210,14 +197,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 ReadPixel(
-			this NativeTexture2D<byte4>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float4 ReadPixel(this NativeTexture2D<byte4>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -231,7 +215,7 @@ namespace FastNoise2.NativeTexture.Extensions
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 
 		/// <summary>
@@ -241,14 +225,11 @@ namespace FastNoise2.NativeTexture.Extensions
 		/// <param name="pixelCoord">The floating-point coordinate of the pixel.</param>
 		/// <returns>The pixel value at the floored coordinate.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static float4 ReadPixel(
-			this NativeTexture2D<ushort4>.ReadOnly tex2D,
-			float2 pixelCoord
-		)
+		public static float4 ReadPixel(this NativeTexture2D<ushort4>.ReadOnly tex2D, float2 pixelCoord)
 		{
 			PixelCoord(tex2D, ref pixelCoord);
 
-			return tex2D[(int2)math.floor(pixelCoord)];
+			return tex2D[(int2)floor(pixelCoord)];
 		}
 	}
 }
