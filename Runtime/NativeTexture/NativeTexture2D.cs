@@ -127,11 +127,13 @@ namespace FastNoise2.NativeTexture
 		/// <param name="mipCount">Mip count.</param>
 		/// <param name="textureFormat">Texture format.</param>
 		/// <param name="allocator">The allocator to use for the texture data.</param>
+		/// <param name="options"></param>
 		public unsafe NativeTexture2D(
 			int2 resolution,
 			int mipCount,
 			TextureFormat textureFormat,
-			Allocator allocator
+			Allocator allocator,
+			NativeArrayOptions options = NativeArrayOptions.ClearMemory
 		)
 		{
 			Resolution = resolution;
@@ -148,7 +150,8 @@ namespace FastNoise2.NativeTexture
 			m_Buffer = MallocTracked(size, AlignOf<T>(), allocator, 0);
 			m_AllocatorLabel = allocator;
 
-			MemClear(m_Buffer, (long)length * (long)SizeOf<T>());
+			if (options == NativeArrayOptions.ClearMemory)
+				MemClear(m_Buffer, (long)length * SizeOf<T>());
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			// Initialize safety handles

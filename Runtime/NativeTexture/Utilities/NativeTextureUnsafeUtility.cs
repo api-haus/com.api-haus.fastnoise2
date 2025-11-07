@@ -1,3 +1,5 @@
+using static Unity.Collections.LowLevel.Unsafe.UnsafeUtility;
+
 namespace FastNoise2.NativeTexture.Utilities
 {
 	using System;
@@ -20,7 +22,7 @@ namespace FastNoise2.NativeTexture.Utilities
 				throw new ArgumentOutOfRangeException("resolution", "Resolution dimensions must be >= 0");
 
 			// Verify T is unmanaged
-			if (!UnsafeUtility.IsUnmanaged<T>())
+			if (!IsUnmanaged<T>())
 				throw new InvalidOperationException(
 					$"{typeof(T)} used in NativeTexture2D<{typeof(T)}> must be unmanaged (contain no managed types)."
 				);
@@ -89,43 +91,32 @@ namespace FastNoise2.NativeTexture.Utilities
 			return texture.m_Buffer;
 		}
 
-		/// <summary>
-		/// Gets an unsafe read-only pointer to the underlying texture data.
-		/// </summary>
-		/// <typeparam name="T">The type of elements in the texture.</typeparam>
-		/// <param name="texture">The texture to get the pointer from.</param>
-		/// <returns>An unsafe read-only pointer to the texture data.</returns>
-		public static unsafe void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T> texture)
+		public static unsafe T ReadPixel<T>(this NativeTexture2D<T> texture, int2 pixelCoord)
 			where T : unmanaged
 		{
+			int index = pixelCoord.ToIndex(texture.Width);
+			if (index < 0 || index >= texture.Length)
+				throw new ArgumentOutOfRangeException(nameof(pixelCoord), nameof(NativeTexture2D<T>));
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
 			AtomicSafetyHandle.CheckReadAndThrow(texture.m_Safety);
 #endif
-			return texture.m_Buffer;
+			return ReadArrayElement<T>(GetUnsafePtr(texture), index);
 		}
 
-		/// <summary>
-		/// Gets an unsafe read-only pointer to the underlying texture data.
-		/// </summary>
-		/// <typeparam name="T">The type of elements in the texture.</typeparam>
-		/// <param name="texture">The read-only texture view to get the pointer from.</param>
-		/// <returns>An unsafe read-only pointer to the texture data.</returns>
-		public static unsafe void* GetUnsafeReadOnlyPtr<T>(this NativeTexture2D<T>.ReadOnly texture)
+		public static unsafe void WritePixel<T>(
+			ref this NativeTexture2D<T> texture,
+			int2 pixelCoord,
+			T pixel
+		)
 			where T : unmanaged
 		{
+			int index = pixelCoord.ToIndex(texture.Width);
+			if (index < 0 || index >= texture.Length)
+				throw new ArgumentOutOfRangeException(nameof(pixelCoord), nameof(NativeTexture2D<T>));
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-			AtomicSafetyHandle.CheckReadAndThrow(texture.safety);
+			AtomicSafetyHandle.CheckWriteAndThrow(texture.m_Safety);
 #endif
-			return texture.buffer;
+			WriteArrayElement(GetUnsafePtr(texture), index, pixel);
 		}
-
-		/// <summary>
-		/// Gets an unsafe buffer pointer without safety checks.
-		/// </summary>
-		/// <typeparam name="T">The type of elements in the texture.</typeparam>
-		/// <param name="texture">The texture to get the pointer from.</param>
-		/// <returns>An unsafe pointer to the texture data without any safety checks.</returns>
-		public static unsafe void* GetUnsafeBufferPointerWithoutChecks<T>(NativeTexture2D<T> texture)
-			where T : unmanaged => texture.m_Buffer;
 	}
 }

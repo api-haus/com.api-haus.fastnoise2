@@ -1,4 +1,6 @@
-﻿namespace FastNoise2.Bindings
+﻿using Unity.Burst;
+
+namespace FastNoise2.Bindings
 {
     using System;
     using System.Collections.Generic;
@@ -90,7 +92,7 @@
 
         public void Dispose()
         {
-            if (m_IsDisposed)
+            if (!IsCreated || m_IsDisposed)
             {
                 return;
             }
@@ -103,6 +105,7 @@
                 ? new DisposeNoiseJob(this).Schedule(inputDeps)
                 : inputDeps;
 
+        [BurstDiscard]
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
             IntPtr nodeHandle = fnNewFromEncodedNodeTree(encodedNodeTree);
@@ -151,6 +154,7 @@
             }
         }
 
+        [BurstDiscard]
         public readonly void Set(string memberName, int value)
         {
             Metadata.Member member;
@@ -173,6 +177,7 @@
             }
         }
 
+        [BurstDiscard]
         public readonly void Set(string memberName, string enumValue)
         {
             Metadata.Member member;
@@ -201,6 +206,7 @@
             }
         }
 
+        [BurstDiscard]
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
             Metadata.Member member;

@@ -36,11 +36,6 @@ namespace FastNoise2.NativeTexture
 		bool IsCreated { get; }
 
 		/// <summary>
-		/// Indicates whether the texture data points directly to a Unity Texture2D native pointer.
-		/// </summary>
-		bool IsUnityTexture2DPointer { get; }
-
-		/// <summary>
 		/// Gets the total number of elements in the texture.
 		/// </summary>
 		int Length { get; }
@@ -50,14 +45,6 @@ namespace FastNoise2.NativeTexture
 		/// </summary>
 		/// <returns>A NativeArray containing the texture data.</returns>
 		NativeArray<TValue> AsArray();
-
-		/// <summary>
-		/// Applies the native texture data to a Unity Texture2D object.
-		/// </summary>
-		/// <param name="texture">The Texture2D object to apply data to.</param>
-		/// <param name="updateMipmaps">Whether to update mipmaps after applying data.</param>
-		/// <returns>The updated Texture2D object.</returns>
-		Texture2D ApplyTo(Texture2D texture, bool updateMipmaps = false);
 
 		/// <summary>
 		/// Gets an unsafe pointer to the underlying texture data.
