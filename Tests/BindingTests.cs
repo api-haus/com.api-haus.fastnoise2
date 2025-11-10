@@ -1,4 +1,5 @@
 using System.IO;
+using NativeTexture;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -7,7 +8,6 @@ using UnityEngine;
 namespace FastNoise2.Tests
 {
 	using Bindings;
-	using NativeTexture;
 
 	public class BindingTests
 	{
@@ -38,32 +38,26 @@ namespace FastNoise2.Tests
 			GenerateBitmap(maxSmooth, "testMetadata");
 
 			// Dunes
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			// Encoded node trees can be invalid and return null
-			if (nodeTree != FastNoise.Invalid) GenerateBitmap(nodeTree, "testENT");
+			if (nodeTree != FastNoise.Invalid)
+				GenerateBitmap(nodeTree, "testENT");
 		}
 
 		[Test]
 		public void GenerateBitmapWithValueBounds()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			// Encoded node trees can be invalid and return null
-			if (nodeTree != FastNoise.Invalid) GenerateBitmapWithTrackedBounds(nodeTree, "testWithValueBounds");
+			if (nodeTree != FastNoise.Invalid)
+				GenerateBitmapWithTrackedBounds(nodeTree, "testWithValueBounds");
 		}
 
 		private static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)
 		{
-			using (
-				BinaryWriter writer = new(
-					File.Open(filename + ".bmp", FileMode.Create)
-				)
-			)
+			using (BinaryWriter writer = new(File.Open(filename + ".bmp", FileMode.Create)))
 			{
 				const uint imageDataOffset = 14u + 12u + (256u * 3u);
 
@@ -117,11 +111,7 @@ namespace FastNoise2.Tests
 			ushort size = 512
 		)
 		{
-			using (
-				BinaryWriter writer = new(
-					File.Open(filename + ".bmp", FileMode.Create)
-				)
-			)
+			using (BinaryWriter writer = new(File.Open(filename + ".bmp", FileMode.Create)))
 			{
 				const uint imageDataOffset = 14u + 12u + (256u * 3u);
 
@@ -146,32 +136,16 @@ namespace FastNoise2.Tests
 				}
 
 				// Image data - use NativeTexture2D and ValueBounds
-				NativeTexture2D<float> noiseTexture = new(
-					new int2(size, size),
-					Allocator.Temp
-				);
+				NativeTexture2D<float> noiseTexture = new(new int2(size, size), Allocator.Temp);
 
 				// Create a bounds reference to track min/max values
-				using (
-					NativeReference<ValueBounds> boundsRef = new(
-						Allocator.Temp
-					)
-				)
+				using (NativeReference<ValueBounds> boundsRef = new(Allocator.Temp))
 				{
 					// Reset bounds before generation
 					boundsRef.Reset();
 
 					// Generate noise with bounds tracking
-					fastNoise.GenUniformGrid2D(
-						noiseTexture,
-						boundsRef,
-						0,
-						0,
-						size,
-						size,
-						0.02f,
-						1337
-					);
+					fastNoise.GenUniformGrid2D(noiseTexture, boundsRef, 0, 0, size, size, 0.02f, 1337);
 
 					// Precalculate normalization values
 					boundsRef.PrecalculateScale();

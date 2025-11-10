@@ -1,6 +1,7 @@
+using NativeTexture;
+
 namespace FastNoise2.Bindings
 {
-    using NativeTexture;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using static FastNoise;

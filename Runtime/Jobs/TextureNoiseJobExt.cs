@@ -1,7 +1,8 @@
+using NativeTexture;
+
 namespace FastNoise2.Jobs
 {
 	using Bindings;
-	using NativeTexture;
 	using Unity.Collections;
 	using Unity.Jobs;
 	using Unity.Mathematics;

@@ -1,4 +1,5 @@
 using System.IO;
+using NativeTexture;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Jobs;
@@ -9,7 +10,6 @@ namespace FastNoise2.Tests
 {
 	using Bindings;
 	using Jobs;
-	using NativeTexture;
 
 	public class JobSystemTests
 	{
@@ -22,8 +22,9 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new(texture);
 
 			// Create bounds reference for tracking min/max values
-			NativeReference<ValueBounds> boundsRef =
-				NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef = NativeTextureNormalizeJobExt.CreateBoundsReference(
+				Allocator.TempJob
+			);
 
 			JobHandle noiseJobDependency = default;
 
@@ -66,9 +67,7 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new(texture);
 
 			// Create a bounds reference to track min/max values during noise generation
-			NativeReference<ValueBounds> boundsRef = new(
-				Allocator.TempJob
-			);
+			NativeReference<ValueBounds> boundsRef = new(Allocator.TempJob);
 
 			// Generate noise with built-in bounds tracking
 			nodeTree.GenUniformGrid2D(nt, boundsRef, 0, 0, nt.Width, nt.Height, 0.02f, 1337);
@@ -96,14 +95,12 @@ namespace FastNoise2.Tests
 			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> nt = new(
-				new int2(512, 512),
-				Allocator.TempJob
-			);
+			NativeTexture2D<float> nt = new(new int2(512, 512), Allocator.TempJob);
 
 			// Create a bounds reference using our extension method
-			NativeReference<ValueBounds> boundsRef =
-				NativeTextureNormalizeJobExt.CreateBoundsReference(Allocator.TempJob);
+			NativeReference<ValueBounds> boundsRef = NativeTextureNormalizeJobExt.CreateBoundsReference(
+				Allocator.TempJob
+			);
 
 			// Generate noise directly with built-in bounds tracking
 			nodeTree.GenUniformGrid2D(nt, boundsRef, 0, 0, nt.Width, nt.Height, 0.02f, 1337);
@@ -114,9 +111,7 @@ namespace FastNoise2.Tests
 
 			dependency.Complete();
 
-			Debug.Log(
-				$"Generated noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}"
-			);
+			Debug.Log($"Generated noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}");
 
 			nt.ApplyTo(texture);
 
@@ -138,9 +133,7 @@ namespace FastNoise2.Tests
 			NativeTexture2D<float> nt = new(texture);
 
 			// Create bounds reference for tracking
-			NativeReference<ValueBounds> boundsRef = new(
-				Allocator.TempJob
-			);
+			NativeReference<ValueBounds> boundsRef = new(Allocator.TempJob);
 
 			// Initial job dependency
 			JobHandle dependency = default;
@@ -164,9 +157,7 @@ namespace FastNoise2.Tests
 			dependency.Complete();
 
 			// Output the results
-			Debug.Log(
-				$"Chained noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}"
-			);
+			Debug.Log($"Chained noise bounds: Min={boundsRef.Value.Min}, Max={boundsRef.Value.Max}");
 
 			nt.ApplyTo(texture);
 

@@ -1,4 +1,5 @@
 using System.IO;
+using NativeTexture;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Jobs;
@@ -8,27 +9,19 @@ using UnityEngine;
 namespace FastNoise2.Tests
 {
 	using Bindings;
-	using NativeTexture;
 
 	public class NativeTextureTests
 	{
 		[Test]
 		public void NoiseIntoNativeTexture2D()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
-			NativeTexture2D<float> noiseTexture2D = new(
-				512,
-				Allocator.TempJob
-			);
+			NativeTexture2D<float> noiseTexture2D = new(512, Allocator.TempJob);
 
 			// Create a bounds reference for tracking min/max values
-			using NativeReference<ValueBounds> boundsRef = new(
-				Allocator.Temp
-			);
+			using NativeReference<ValueBounds> boundsRef = new(Allocator.Temp);
 
 			// Generate noise directly into the native texture with built-in bounds tracking
 			nodeTree.GenUniformGrid2D(
@@ -54,17 +47,13 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture2DZeroCopy()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// Create a bounds reference for tracking min/max values
-			using NativeReference<ValueBounds> boundsRef = new(
-				Allocator.Temp
-			);
+			using NativeReference<ValueBounds> boundsRef = new(Allocator.Temp);
 
 			// Generate noise directly into the native texture with built-in bounds tracking
 			nodeTree.GenUniformGrid2D(
@@ -90,17 +79,13 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture2DWithBounds()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// Create a bounds reference to track min/max values
-			NativeReference<ValueBounds> boundsRef = new(
-				Allocator.Temp
-			);
+			NativeReference<ValueBounds> boundsRef = new(Allocator.Temp);
 
 			// Generate noise directly into the texture with built-in bounds tracking
 			nodeTree.GenUniformGrid2D(
@@ -122,7 +107,8 @@ namespace FastNoise2.Tests
 
 			// Normalize the texture using our bounds
 			NativeArray<float> textureData = noiseTexture2D.AsArray();
-			for (int i = 0; i < textureData.Length; i++) textureData[i] = boundsRef.NormalizeValue(textureData[i]);
+			for (int i = 0; i < textureData.Length; i++)
+				textureData[i] = boundsRef.NormalizeValue(textureData[i]);
 
 			noiseTexture2D.ApplyTo(texture);
 
@@ -134,17 +120,13 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture2DWithCustomBounds()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			Texture2D texture = new(512, 512, TextureFormat.RFloat, false);
 			NativeTexture2D<float> noiseTexture2D = new(texture);
 
 			// First, generate noise directly and track the actual bounds
-			NativeReference<ValueBounds> actualBoundsRef = new(
-				Allocator.Temp
-			);
+			NativeReference<ValueBounds> actualBoundsRef = new(Allocator.Temp);
 
 			// Generate noise with the built-in bounds tracking
 			nodeTree.GenUniformGrid2D(
@@ -164,9 +146,7 @@ namespace FastNoise2.Tests
 			);
 
 			// Create a bounds reference with custom min/max values
-			NativeReference<ValueBounds> customBoundsRef = new(
-				Allocator.Temp
-			);
+			NativeReference<ValueBounds> customBoundsRef = new(Allocator.Temp);
 
 			// Set custom bounds values
 			ValueBounds bounds = customBoundsRef.Value;

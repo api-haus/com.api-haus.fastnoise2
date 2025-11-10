@@ -2,6 +2,7 @@
 	"name": "FastNoise2.Editor",
 	"rootNamespace": "FastNoise2",
 	"references": [
+		"NativeTexture",
 		"GUID:0e6c55c1b7e24401bcfb93b66e551331",
 		"GUID:478a2357cc57436488a56e564b08d223",
 		"GUID:469a0115744024da8b8d27b5b1d7fe31",

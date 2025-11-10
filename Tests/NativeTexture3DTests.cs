@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using NativeTexture;
 using NUnit.Framework;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -11,7 +12,6 @@ using UnityEngine.TestTools;
 namespace FastNoise2.Tests
 {
 	using Bindings;
-	using NativeTexture;
 
 	public class NativeTexture3DTests
 	{
@@ -80,8 +80,7 @@ namespace FastNoise2.Tests
 				for (int y = 0; y < resolution.y; y++)
 				for (int x = 0; x < resolution.x; x++)
 				{
-					float expectedValue =
-						x + (y * resolution.x) + (z * resolution.x * resolution.y);
+					float expectedValue = x + (y * resolution.x) + (z * resolution.x * resolution.y);
 					float actualValue = texture3D[new int3(x, y, z)];
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
@@ -97,8 +96,7 @@ namespace FastNoise2.Tests
 					int y = i / resolution.x % resolution.y;
 					int z = i / (resolution.x * resolution.y);
 
-					float expectedValue =
-						x + (y * resolution.x) + (z * resolution.x * resolution.y);
+					float expectedValue = x + (y * resolution.x) + (z * resolution.x * resolution.y);
 					float actualValue = texture3D[i];
 					Assert.AreEqual(expectedValue, actualValue, 0.0001f);
 
@@ -132,9 +130,7 @@ namespace FastNoise2.Tests
 				{
 					// Create a normalized gradient [0-1]
 					float value =
-						((float)x / resolution.x)
-						+ ((float)y / resolution.y)
-						+ ((float)z / resolution.z);
+						((float)x / resolution.x) + ((float)y / resolution.y) + ((float)z / resolution.z);
 					value /= 3.0f; // Normalize to [0-1]
 					texture3D[new int3(x, y, z)] = value;
 				}
@@ -352,9 +348,7 @@ namespace FastNoise2.Tests
 		[Test]
 		public void NoiseIntoNativeTexture3D()
 		{
-			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree(
-				"DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA=="
-			);
+			using FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
 
 			int3 resolution = new(32, 32, 32);
 			NativeTexture3D<float> noiseTexture3D = new(resolution, Allocator.TempJob);

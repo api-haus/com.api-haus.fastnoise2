@@ -1,10 +1,9 @@
+using NativeTexture;
 using Unity.Collections;
 using Unity.Jobs;
 
 namespace FastNoise2.Jobs
 {
-	using NativeTexture;
-
 	/// <summary>
 	/// Extension methods for normalizing textures via jobs.
 	/// </summary>

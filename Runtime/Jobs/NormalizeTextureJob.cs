@@ -1,6 +1,7 @@
+using NativeTexture;
+
 namespace FastNoise2.Jobs
 {
-	using NativeTexture;
 	using Unity.Burst;
 	using Unity.Collections;
 	using Unity.Jobs;
