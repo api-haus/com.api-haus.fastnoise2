@@ -18,7 +18,6 @@ namespace FastNoise2.Jobs
 		public int seed;
 		public int2 offset;
 		public float frequency;
-		public int2 size;
 
 		public readonly void Execute() =>
 			noise.GenUniformGrid2D(
@@ -26,8 +25,8 @@ namespace FastNoise2.Jobs
 				boundsRef,
 				offset.x,
 				offset.y,
-				size.x,
-				size.y,
+				texture.Width,
+				texture.Height,
 				frequency,
 				seed
 			);

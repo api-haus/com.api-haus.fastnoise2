@@ -169,5 +169,40 @@ namespace FastNoise2.Tests
 			nt.Dispose();
 			boundsRef.Dispose();
 		}
+
+		[Test]
+		public void GenUniformGrid2DJob_DefaultSize_UsesTextureDimensions()
+		{
+			FastNoise nodeTree = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+
+			Texture2D texture = new(128, 128, TextureFormat.RFloat, false);
+			NativeTexture2D<float> nt = new(texture);
+			NativeReference<ValueBounds> boundsRef = new(Allocator.TempJob);
+
+			try
+			{
+				JobHandle handle = new GenUniformGrid2DJob
+				{
+					texture = nt,
+					noise = nodeTree,
+					boundsRef = boundsRef,
+					seed = 1337,
+					offset = new int2(0, 0),
+					frequency = 0.02f,
+					// Intentionally do not set size; job should use texture.Width/Height
+				}.Schedule(default);
+
+				handle.Complete();
+
+				Assert.IsTrue(boundsRef.Value.Min < boundsRef.Value.Max);
+			}
+			finally
+			{
+				Object.DestroyImmediate(texture);
+				nodeTree.Dispose();
+				nt.Dispose();
+				boundsRef.Dispose();
+			}
+		}
 	}
 }

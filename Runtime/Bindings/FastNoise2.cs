@@ -925,6 +925,6 @@ namespace FastNoise2.Bindings
         );
 
         private bool m_IsDisposed;
-        public readonly bool IsCreated => !m_IsDisposed && Invalid != this;
+        public readonly bool IsCreated => !m_IsDisposed && mNodeHandle != IntPtr.Zero;
     }
 }
