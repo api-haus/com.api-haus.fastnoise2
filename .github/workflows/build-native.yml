@@ -1,0 +1,111 @@
+name: Build Native Plugins
+
+on:
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: 'FastNoise2 upstream tag/branch/SHA'
+        required: true
+        default: 'v1.0.1'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/build-native.yml'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows
+            os: windows-latest
+            shared: ON
+            cmake_flags: -A x64
+          - platform: linux
+            os: ubuntu-latest
+            shared: ON
+            cmake_flags: -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+          - platform: macos
+            os: macos-latest
+            shared: ON
+            cmake_flags: >-
+              -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+          - platform: android
+            os: ubuntu-latest
+            shared: ON
+            cmake_flags: >-
+              -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_LATEST_HOME/build/cmake/android.toolchain.cmake
+              -DANDROID_ABI=arm64-v8a
+              -DANDROID_PLATFORM=android-21
+              -DANDROID_STL=c++_static
+          - platform: ios
+            os: macos-latest
+            shared: OFF
+            cmake_flags: >-
+              -G Xcode
+              -DCMAKE_SYSTEM_NAME=iOS
+              -DCMAKE_OSX_ARCHITECTURES=arm64
+              -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0
+
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout upstream FastNoise2
+        uses: actions/checkout@v4
+        with:
+          repository: Auburn/FastNoise2
+          ref: ${{ inputs.upstream_ref || 'v1.0.1' }}
+          submodules: recursive
+
+      - name: Configure
+        run: >-
+          cmake -S . -B build
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+          -DBUILD_SHARED_LIBS=${{ matrix.shared }}
+          -DFASTNOISE2_TOOLS=OFF
+          -DFASTNOISE2_TESTS=OFF
+          ${{ matrix.cmake_flags }}
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Install
+        run: cmake --install build --config Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastnoise2-${{ matrix.platform }}
+          path: ${{ github.workspace }}/install/
+
+  collect:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          pattern: fastnoise2-*
+
+      - name: Assemble combined artifact
+        run: |
+          mkdir -p out/windows out/linux out/macos out/android out/ios
+          cp -r artifacts/fastnoise2-windows/bin out/windows/ || true
+          cp -r artifacts/fastnoise2-windows/lib out/windows/ || true
+          cp -r artifacts/fastnoise2-linux/lib out/linux/
+          cp -r artifacts/fastnoise2-macos/lib out/macos/
+          cp -r artifacts/fastnoise2-android/lib out/android/
+          cp -r artifacts/fastnoise2-ios/lib out/ios/
+          echo "=== Final layout ==="
+          find out -type f | sort
+
+      - name: Upload combined artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fastnoise2-all-platforms
+          path: out/
