@@ -44,7 +44,8 @@ MonoBehaviour:
         - rid: 4858403379704496174
         - rid: 4858403380686487679
         m_GraphStickyNoteModels: []
-        m_GraphPlacematModels: []
+        m_GraphPlacematModels:
+        - rid: 4858403382315974983
         m_GraphVariableModels: []
         m_GraphPortalModels: []
         m_SectionModels:
@@ -52,10 +53,10 @@ MonoBehaviour:
         m_LocalSubgraphs: []
         m_LastKnownBounds:
           serializedVersion: 2
-          x: -64.5
-          y: 266.5
-          width: 1622.5
-          height: 959
+          x: -73.5
+          y: 293
+          width: 1631.5
+          height: 1033
         m_GraphElementMetaData:
         - m_Guid:
             m_Value0: 8804669402315184899
@@ -232,7 +233,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: d1dc07c84d2cd3988fde980de4ff917f
         m_Version: 2
-        m_Position: {x: 247.41324, y: 906.5023}
+        m_Position: {x: 240.87856, y: 969.9601}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -299,7 +300,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 5db0410a808964148ea5d5b9dcbecea4
         m_Version: 2
-        m_Position: {x: 574.82184, y: 266.7182}
+        m_Position: {x: 518.6622, y: 330.17593}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -432,7 +433,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: a2a8e38e76ea5d4492bbcec5ec7f9cc6
         m_Version: 2
-        m_Position: {x: 1064.2445, y: 512.1903}
+        m_Position: {x: 1091.8348, y: 587.1481}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -529,7 +530,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 2d3a6e56a4c037c590b4d38b592f2d96
         m_Version: 2
-        m_Position: {x: -64.28351, y: 679.5635}
+        m_Position: {x: -36.69319, y: 683.02124}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -622,7 +623,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 4114794a46c29fe12f9dfa7e03f41126
         m_Version: 2
-        m_Position: {x: 713.65735, y: 842.1421}
+        m_Position: {x: 856.3727, y: 796.09985}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -800,3 +801,26 @@ MonoBehaviour:
           m_PortDirection: 1
           m_PortOrientation: 0
           m_Title: OffsetX
+    - rid: 4858403382315974983
+      type: {class: PlacematModel, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
+      data:
+        m_Guid:
+          m_Value0: 14207765197839111202
+          m_Value1: 1715878517827309363
+        m_HashGuid:
+          serializedVersion: 2
+          Hash: 22945be52b1f2cc5330fd2bc6b06d017
+        m_Version: 2
+        m_Title: Placemat
+        m_TitleFontSize: 18
+        m_TitleAlignment: 0
+        m_Position:
+          serializedVersion: 2
+          x: -73.49994
+          y: 292.99997
+          width: 1403.4999
+          height: 1033
+        m_Comment: 
+        m_ElementColor:
+          m_Color: {r: 0.20784314, g: 0.22745098, b: 0.2784314, a: 1}
+          m_HasUserColor: 0
