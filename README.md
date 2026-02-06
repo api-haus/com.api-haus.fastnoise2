@@ -22,11 +22,6 @@ For native texture containers and sampling utilities, see the optional companion
   - `NoiseNode.Decode(string)` — deserializes a base64 encoded node tree
   - Format is compatible with C++ NoiseTool
 
-- **Library Signing**:
-  - `Window > FastNoise2` editor window for one-click library signing
-  - Adds `FN2_USER_SIGNED` scripting define across all build targets
-  - Auto-opens on first import when libraries are unsigned
-
 - **Job System Integration**:
   - Full Burst/Jobs/IL2CPP compatibility for noise generation
   - Native interop via `FastNoise` handle type
@@ -82,33 +77,6 @@ https://github.com/api-haus/com.auburn.fastnoise2.git
 
 Unity will automatically download and install the package.
 
-### Library Signing
-
-On first import, the signing editor window (`Window > FastNoise2`) opens automatically.
-
-1. Click **Sign Libraries** — this sets file permissions and enables the `FN2_USER_SIGNED` scripting define across all build targets.
-2. Wait for domain reload to complete.
-3. Native interop is now available.
-
-#### Fallback (CI / Headless)
-
-If the editor window is not available, sign libraries manually:
-
-**macOS:**
-```bash
-chmod +x path/to/library
-xattr -dr com.apple.quarantine path/to/library
-```
-
-**Linux:**
-```bash
-chmod +x path/to/library
-```
-
-Replace `path/to/library` with the actual path to the native library files under `Plugins/`.
-
-> **⚠️ Disclaimer:** Modifying file permissions and removing security attributes can expose your system to potential security risks. Ensure you trust the source of the libraries before proceeding.
-
 ---
 
 ## Usage Examples
@@ -155,7 +123,7 @@ Debug.Log(encoded == decoded.Encode()); // True
 ```csharp
 using FastNoise2.Bindings;
 
-using FastNoise fn = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+using FastNoise fn = FastNoise.FromEncodedNodeTree("BxA9Cle/GGZmZj8E");
 
 float[] noiseOutput = new float[512 * 512];
 FastNoise.OutputMinMax minMax = fn.GenUniformGrid2D(
@@ -175,7 +143,7 @@ using NativeTexture.FastNoise2;
 using Unity.Collections;
 using Unity.Mathematics;
 
-using FastNoise fn = FastNoise.FromEncodedNodeTree("DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==");
+using FastNoise fn = FastNoise.FromEncodedNodeTree("BxA9Cle/GGZmZj8E");
 
 var noiseTexture = new NativeTexture2D<float>(new int2(512, 512), Allocator.TempJob);
 
@@ -214,7 +182,6 @@ All assemblies have `autoReferenced: false` — consumers must add explicit asse
 - [x] ~~Complete Noise Editor integration (serialization to/from Noise Tool)~~ — Encode/Decode implemented
 - [x] ~~Support for all texture dimensions (4D) and job types~~ — via [`im.pala.nativetexture`](https://github.com/api-haus/im.pala.nativetexture)
 - [ ] Comprehensive documentation and additional examples
-- [x] ~~macOS CodeSigning~~ — Signing editor window implemented
 - [ ] OpenUPM release
 
 ---
