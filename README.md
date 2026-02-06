@@ -1,6 +1,8 @@
 # FastNoise2 for Unity (UPM Package)
 
-[FastNoise2 by Auburn](https://github.com/Auburn/FastNoise2) packaged for Unity Package Manager (UPM). This package provides SIMD-accelerated noise generation with a type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
+<img src=".github/docs/grapheditor.jpg" width="100%">
+
+[FastNoise2](https://github.com/Auburn/FastNoise2) v1.0.1 packaged for Unity Package Manager (UPM). SIMD-accelerated noise generation with a visual graph editor, type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
 
 For native texture containers and sampling utilities, see the optional companion package [`im.pala.nativetexture`](https://github.com/api-haus/im.pala.nativetexture).
 
@@ -29,15 +31,15 @@ For native texture containers and sampling utilities, see the optional companion
   - Full Burst/Jobs/IL2CPP compatibility for noise generation
   - Native interop via `FastNoise` handle type
 
+- **Graph Editor** (Unity GraphToolkit):
+  - Visual node-based noise graph editor inside Unity
+  - Per-node noise texture previews with live updates
+  - Hybrid ports — inline value editors that toggle when a wire is connected
+  - `FastNoiseGraph` asset for storing and serializing noise graphs
+
 - **Authoring Tools**:
   - `BakedNoiseTextureAsset` for creating and configuring baked noise textures
-  - `FastNoiseGraph` for storing and serializing noise node configurations
-  - Integration with FastNoise Tool for visual noise design
-
-- **Editor Extensions**:
-  - Property drawers for noise graph assets
-  - Menu items for launching the FastNoise Tool
-  - Custom editors for noise assets
+  - Property drawers and custom editors for noise assets
 
 - **Cross-Platform Native Support**:
   - Optimized native libraries for Windows, macOS, Linux, iOS, and Android
@@ -208,12 +210,12 @@ All assemblies have `autoReferenced: false` — consumers must add explicit asse
 
 ## Roadmap / TODO
 
-- [ ] Update to NewFastSIMD branch
+- [x] ~~Update to NewFastSIMD branch~~ — v1.0.1
 - [x] ~~Complete Noise Editor integration (serialization to/from Noise Tool)~~ — Encode/Decode implemented
-- [ ] Support for all texture dimensions (4D) and job types
+- [x] ~~Support for all texture dimensions (4D) and job types~~ — via [`im.pala.nativetexture`](https://github.com/api-haus/im.pala.nativetexture)
 - [ ] Comprehensive documentation and additional examples
 - [x] ~~macOS CodeSigning~~ — Signing editor window implemented
-- [ ] Continuous Integration (CI), Semantic Versioning (SemVer), and OpenUPM support
+- [ ] OpenUPM release
 
 ---
 
