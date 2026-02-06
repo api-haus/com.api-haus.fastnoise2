@@ -42,6 +42,7 @@ namespace FastNoise2.Editor.GraphEditor
 			public PortModel PortModel;      // null for pure variables
 			public Port PortView;            // null for pure variables
 			public VisualElement EditorSlot;  // null for pure node lookups
+			public BaseModelPropertyField Editor; // null for pure node lookups
 		}
 
 		public static FN2PropertyPortPart Create(string name, Model model,
@@ -193,7 +194,11 @@ namespace FastNoise2.Editor.GraphEditor
 								var editor = InlineValueEditor.CreateEditorForConstants(
 									ownerView.RootView, ownerModels, constants, member.Name);
 								if (editor != null)
+								{
 									editorSlot.Add(editor);
+									editor.UpdateDisplayedValue();
+									state.Editor = editor;
+								}
 							}
 						}
 
@@ -220,7 +225,11 @@ namespace FastNoise2.Editor.GraphEditor
 								var editor = InlineValueEditor.CreateEditorForConstants(
 									ownerView.RootView, ownerModels, constants, member.Name);
 								if (editor != null)
+								{
 									editorSlot.Add(editor);
+									editor.UpdateDisplayedValue();
+									state.Editor = editor;
+								}
 							}
 						}
 
@@ -260,9 +269,11 @@ namespace FastNoise2.Editor.GraphEditor
 
 		public override void UpdateUIFromModel(UpdateFromModelVisitor visitor)
 		{
-			// Toggle connected class on hybrid rows and swap label visibility
+			// Refresh all editor fields from their constant values
 			foreach (var state in m_Rows)
 			{
+				state.Editor?.UpdateDisplayedValue();
+
 				if (state.MemberInfo.Type != FN2BridgeMemberType.Hybrid)
 					continue;
 

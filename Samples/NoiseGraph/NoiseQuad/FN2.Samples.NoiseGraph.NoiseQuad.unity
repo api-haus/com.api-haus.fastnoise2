@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 537dccda4d6e3d01ab0c365414bd517e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FN2.Samples.NoiseGraph.NoiseQuad::FastNoise2.Samples.NoiseGraphQuad
-  noiseGraph: {fileID: -6750239444755058063, guid: 51aefc74474c0c3c0bffc35bc337204d, type: 3}
+  noiseGraph: {fileID: -6750239444755058063, guid: 3d35489dbd606dea2a053db3c00e37f4, type: 3}
   resolution: 256
   frequency: 0.02
   seed: 1337

@@ -12,7 +12,7 @@ namespace FastNoise2.Editor.GraphEditor
 	/// driven automatically from <see cref="FN2NodeRegistry"/> metadata.
 	/// </summary>
 	[Serializable]
-	public abstract class FN2EditorNode : Node
+	public abstract class FN2EditorNode : Node, ISerializationCallbackReceiver
 	{
 		// -- Port / option ID prefixes to avoid collisions --
 		internal const string VarPrefix = "var_";
@@ -147,12 +147,66 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 		}
 
+		// ───────────────────── Serialization ─────────────────────
+
+		public void OnBeforeSerialize()
+		{
+			SyncDictionariesFromOptions();
+			variableValues.OnBeforeSerialize();
+			hybridDefaults.OnBeforeSerialize();
+		}
+
+		public void OnAfterDeserialize()
+		{
+			variableValues.OnAfterDeserialize();
+			hybridDefaults.OnAfterDeserialize();
+		}
+
+		void SyncDictionariesFromOptions()
+		{
+			FN2NodeDef def;
+			try { def = FN2NodeRegistry.GetNodeDef(NodeTypeName); }
+			catch { return; }
+
+			foreach (var member in def.Members)
+			{
+				switch (member.Type)
+				{
+					case FN2MemberType.Float:
+					{
+						string id = VarPrefix + member.LookupKey;
+						var option = GetNodeOptionByName(id);
+						if (option != null && option.TryGetValue<float>(out float fval))
+							variableValues.SetFloat(id, fval);
+						break;
+					}
+					case FN2MemberType.Int:
+					case FN2MemberType.Enum:
+					{
+						string id = VarPrefix + member.LookupKey;
+						var option = GetNodeOptionByName(id);
+						if (option != null && option.TryGetValue<int>(out int ival))
+							variableValues.SetInt(id, ival);
+						break;
+					}
+					case FN2MemberType.Hybrid:
+					{
+						string id = HybridValuePrefix + member.LookupKey;
+						var option = GetNodeOptionByName(id);
+						if (option != null && option.TryGetValue<float>(out float hval))
+							hybridDefaults.SetFloat(id, hval);
+						break;
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Serializable string→raw-bytes dictionary for storing variable values.
 		/// Int values stored as-is; float values stored via BitConverter.
 		/// </summary>
 		[Serializable]
-		internal class SerializableDictionary : ISerializationCallbackReceiver
+		internal class SerializableDictionary
 		{
 			[SerializeField] List<string> keys = new();
 			[SerializeField] List<int> values = new();
@@ -183,7 +237,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 			public IEnumerable<KeyValuePair<string, int>> Entries => m_Dict;
 
-			public void OnBeforeSerialize()
+			internal void OnBeforeSerialize()
 			{
 				keys.Clear();
 				values.Clear();
@@ -194,7 +248,7 @@ namespace FastNoise2.Editor.GraphEditor
 				}
 			}
 
-			public void OnAfterDeserialize()
+			internal void OnAfterDeserialize()
 			{
 				m_Dict = new Dictionary<string, int>();
 				int count = Math.Min(keys.Count, values.Count);
