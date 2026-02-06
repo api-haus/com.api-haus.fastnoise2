@@ -65,3 +65,13 @@
 .fn2-node .ge-port__label {
     color: #7E7E7E;
 }
+
+/* ─── Category sheen overlay ─── */
+.fn2-node-sheen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}

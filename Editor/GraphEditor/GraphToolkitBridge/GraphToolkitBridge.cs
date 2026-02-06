@@ -1,3 +1,4 @@
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Overlays;
 using UnityEngine;
@@ -22,6 +23,9 @@ namespace FastNoise2.Editor.GraphEditor
 			"gtf-error-notifications",
 			"gtf-breadcrumbs",
 		};
+
+		static readonly FieldInfo s_ItemLibraryHelperField = typeof(GraphView)
+			.GetField("m_ItemLibraryHelper", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		static StyleSheet s_WindowStyleSheet;
 		static StyleSheet s_MainPreviewStyleSheet;
@@ -113,6 +117,9 @@ namespace FastNoise2.Editor.GraphEditor
 				// Guard: skip if already customized
 				if (graphView.Q(SentinelName) != null)
 					continue;
+
+				// Replace the item library helper so the add-node menu uses FN2 categories
+				s_ItemLibraryHelperField?.SetValue(graphView, new FN2LibraryHelper(graphModel));
 
 				// Hide overlays
 				foreach (string overlayId in k_OverlaysToHide)

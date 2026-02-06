@@ -1,5 +1,6 @@
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace FastNoise2.Editor.GraphEditor
@@ -36,6 +37,30 @@ namespace FastNoise2.Editor.GraphEditor
 			AddToClassList(fn2UssClassName);
 			GraphElementHelper.AddStylesheet(this, "FN2NodeView.uss",
 				"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
+
+			ApplyCategoryColoring();
+		}
+
+		void ApplyCategoryColoring()
+		{
+			var userNodeModel = Model as IUserNodeModelImp;
+			if (userNodeModel == null)
+				return;
+
+			string nodeTypeName = FN2BridgeCallbacks.GetNodeTypeName?.Invoke(userNodeModel.Node);
+			if (!FN2NodeCategory.TryGetCategoryColor(nodeTypeName, out var color))
+				return;
+
+			var titleContainer = this.Q(className: "ge-node__title-icon-container");
+			if (titleContainer == null)
+				return;
+
+			titleContainer.style.backgroundColor = color;
+
+			var sheen = new VisualElement();
+			sheen.AddToClassList("fn2-node-sheen");
+			sheen.style.backgroundImage = FN2NodeCategory.SheenTexture;
+			titleContainer.Insert(0, sheen);
 		}
 	}
 }
