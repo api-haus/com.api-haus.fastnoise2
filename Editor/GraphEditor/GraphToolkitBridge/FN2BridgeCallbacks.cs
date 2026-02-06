@@ -75,6 +75,18 @@ namespace FastNoise2.Editor.GraphEditor
 		public static Func<string, int, int, float, Texture2D> RenderPreviewWithFrequency;
 
 		/// <summary>
+		/// Generates a 512x512 RFloat heightmap from an encoded node tree for terrain preview.
+		/// Parameter: encoded string. Returns null on failure.
+		/// </summary>
+		public static Func<string, Texture2D> GenerateTerrainHeightmap;
+
+		/// <summary>
+		/// Blits a heightmap through the terrain raymarching shader into the target RenderTexture.
+		/// Parameters: heightmap, target RenderTexture.
+		/// </summary>
+		public static Action<Texture2D, RenderTexture> BlitTerrain;
+
+		/// <summary>
 		/// Shared preview frequency/scale used by both the main preview and node previews.
 		/// Adjusted by scroll-wheel on the main preview element.
 		/// </summary>

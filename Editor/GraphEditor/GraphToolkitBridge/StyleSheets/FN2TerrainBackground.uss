@@ -1,0 +1,24 @@
+/* Make the grid background transparent so terrain shows through */
+GridBackground {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.fn2-terrain-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    /* Canvas fallback when no terrain is rendered */
+    background-color: #161616;
+}
+
+.fn2-terrain-background__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.6;
+}

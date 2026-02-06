@@ -29,6 +29,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 		static StyleSheet s_WindowStyleSheet;
 		static StyleSheet s_MainPreviewStyleSheet;
+		static StyleSheet s_TerrainBackgroundStyleSheet;
 
 		public static INode CreateNode(Graph graph, Node node, Vector2 position)
 		{
@@ -131,6 +132,18 @@ namespace FastNoise2.Editor.GraphEditor
 						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss");
 				if (s_WindowStyleSheet != null)
 					window.rootVisualElement.styleSheets.Add(s_WindowStyleSheet);
+
+				// Inject Terrain Background USS
+				if (s_TerrainBackgroundStyleSheet == null)
+					s_TerrainBackgroundStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2TerrainBackground.uss");
+				if (s_TerrainBackgroundStyleSheet != null)
+					window.rootVisualElement.styleSheets.Add(s_TerrainBackgroundStyleSheet);
+
+				// Add Terrain Background on the visual hierarchy (not contentContainer)
+				// so it renders behind m_GraphViewContainer (GridBackground + nodes).
+				var terrainBackground = new FN2TerrainBackground();
+				graphView.hierarchy.Insert(0, terrainBackground);
 
 				// Inject Main Preview USS
 				if (s_MainPreviewStyleSheet == null)

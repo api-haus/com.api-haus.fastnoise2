@@ -1,0 +1,70 @@
+using FastNoise2.Bindings;
+using UnityEditor;
+using UnityEngine;
+
+namespace FastNoise2.Editor.GraphEditor
+{
+	static class FastNoiseTerrainPreview
+	{
+		const int HeightmapSize = 512;
+		const float Frequency = 0.01f;
+		const string ShaderPath = "Packages/com.auburn.fastnoise2/Editor/GraphEditor/Shaders/FN2TerrainRaymarch.shader";
+
+		static Material s_Material;
+
+		public static Texture2D GenerateHeightmap(string encoded)
+		{
+#if FN2_USER_SIGNED
+			if (string.IsNullOrEmpty(encoded))
+				return null;
+
+			FastNoise noise = FastNoise.FromEncodedNodeTree(encoded);
+			if (!noise.IsCreated)
+				return null;
+
+			try
+			{
+				float[] data = new float[HeightmapSize * HeightmapSize];
+				noise.GenUniformGrid2D(data, 0f, 0f, HeightmapSize, HeightmapSize, Frequency, Frequency, 1337);
+
+				var texture = new Texture2D(HeightmapSize, HeightmapSize, TextureFormat.RFloat, false)
+				{
+					filterMode = FilterMode.Bilinear,
+					wrapMode = TextureWrapMode.Clamp
+				};
+
+				// Remap [-1,1] to [0,1]
+				for (int i = 0; i < data.Length; i++)
+					data[i] = data[i] * 0.5f + 0.5f;
+
+				texture.SetPixelData(data, 0);
+				texture.Apply(false, false);
+				return texture;
+			}
+			finally
+			{
+				noise.Dispose();
+			}
+#else
+			return null;
+#endif
+		}
+
+		public static void BlitTerrain(Texture2D heightmap, RenderTexture target)
+		{
+			if (heightmap == null || target == null)
+				return;
+
+			if (s_Material == null)
+			{
+				var shader = AssetDatabase.LoadAssetAtPath<Shader>(ShaderPath);
+				if (shader == null)
+					return;
+				s_Material = new Material(shader);
+			}
+
+			s_Material.SetTexture("_HeightMap", heightmap);
+			Graphics.Blit(null, target, s_Material);
+		}
+	}
+}
