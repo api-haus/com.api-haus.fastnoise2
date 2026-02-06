@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine;
@@ -5,22 +6,22 @@ using UnityEngine.UIElements;
 
 namespace FastNoise2.Editor.GraphEditor
 {
-	/// <summary>
-	/// Displays a noise texture preview at the bottom of an FN2 node.
-	/// Calls <see cref="FN2BridgeCallbacks.RenderNodePreview"/> to compile
-	/// the subtree and render noise output. Caches the texture and debounces
-	/// re-renders to avoid excessive computation.
-	/// </summary>
 	class FN2TexturePreviewPart : BaseModelViewPart
 	{
 		public static readonly string ussClassName = "fn2-texture-preview-part";
 		const int PreviewSize = 128;
-		const long DebounceMs = 200;
+		const long TickIntervalMs = 50; // 20 Hz
 
+		// --- Shared round-robin state ---
+		static readonly List<FN2TexturePreviewPart> s_Parts = new();
+		static int s_NextIndex;
+		static VisualElement s_TickHost;
+		static IVisualElementScheduledItem s_TickLoop;
+
+		// --- Instance ---
 		VisualElement m_Root;
 		Image m_Image;
 		Texture2D m_CachedTexture;
-		IVisualElementScheduledItem m_PendingRender;
 
 		public static FN2TexturePreviewPart Create(string name, Model model,
 			ChildView ownerElement, string parentClassName)
@@ -44,6 +45,16 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Root.Add(m_Image);
 
 			parent.Add(m_Root);
+
+			s_Parts.Add(this);
+			EnsureTickLoop();
+
+			m_Root.RegisterCallback<DetachFromPanelEvent>(OnDetach);
+		}
+
+		void OnDetach(DetachFromPanelEvent _)
+		{
+			s_Parts.Remove(this);
 		}
 
 		public override void UpdateUIFromModel(UpdateFromModelVisitor visitor)
@@ -51,10 +62,30 @@ namespace FastNoise2.Editor.GraphEditor
 			if (FN2BridgeCallbacks.RenderNodePreview == null)
 				return;
 
-			// Debounce: cancel pending render and schedule a new one
-			m_PendingRender?.Pause();
-			m_PendingRender = m_Root.schedule.Execute(RenderPreview);
-			m_PendingRender.ExecuteLater(DebounceMs);
+			EnsureTickLoop();
+		}
+
+		// --- Tick loop: render one node per tick, round-robin ---
+		void EnsureTickLoop()
+		{
+			if (s_TickHost?.panel != null)
+				return;
+
+			s_TickHost = m_Root;
+			s_TickLoop = m_Root.schedule.Execute(ProcessNextNode).Every(TickIntervalMs);
+		}
+
+		static void ProcessNextNode()
+		{
+			if (s_Parts.Count == 0 || FN2BridgeCallbacks.RenderNodePreview == null)
+				return;
+
+			var index = s_NextIndex % s_Parts.Count;
+			s_NextIndex = index + 1;
+
+			var part = s_Parts[index];
+			if (part.m_Root?.panel != null)
+				part.RenderPreview();
 		}
 
 		void RenderPreview()

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine.UIElements;
@@ -81,48 +80,15 @@ namespace FastNoise2.Editor.GraphEditor
 				if (toNodeModel == null)
 					return;
 
-				var graphModel = toNodeModel.GraphModel;
-				var visited = new HashSet<AbstractNodeModel>();
-
-				UpdateDownstreamFN2Nodes(rootView, toNodeModel, graphModel, visited);
-			}).ExecuteLater(0);
-		}
-
-		static void UpdateDownstreamFN2Nodes(RootView rootView,
-			AbstractNodeModel startNode, GraphModel graphModel,
-			HashSet<AbstractNodeModel> visited)
-		{
-			var queue = new Queue<AbstractNodeModel>();
-			queue.Enqueue(startNode);
-			visited.Add(startNode);
-
-			while (queue.Count > 0)
-			{
-				var node = queue.Dequeue();
-
-				// Update this node's view if it's an FN2 node
-				if (node is IUserNodeModelImp userNode
+				// Update the directly affected node (hybrid toggle + dirty marking)
+				if (toNodeModel is IUserNodeModelImp userNode
 					&& FN2BridgeCallbacks.IsFN2Node != null
 					&& FN2BridgeCallbacks.IsFN2Node(userNode.Node))
 				{
-					var nodeView = node.GetView<ModelView>(rootView);
+					var nodeView = toNodeModel.GetView<ModelView>(rootView);
 					nodeView?.UpdateView(UpdateFromModelVisitor.genericUpdateFromModelVisitor);
 				}
-
-				// Enqueue downstream nodes via output ports
-				if (node is not InputOutputPortsNodeModel ioNode)
-					continue;
-
-				foreach (var outputPort in ioNode.OutputPorts)
-				{
-					foreach (var wire in outputPort.GetConnectedWires())
-					{
-						var downstream = wire.ToPort?.NodeModel;
-						if (downstream != null && visited.Add(downstream))
-							queue.Enqueue(downstream);
-					}
-				}
-			}
+			}).ExecuteLater(0);
 		}
 	}
 }
