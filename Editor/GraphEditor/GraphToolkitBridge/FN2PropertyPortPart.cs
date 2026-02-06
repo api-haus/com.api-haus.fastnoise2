@@ -11,13 +11,18 @@ namespace FastNoise2.Editor.GraphEditor
 	/// <c>InOutPortContainerPart</c>. Each FN2 member gets a single row containing
 	/// its port connector (if applicable) and value editor (if applicable).
 	/// For hybrid members, the value editor hides when a wire is connected.
+	///
+	/// Extends <see cref="GraphViewPart"/> (not <c>BaseModelViewPart</c>) so that
+	/// <c>GraphElement.EnableCulling</c> routes through <see cref="SetCullingState"/>
+	/// instead of directly ripping the Root from the hierarchy. This lets us cache
+	/// port positions before removal, which <c>Port.GetGlobalCenter()</c> needs
+	/// to return correct wire endpoints while the node is culled off-screen.
 	/// </summary>
-	class FN2PropertyPortPart : BaseModelViewPart
+	class FN2PropertyPortPart : GraphViewPart
 	{
 		public static readonly string ussClassName = "fn2-property-port-part";
 		public static readonly string rowUssClassName = "fn2-member-row";
 		public static readonly string rowConnectedUssClassName = "fn2-member-row--connected";
-		public static readonly string rowOutputUssClassName = "fn2-member-row--output";
 		public static readonly string portSlotUssClassName = "fn2-member-port-slot";
 		public static readonly string labelUssClassName = "fn2-member-label";
 		public static readonly string editorSlotUssClassName = "fn2-member-editor-slot";
@@ -28,6 +33,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 		VisualElement m_Root;
 		readonly List<MemberRowState> m_Rows = new();
+		Port m_OutputPortView;
 
 		struct MemberRowState
 		{
@@ -63,6 +69,7 @@ namespace FastNoise2.Editor.GraphEditor
 		{
 			m_Root.Clear();
 			m_Rows.Clear();
+			m_OutputPortView = null;
 
 			var nodeModel = m_Model as InputOutputPortsNodeModel;
 			if (nodeModel == null)
@@ -93,36 +100,25 @@ namespace FastNoise2.Editor.GraphEditor
 			// Apply on the node view itself so it actually constrains the node width
 			((VisualElement)m_OwnerElement).style.minWidth = estimatedMinWidth;
 
-			// Build the output port row first
+			// Create the output port view but don't add it to any row yet —
+			// it will be placed inline on the first NodeLookup row (or first row as fallback).
+			VisualElement outputPortSlot = null;
 			if (nodeModel.OutputsById.TryGetValue("output", out var outputPortModel))
 			{
-				var row = new VisualElement();
-				row.AddToClassList(rowUssClassName);
-				row.AddToClassList(rowOutputUssClassName);
-
-				// Spacer pushes port to the right
-				var spacer = new VisualElement();
-				spacer.AddToClassList("fn2-member-spacer");
-				row.Add(spacer);
-
 				var portView = ModelViewFactory.CreateUI<Port>(
 					ownerView.RootView, outputPortModel);
 				if (portView != null)
 				{
-					var portSlot = new VisualElement();
-					portSlot.AddToClassList(portSlotUssClassName);
-					portSlot.Add(portView);
-					row.Add(portSlot);
+					portView.AddToClassList("fn2-output-port");
+					m_OutputPortView = portView;
+					outputPortSlot = new VisualElement();
+					outputPortSlot.AddToClassList(portSlotUssClassName);
+					outputPortSlot.Add(portView);
 				}
-
-				m_Root.Add(row);
-				m_Rows.Add(new MemberRowState
-				{
-					Row = row,
-					PortModel = outputPortModel,
-					PortView = portView,
-				});
 			}
+
+			bool outputPlaced = false;
+			VisualElement firstRow = null;
 
 			// Build input member rows in metadata order
 			foreach (var member in memberInfos)
@@ -236,6 +232,29 @@ namespace FastNoise2.Editor.GraphEditor
 
 				m_Root.Add(row);
 				m_Rows.Add(state);
+
+				if (firstRow == null)
+					firstRow = row;
+
+				// Place output port on the first NodeLookup row
+				if (!outputPlaced && outputPortSlot != null &&
+					member.Type == FN2BridgeMemberType.NodeLookup)
+				{
+					var spacer = new VisualElement();
+					spacer.AddToClassList("fn2-member-spacer");
+					row.Add(spacer);
+					row.Add(outputPortSlot);
+					outputPlaced = true;
+				}
+			}
+
+			// Fallback: place output port on the first row if no NodeLookup was found
+			if (!outputPlaced && outputPortSlot != null && firstRow != null)
+			{
+				var spacer = new VisualElement();
+				spacer.AddToClassList("fn2-member-spacer");
+				firstRow.Add(spacer);
+				firstRow.Add(outputPortSlot);
 			}
 		}
 
@@ -255,6 +274,32 @@ namespace FastNoise2.Editor.GraphEditor
 				if (state.PortView?.Label != null)
 					state.PortView.Label.style.display =
 						connected ? DisplayStyle.Flex : DisplayStyle.None;
+			}
+		}
+
+		/// <summary>
+		/// Cache port positions before the base class removes Root from the hierarchy
+		/// during culling, and clear the cache when culling is disabled. Without this,
+		/// <c>Port.GetGlobalCenter()</c> returns garbage for culled ports because
+		/// <c>connector.LocalToWorld()</c> has no valid ancestor transform chain.
+		/// </summary>
+		public override void SetCullingState(GraphViewCullingState cullingState)
+		{
+			if (cullingState == GraphViewCullingState.Enabled)
+			{
+				var cullingRef = (VisualElement)m_OwnerElement;
+				foreach (var state in m_Rows)
+					state.PortView?.PrepareCulling(cullingRef);
+				m_OutputPortView?.PrepareCulling(cullingRef);
+			}
+
+			base.SetCullingState(cullingState);
+
+			if (cullingState == GraphViewCullingState.Disabled)
+			{
+				foreach (var state in m_Rows)
+					state.PortView?.ClearCulling();
+				m_OutputPortView?.ClearCulling();
 			}
 		}
 	}

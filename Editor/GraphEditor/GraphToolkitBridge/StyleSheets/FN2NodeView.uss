@@ -11,7 +11,7 @@
     min-height: 20px;
 }
 
-/* Output row: spacer pushes port to the right */
+/* Spacer pushes output port to the right */
 .fn2-member-spacer {
     flex-grow: 1;
 }
@@ -48,23 +48,8 @@
     margin-top: 2px;
 }
 
-/* ─── Output port overlaid on preview ─── */
-.fn2-texture-preview-part > .fn2-member-row--output {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0;
-    min-height: auto;
-}
-
-.fn2-texture-preview-part > .fn2-member-row--output > .fn2-member-spacer {
-    display: none;
-}
-
-.fn2-texture-preview-part > .fn2-member-row--output .ge-port__label {
+/* ─── Output port: hide label, show connector only ─── */
+.fn2-output-port .ge-port__label {
     display: none;
 }
 
