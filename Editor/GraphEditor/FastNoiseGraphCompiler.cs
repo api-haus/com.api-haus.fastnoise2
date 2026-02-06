@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using FastNoise2.Bindings;
 using FastNoise2.Generators;
 using Unity.GraphToolkit.Editor;
 
@@ -39,7 +38,7 @@ namespace FastNoise2.Editor.GraphEditor
 				return null;
 			}
 
-			var visited = new Dictionary<FastNoiseEditorNode, NodeDescriptor>();
+			var visited = new Dictionary<FN2EditorNode, NodeDescriptor>();
 			var descriptor = CompileFromPort(sourcePort.firstConnectedPort, visited);
 			if (descriptor == null)
 			{
@@ -51,9 +50,9 @@ namespace FastNoise2.Editor.GraphEditor
 		}
 
 		static NodeDescriptor CompileFromPort(IPort outputPort,
-			Dictionary<FastNoiseEditorNode, NodeDescriptor> visited)
+			Dictionary<FN2EditorNode, NodeDescriptor> visited)
 		{
-			var ownerNode = GraphToolkitBridge.GetNodeFromPort(outputPort) as FastNoiseEditorNode;
+			var ownerNode = GraphToolkitBridge.GetNodeFromPort(outputPort) as FN2EditorNode;
 			if (ownerNode == null)
 				return null;
 
@@ -63,93 +62,91 @@ namespace FastNoise2.Editor.GraphEditor
 			return CompileEditorNode(ownerNode, visited);
 		}
 
-		static NodeDescriptor CompileEditorNode(FastNoiseEditorNode node,
-			Dictionary<FastNoiseEditorNode, NodeDescriptor> visited)
+		static NodeDescriptor CompileEditorNode(FN2EditorNode node,
+			Dictionary<FN2EditorNode, NodeDescriptor> visited)
 		{
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(node.nodeTypeName); }
+			FN2NodeDef def;
+			try { def = FN2NodeRegistry.GetNodeDef(node.NodeTypeName); }
 			catch { return null; }
 
 			var variables = new Dictionary<string, int>();
 			var nodeLookups = new Dictionary<string, NodeDescriptor>();
 			var hybrids = new Dictionary<string, HybridValue>();
 
-			foreach (var kv in meta.members)
+			foreach (var member in def.Members)
 			{
-				var member = kv.Value;
-				switch (member.type)
+				switch (member.Type)
 				{
-					case FastNoise.Metadata.Member.Type.Float:
+					case FN2MemberType.Float:
 					{
-						string optionId = FastNoiseEditorNode.VarPrefix + kv.Key;
+						string optionId = FN2EditorNode.VarPrefix + member.LookupKey;
 						bool hasStored = node.variableValues.TryGetInt(optionId, out int storedRaw);
 						var option = node.GetNodeOptionByName(optionId);
 						if (option != null && option.TryGetValue<float>(out float fval))
 						{
 							int bits = BitConverter.SingleToInt32Bits(fval);
 							if (hasStored || bits != 0)
-								variables[kv.Key] = bits;
+								variables[member.LookupKey] = bits;
 						}
 						else if (hasStored)
 						{
-							variables[kv.Key] = storedRaw;
+							variables[member.LookupKey] = storedRaw;
 						}
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Int:
-					case FastNoise.Metadata.Member.Type.Enum:
+					case FN2MemberType.Int:
+					case FN2MemberType.Enum:
 					{
-						string optionId = FastNoiseEditorNode.VarPrefix + kv.Key;
+						string optionId = FN2EditorNode.VarPrefix + member.LookupKey;
 						bool hasStored = node.variableValues.TryGetInt(optionId, out int storedRaw);
 						var option = node.GetNodeOptionByName(optionId);
 						if (option != null && option.TryGetValue<int>(out int ival))
 						{
 							if (hasStored || ival != 0)
-								variables[kv.Key] = ival;
+								variables[member.LookupKey] = ival;
 						}
 						else if (hasStored)
 						{
-							variables[kv.Key] = storedRaw;
+							variables[member.LookupKey] = storedRaw;
 						}
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.NodeLookup:
+					case FN2MemberType.NodeLookup:
 					{
-						string portId = FastNoiseEditorNode.NodeLookupPrefix + kv.Key;
+						string portId = FN2EditorNode.NodeLookupPrefix + member.LookupKey;
 						var port = node.GetInputPortByName(portId);
 						if (port != null && port.isConnected)
 						{
 							var child = CompileFromPort(port.firstConnectedPort, visited);
 							if (child != null)
-								nodeLookups[kv.Key] = child;
+								nodeLookups[member.LookupKey] = child;
 						}
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Hybrid:
+					case FN2MemberType.Hybrid:
 					{
-						string portId = FastNoiseEditorNode.HybridPortPrefix + kv.Key;
+						string portId = FN2EditorNode.HybridPortPrefix + member.LookupKey;
 						var port = node.GetInputPortByName(portId);
 						if (port != null && port.isConnected)
 						{
 							var child = CompileFromPort(port.firstConnectedPort, visited);
 							if (child != null)
-								hybrids[kv.Key] = new HybridValue(child);
+								hybrids[member.LookupKey] = new HybridValue(child);
 						}
 						else
 						{
-							string optionId = FastNoiseEditorNode.HybridValuePrefix + kv.Key;
+							string optionId = FN2EditorNode.HybridValuePrefix + member.LookupKey;
 							bool hasStored = node.hybridDefaults.TryGetFloat(optionId, out float storedFloat);
 							var option = node.GetNodeOptionByName(optionId);
 							if (option != null && option.TryGetValue<float>(out float hval))
 							{
 								int bits = BitConverter.SingleToInt32Bits(hval);
 								if (hasStored || bits != 0)
-									hybrids[kv.Key] = new HybridValue(hval);
+									hybrids[member.LookupKey] = new HybridValue(hval);
 							}
 							else if (hasStored)
 							{
-								hybrids[kv.Key] = new HybridValue(storedFloat);
+								hybrids[member.LookupKey] = new HybridValue(storedFloat);
 							}
 						}
 						break;
@@ -157,12 +154,9 @@ namespace FastNoise2.Editor.GraphEditor
 				}
 			}
 
-			var descriptor = new NodeDescriptor(node.nodeTypeName, variables, nodeLookups, hybrids);
+			var descriptor = new NodeDescriptor(node.NodeTypeName, variables, nodeLookups, hybrids);
 			visited[node] = descriptor;
 			return descriptor;
-#else
-			return null;
-#endif
 		}
 	}
 }

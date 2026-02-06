@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using FastNoise2.Bindings;
 using FastNoise2.Generators;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;
@@ -16,9 +15,24 @@ namespace FastNoise2.Editor.GraphEditor
 		const float NodeSpacingX = 300f;
 		const float NodeSpacingY = 180f;
 
+		static readonly Dictionary<string, Type> s_NodeTypesByName;
+
+		static FastNoiseGraphDecompiler()
+		{
+			s_NodeTypesByName = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+			var baseType = typeof(FN2EditorNode);
+			foreach (var type in baseType.Assembly.GetTypes())
+			{
+				if (type.IsAbstract || !baseType.IsAssignableFrom(type))
+					continue;
+				// Class name == node type name by convention
+				s_NodeTypesByName[type.Name] = type;
+			}
+		}
+
 		struct CreatedNode
 		{
-			public FastNoiseEditorNode EditorNode;
+			public FN2EditorNode EditorNode;
 			public INode GraphNode;
 		}
 
@@ -46,13 +60,22 @@ namespace FastNoise2.Editor.GraphEditor
 			if (nodeMap.TryGetValue(root, out var rootCreated))
 			{
 				var fromPort = rootCreated.EditorNode.GetOutputPortByName(
-					FastNoiseEditorNode.OutputPortName);
+					FN2EditorNode.OutputPortName);
 				var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 				if (fromPort != null && toPort != null)
 					GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
 			}
 
 			return true;
+		}
+
+		static FN2EditorNode CreateNodeByTypeName(string nodeTypeName)
+		{
+			if (s_NodeTypesByName.TryGetValue(nodeTypeName, out var type))
+				return (FN2EditorNode)Activator.CreateInstance(type);
+
+			Debug.LogWarning($"Unknown FN2 node type for decompiler: {nodeTypeName}");
+			return null;
 		}
 
 		static void CreateNodesRecursive(NodeDescriptor descriptor, FastNoiseEditorGraph graph,
@@ -72,8 +95,10 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 
 			// Create this node
-			var editorNode = new FastNoiseEditorNode();
-			editorNode.nodeTypeName = descriptor.NodeName;
+			var editorNode = CreateNodeByTypeName(descriptor.NodeName);
+			if (editorNode == null)
+				return;
+
 			PopulateVariables(editorNode, descriptor);
 			PopulateHybrids(editorNode, descriptor);
 
@@ -93,26 +118,17 @@ namespace FastNoise2.Editor.GraphEditor
 			WireChildren(descriptor, editorNode, graph, nodeMap);
 		}
 
-		static void PopulateVariables(FastNoiseEditorNode node, NodeDescriptor descriptor)
+		static void PopulateVariables(FN2EditorNode node, NodeDescriptor descriptor)
 		{
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(descriptor.NodeName); }
-			catch { return; }
-
 			foreach (var kv in descriptor.Variables)
 			{
 				string lookupKey = kv.Key.Replace(" ", "").ToLower();
-				if (!meta.members.TryGetValue(lookupKey, out _))
-					continue;
-
-				string optionId = FastNoiseEditorNode.VarPrefix + lookupKey;
+				string optionId = FN2EditorNode.VarPrefix + lookupKey;
 				node.variableValues.SetInt(optionId, kv.Value);
 			}
-#endif
 		}
 
-		static void PopulateHybrids(FastNoiseEditorNode node, NodeDescriptor descriptor)
+		static void PopulateHybrids(FN2EditorNode node, NodeDescriptor descriptor)
 		{
 			foreach (var kv in descriptor.Hybrids)
 			{
@@ -120,29 +136,24 @@ namespace FastNoise2.Editor.GraphEditor
 					continue;
 
 				string lookupKey = kv.Key.Replace(" ", "").ToLower();
-				string optionId = FastNoiseEditorNode.HybridValuePrefix + lookupKey;
+				string optionId = FN2EditorNode.HybridValuePrefix + lookupKey;
 				node.hybridDefaults.SetFloat(optionId, kv.Value.FloatValue);
 			}
 		}
 
-		static void WireChildren(NodeDescriptor descriptor, FastNoiseEditorNode parentNode,
+		static void WireChildren(NodeDescriptor descriptor, FN2EditorNode parentNode,
 			FastNoiseEditorGraph graph, Dictionary<NodeDescriptor, CreatedNode> nodeMap)
 		{
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(descriptor.NodeName); }
-			catch { return; }
-
 			foreach (var kv in descriptor.NodeLookups)
 			{
 				if (!nodeMap.TryGetValue(kv.Value, out var childCreated))
 					continue;
 
 				string lookupKey = kv.Key.Replace(" ", "").ToLower();
-				string portId = FastNoiseEditorNode.NodeLookupPrefix + lookupKey;
+				string portId = FN2EditorNode.NodeLookupPrefix + lookupKey;
 				var toPort = parentNode.GetInputPortByName(portId);
 				var fromPort = childCreated.EditorNode.GetOutputPortByName(
-					FastNoiseEditorNode.OutputPortName);
+					FN2EditorNode.OutputPortName);
 
 				if (toPort != null && fromPort != null)
 					GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
@@ -157,15 +168,14 @@ namespace FastNoise2.Editor.GraphEditor
 					continue;
 
 				string lookupKey = kv.Key.Replace(" ", "").ToLower();
-				string portId = FastNoiseEditorNode.HybridPortPrefix + lookupKey;
+				string portId = FN2EditorNode.HybridPortPrefix + lookupKey;
 				var toPort = parentNode.GetInputPortByName(portId);
 				var fromPort = childCreated.EditorNode.GetOutputPortByName(
-					FastNoiseEditorNode.OutputPortName);
+					FN2EditorNode.OutputPortName);
 
 				if (toPort != null && fromPort != null)
 					GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
 			}
-#endif
 		}
 	}
 }

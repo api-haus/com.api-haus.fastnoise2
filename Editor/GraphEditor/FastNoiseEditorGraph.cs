@@ -26,7 +26,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 			foreach (var node in GetNodes())
 			{
-				if (node is FastNoiseEditorNode editorNode)
+				if (node is FN2EditorNode editorNode)
 					editorNode.ValidateConnections(graphLogger);
 			}
 		}

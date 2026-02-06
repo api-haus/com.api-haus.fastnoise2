@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
-using FastNoise2.Bindings;
+using FastNoise2.Generators;
 using Unity.GraphToolkit.Editor;
 using UnityEngine;
 
 namespace FastNoise2.Editor.GraphEditor
 {
 	/// <summary>
-	/// Metadata-driven noise node. A single <see cref="nodeTypeName"/> field
-	/// drives port/option topology via native FN2 metadata.
+	/// Abstract base for all FastNoise2 editor nodes. Concrete subclasses declare
+	/// their node type name via <see cref="NodeTypeName"/>; ports and options are
+	/// driven automatically from <see cref="FN2NodeRegistry"/> metadata.
 	/// </summary>
 	[Serializable]
-	public class FastNoiseEditorNode : Node
+	public abstract class FN2EditorNode : Node
 	{
 		// -- Port / option ID prefixes to avoid collisions --
 		internal const string VarPrefix = "var_";
@@ -19,9 +20,13 @@ namespace FastNoise2.Editor.GraphEditor
 		internal const string NodeLookupPrefix = "nl_";
 		internal const string HybridPortPrefix = "hyb_";
 		internal const string OutputPortName = "output";
-		internal const string NodeTypeOptionName = "nodeType";
 
-		[SerializeField] internal string nodeTypeName = "Simplex";
+		/// <summary>
+		/// The FN2 node type name this editor node represents.
+		/// Must match a name in <see cref="FN2NodeRegistry"/>.
+		/// </summary>
+		public abstract string NodeTypeName { get; }
+
 		[SerializeField] internal SerializableDictionary variableValues = new();
 		[SerializeField] internal SerializableDictionary hybridDefaults = new();
 
@@ -29,66 +34,56 @@ namespace FastNoise2.Editor.GraphEditor
 
 		protected override void OnDefineOptions(IOptionDefinitionContext context)
 		{
-			// Node type selector
-			context.AddOption<string>(NodeTypeOptionName)
-				.WithDisplayName("Node Type")
-				.WithDefaultValue(nodeTypeName)
-				.Delayed()
-				.Build();
-
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(nodeTypeName); }
+			FN2NodeDef def;
+			try { def = FN2NodeRegistry.GetNodeDef(NodeTypeName); }
 			catch { return; }
 
-			foreach (var kv in meta.members)
+			foreach (var member in def.Members)
 			{
-				var member = kv.Value;
-				switch (member.type)
+				switch (member.Type)
 				{
-					case FastNoise.Metadata.Member.Type.Float:
+					case FN2MemberType.Float:
 					{
-						string id = VarPrefix + kv.Key;
+						string id = VarPrefix + member.LookupKey;
 						float defaultVal = variableValues.TryGetFloat(id, out float v) ? v : 0f;
 						context.AddOption<float>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key))
+							.WithDisplayName(member.Name)
 							.WithDefaultValue(defaultVal)
 							.Build();
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Int:
+					case FN2MemberType.Int:
 					{
-						string id = VarPrefix + kv.Key;
+						string id = VarPrefix + member.LookupKey;
 						int defaultVal = variableValues.TryGetInt(id, out int iv) ? iv : 0;
 						context.AddOption<int>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key))
+							.WithDisplayName(member.Name)
 							.WithDefaultValue(defaultVal)
 							.Build();
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Enum:
+					case FN2MemberType.Enum:
 					{
-						string id = VarPrefix + kv.Key;
+						string id = VarPrefix + member.LookupKey;
 						int defaultVal = variableValues.TryGetInt(id, out int ev) ? ev : 0;
 						context.AddOption<int>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key))
+							.WithDisplayName(member.Name)
 							.WithDefaultValue(defaultVal)
 							.Build();
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Hybrid:
+					case FN2MemberType.Hybrid:
 					{
-						string id = HybridValuePrefix + kv.Key;
+						string id = HybridValuePrefix + member.LookupKey;
 						float defaultVal = hybridDefaults.TryGetFloat(id, out float hv) ? hv : 0f;
 						context.AddOption<float>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key) + " (Default)")
+							.WithDisplayName(member.Name + " (Default)")
 							.WithDefaultValue(defaultVal)
 							.Build();
 						break;
 					}
 				}
 			}
-#endif
 		}
 
 		// ───────────────────── Ports ─────────────────────
@@ -100,60 +95,55 @@ namespace FastNoise2.Editor.GraphEditor
 				.WithDisplayName("Output")
 				.Build();
 
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(nodeTypeName); }
+			FN2NodeDef def;
+			try { def = FN2NodeRegistry.GetNodeDef(NodeTypeName); }
 			catch { return; }
 
-			foreach (var kv in meta.members)
+			foreach (var member in def.Members)
 			{
-				var member = kv.Value;
-				switch (member.type)
+				switch (member.Type)
 				{
-					case FastNoise.Metadata.Member.Type.NodeLookup:
+					case FN2MemberType.NodeLookup:
 					{
-						string id = NodeLookupPrefix + kv.Key;
+						string id = NodeLookupPrefix + member.LookupKey;
 						context.AddInputPort<NoiseSignal>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key))
+							.WithDisplayName(member.Name)
 							.Build();
 						break;
 					}
-					case FastNoise.Metadata.Member.Type.Hybrid:
+					case FN2MemberType.Hybrid:
 					{
-						string id = HybridPortPrefix + kv.Key;
+						string id = HybridPortPrefix + member.LookupKey;
 						context.AddInputPort<NoiseSignal>(id)
-							.WithDisplayName(FN2MetadataCache.GetProperMemberName(meta.id, kv.Key))
+							.WithDisplayName(member.Name)
 							.Build();
 						break;
 					}
 				}
 			}
-#endif
 		}
 
 		// ───────────────────── Validation ─────────────────────
 
 		internal void ValidateConnections(GraphLogger logger)
 		{
-#if FN2_USER_SIGNED
-			FastNoise.Metadata meta;
-			try { meta = FastNoise.GetNodeMetadata(nodeTypeName); }
+			FN2NodeDef def;
+			try { def = FN2NodeRegistry.GetNodeDef(NodeTypeName); }
 			catch { return; }
 
-			foreach (var kv in meta.members)
+			foreach (var member in def.Members)
 			{
-				if (kv.Value.type != FastNoise.Metadata.Member.Type.NodeLookup)
+				if (member.Type != FN2MemberType.NodeLookup)
 					continue;
 
-				string portId = NodeLookupPrefix + kv.Key;
+				string portId = NodeLookupPrefix + member.LookupKey;
 				var port = GetInputPortByName(portId);
 				if (port != null && !port.isConnected)
 				{
 					logger.LogWarning(
-						$"{nodeTypeName}: Required input '{FN2MetadataCache.GetProperMemberName(meta.id, kv.Key)}' is not connected.");
+						$"{NodeTypeName}: Required input '{member.Name}' is not connected.");
 				}
 			}
-#endif
 		}
 
 		/// <summary>

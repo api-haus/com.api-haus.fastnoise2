@@ -1,6 +1,7 @@
 using System.IO;
 using FastNoise2.Bindings;
 using FastNoise2.Editor.GraphEditor;
+using FastNoise2.Editor.GraphEditor.Nodes;
 using FastNoise2.Generators;
 using NUnit.Framework;
 using Unity.GraphToolkit.Editor;
@@ -69,7 +70,7 @@ namespace FastNoise2.Tests
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 			int initialCount = graph.nodeCount;
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, Vector2.zero);
 
 			Assert.That(graph.nodeCount, Is.EqualTo(initialCount + 1));
@@ -80,7 +81,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -96,13 +97,13 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(300, 0));
 
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 
 			Assert.That(fromPort, Is.Not.Null, "Output port not found on Simplex node");
@@ -121,7 +122,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			var simplexINode = GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 			Assert.That(simplexINode, Is.Not.Null, "Bridge returned null INode for Simplex");
 
@@ -137,7 +138,7 @@ namespace FastNoise2.Tests
 			FastNoiseOutputNode foundOutput = null;
 			foreach (var inode in graph.GetNodes())
 			{
-				if (inode is FastNoiseEditorNode) userNodeCount++;
+				if (inode is FN2EditorNode) userNodeCount++;
 				if (inode is FastNoiseOutputNode outN) { foundOutput = outN; userNodeCount++; }
 			}
 
@@ -147,7 +148,7 @@ namespace FastNoise2.Tests
 				"GetNodes() did not find a FastNoiseOutputNode");
 
 			// Check port wiring
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			Assert.That(fromPort, Is.Not.Null, "Simplex output port is null");
 			Assert.That(toPort, Is.Not.Null, "Output input port is null");
@@ -159,8 +160,8 @@ namespace FastNoise2.Tests
 			// Check that GetNodeFromPort works
 			var connectedNode = GraphToolkitBridge.GetNodeFromPort(toPort.firstConnectedPort);
 			Assert.That(connectedNode, Is.Not.Null, "GetNodeFromPort returned null");
-			Assert.That(connectedNode, Is.InstanceOf<FastNoiseEditorNode>(),
-				$"GetNodeFromPort returned {connectedNode.GetType().Name}, expected FastNoiseEditorNode");
+			Assert.That(connectedNode, Is.InstanceOf<FN2EditorNode>(),
+				$"GetNodeFromPort returned {connectedNode.GetType().Name}, expected FN2EditorNode");
 
 			// Compile
 			string encoded = FastNoiseGraphCompiler.Compile(graph, out string error);
@@ -186,13 +187,13 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(300, 0));
 
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
 
@@ -221,13 +222,13 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(300, 0));
 
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
 
@@ -256,11 +257,11 @@ namespace FastNoise2.Tests
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
 			// Simplex source node
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			// FractalFBm node — has a NodeLookup "source" input
-			var fbmNode = new FastNoiseEditorNode { nodeTypeName = "FractalFBm" };
+			var fbmNode = new FractalFBm();
 			GraphToolkitBridge.CreateNode(graph, fbmNode, new Vector2(300, 0));
 
 			// Output node
@@ -268,13 +269,13 @@ namespace FastNoise2.Tests
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(600, 0));
 
 			// Wire Simplex → FBm source
-			var simplexOut = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
-			var fbmSourcePort = fbmNode.GetInputPortByName(FastNoiseEditorNode.NodeLookupPrefix + "source");
+			var simplexOut = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
+			var fbmSourcePort = fbmNode.GetInputPortByName(FN2EditorNode.NodeLookupPrefix + "source");
 			Assert.That(fbmSourcePort, Is.Not.Null, "FBm 'source' input port not found");
 			GraphToolkitBridge.CreateWire(graph, fbmSourcePort, simplexOut);
 
 			// Wire FBm → Output
-			var fbmOut = fbmNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fbmOut = fbmNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var outputIn = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph, outputIn, fbmOut);
 
@@ -303,33 +304,33 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
-			var perlinNode = new FastNoiseEditorNode { nodeTypeName = "Perlin" };
+			var perlinNode = new Perlin();
 			GraphToolkitBridge.CreateNode(graph, perlinNode, new Vector2(0, 200));
 
 			// Add node has NodeLookup "lhs" and Hybrid "rhs"
-			var addNode = new FastNoiseEditorNode { nodeTypeName = "Add" };
+			var addNode = new Add();
 			GraphToolkitBridge.CreateNode(graph, addNode, new Vector2(300, 100));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(600, 100));
 
 			// Wire Simplex → Add LHS
-			var simplexOut = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
-			var addLhs = addNode.GetInputPortByName(FastNoiseEditorNode.NodeLookupPrefix + "lhs");
+			var simplexOut = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
+			var addLhs = addNode.GetInputPortByName(FN2EditorNode.NodeLookupPrefix + "lhs");
 			Assert.That(addLhs, Is.Not.Null, "Add 'lhs' port not found");
 			GraphToolkitBridge.CreateWire(graph, addLhs, simplexOut);
 
 			// Wire Perlin → Add RHS (hybrid port)
-			var perlinOut = perlinNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
-			var addRhs = addNode.GetInputPortByName(FastNoiseEditorNode.HybridPortPrefix + "rhs");
+			var perlinOut = perlinNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
+			var addRhs = addNode.GetInputPortByName(FN2EditorNode.HybridPortPrefix + "rhs");
 			Assert.That(addRhs, Is.Not.Null, "Add 'rhs' hybrid port not found");
 			GraphToolkitBridge.CreateWire(graph, addRhs, perlinOut);
 
 			// Wire Add → Output
-			var addOut = addNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var addOut = addNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var outputIn = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph, outputIn, addOut);
 
@@ -352,13 +353,13 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph, outputNode, new Vector2(300, 0));
 
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph, toPort, fromPort);
 
@@ -372,20 +373,20 @@ namespace FastNoise2.Tests
 			Object.DestroyImmediate(preview);
 		}
 
-		// ───────────── Metadata cache ─────────────
+		// ───────────── Node registry ─────────────
 
 		[Test]
-		public void MetadataCache_ReturnsNodeTypes()
+		public void NodeRegistry_ReturnsNodeTypes()
 		{
-			string[] types = FN2MetadataCache.GetAllNodeTypeNames();
+			string[] types = FN2NodeRegistry.AllNodeNames;
 			Assert.That(types, Is.Not.Null);
 			Assert.That(types.Length, Is.GreaterThan(0), "No node types returned");
 		}
 
 		[Test]
-		public void MetadataCache_ContainsKnownTypes()
+		public void NodeRegistry_ContainsKnownTypes()
 		{
-			string[] types = FN2MetadataCache.GetAllNodeTypeNames();
+			string[] types = FN2NodeRegistry.AllNodeNames;
 			Assert.That(types, Does.Contain("Simplex"));
 			Assert.That(types, Does.Contain("Perlin"));
 			Assert.That(types, Does.Contain("FractalFBm"));
@@ -413,13 +414,13 @@ namespace FastNoise2.Tests
 			// Step 1: Build a graph manually
 			var graph1 = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new FastNoiseEditorNode { nodeTypeName = "Simplex" };
+			var simplexNode = new Simplex();
 			GraphToolkitBridge.CreateNode(graph1, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
 			GraphToolkitBridge.CreateNode(graph1, outputNode, new Vector2(300, 0));
 
-			var fromPort = simplexNode.GetOutputPortByName(FastNoiseEditorNode.OutputPortName);
+			var fromPort = simplexNode.GetOutputPortByName(FN2EditorNode.OutputPortName);
 			var toPort = outputNode.GetInputPortByName(FastNoiseOutputNode.InputPortName);
 			GraphToolkitBridge.CreateWire(graph1, toPort, fromPort);
 
