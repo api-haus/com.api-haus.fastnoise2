@@ -77,7 +77,8 @@ namespace FastNoise2.Editor.GraphEditor
 						string id = HybridValuePrefix + member.LookupKey;
 						float defaultVal = hybridDefaults.TryGetFloat(id, out float hv) ? hv : 0f;
 						context.AddOption<float>(id)
-							.WithDisplayName(member.Name + " (Default)")
+							.WithDisplayName(member.Name + "*")
+							.WithTooltip("Default value used when no node is connected")
 							.WithDefaultValue(defaultVal)
 							.Build();
 						break;
