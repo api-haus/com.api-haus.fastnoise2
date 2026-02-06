@@ -126,10 +126,12 @@ namespace FastNoise2.Generators
 		/// </summary>
 		static string GetProperNodeName(FastNoise.Metadata meta)
 		{
-			// The metadata name is lowercased. We need the original.
-			// Use fnGetMetadataName to get the original C string.
+#if FN2_USER_SIGNED
 			IntPtr namePtr = FastNoise.fnGetMetadataName(meta.id);
 			return System.Runtime.InteropServices.Marshal.PtrToStringAnsi(namePtr);
+#else
+			throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
 		}
 
 		static string FindVariableMemberByIndex(FastNoise.Metadata meta, int index)

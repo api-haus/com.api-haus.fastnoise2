@@ -1,3 +1,4 @@
+using System;
 using static FastNoise2.Bindings.FastNoise;
 
 namespace FastNoise2.Bindings
@@ -15,7 +16,9 @@ namespace FastNoise2.Bindings
             float xStepSize,
             float yStepSize,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenUniformGrid2D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -28,6 +31,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenUniformGrid3D(
             this FastNoise fn,
@@ -43,7 +50,9 @@ namespace FastNoise2.Bindings
             float yStepSize,
             float zStepSize,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenUniformGrid3D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -59,6 +68,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenUniformGrid4D(
             this FastNoise fn,
@@ -77,7 +90,9 @@ namespace FastNoise2.Bindings
             float zStepSize,
             float wStepSize,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenUniformGrid4D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -96,6 +111,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenTileable2D(
             this FastNoise fn,
@@ -106,7 +125,9 @@ namespace FastNoise2.Bindings
             float xStepSize,
             float yStepSize,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenTileable2D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -117,6 +138,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenPositionArray2D(
             this FastNoise fn,
@@ -128,7 +153,9 @@ namespace FastNoise2.Bindings
             float xOffset,
             float yOffset,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenPositionArray2D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -140,6 +167,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenPositionArray3D(
             this FastNoise fn,
@@ -153,7 +184,9 @@ namespace FastNoise2.Bindings
             float yOffset,
             float zOffset,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenPositionArray3D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -167,6 +200,10 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public static unsafe void GenPositionArray4D(
             this FastNoise fn,
@@ -182,7 +219,9 @@ namespace FastNoise2.Bindings
             float zOffset,
             float wOffset,
             int seed
-        ) =>
+        )
+        {
+#if FN2_USER_SIGNED
             fnGenPositionArray4D(
                 fn.mNodeHandle,
                 noiseOut,
@@ -198,5 +237,9 @@ namespace FastNoise2.Bindings
                 seed,
                 outputMinMax
             );
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
     }
 }

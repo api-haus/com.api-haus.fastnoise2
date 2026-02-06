@@ -10,6 +10,7 @@ namespace FastNoise2.Generators
 	{
 		public static FastNoise Build(NodeDescriptor descriptor)
 		{
+#if FN2_USER_SIGNED
 			FastNoise fn = new(descriptor.NodeName);
 			FastNoise.Metadata meta = FastNoise.GetNodeMetadata(descriptor.NodeName);
 
@@ -67,6 +68,9 @@ namespace FastNoise2.Generators
 			}
 
 			return fn;
+#else
+			throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
 		}
 
 		static string FormatLookup(string s) => s.Replace(" ", "").ToLower();

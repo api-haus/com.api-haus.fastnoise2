@@ -63,6 +63,7 @@ namespace FastNoise2.Bindings
 
         public FastNoise(string metadataName)
         {
+#if FN2_USER_SIGNED
             if (!s_metadataNameLookup.TryGetValue(FormatLookup(metadataName), out m_MetadataId))
             {
                 throw new ArgumentException("Failed to find metadata name: " + metadataName);
@@ -70,13 +71,20 @@ namespace FastNoise2.Bindings
 
             m_IsDisposed = false;
             mNodeHandle = fnNewFromMetadata(m_MetadataId);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         private FastNoise(IntPtr nodeHandle)
         {
+#if FN2_USER_SIGNED
             mNodeHandle = nodeHandle;
             m_IsDisposed = false;
             m_MetadataId = fnGetMetadataID(nodeHandle);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         private struct DisposeNoiseJob : IJob
@@ -93,21 +101,30 @@ namespace FastNoise2.Bindings
 
         public void Dispose()
         {
+#if FN2_USER_SIGNED
             if (!IsCreated || m_IsDisposed)
             {
                 return;
             }
             fnDeleteNodeRef(mNodeHandle);
             m_IsDisposed = true;
+#endif
         }
 
-        public JobHandle Dispose(JobHandle inputDeps) =>
-            IsCreated //
+        public JobHandle Dispose(JobHandle inputDeps)
+        {
+#if FN2_USER_SIGNED
+            return IsCreated //
                 ? new DisposeNoiseJob(this).Schedule(inputDeps)
                 : inputDeps;
+#else
+            return inputDeps;
+#endif
+        }
 
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
+#if FN2_USER_SIGNED
             IntPtr nodeHandle = fnNewFromEncodedNodeTree(encodedNodeTree);
 
             if (nodeHandle == IntPtr.Zero)
@@ -116,12 +133,23 @@ namespace FastNoise2.Bindings
             }
 
             return new FastNoise(nodeHandle);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
-        public readonly uint GetSIMDLevel() => fnGetSIMDLevel(mNodeHandle);
+        public readonly uint GetSIMDLevel()
+        {
+#if FN2_USER_SIGNED
+            return fnGetSIMDLevel(mNodeHandle);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         public readonly void Set(string memberName, float value)
         {
+#if FN2_USER_SIGNED
             Metadata.Member member;
             if (
                 !s_nodeMetadata[m_MetadataId]
@@ -152,10 +180,14 @@ namespace FastNoise2.Bindings
                 default:
                     throw new ArgumentException(memberName + " cannot be set to a float value");
             }
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly void Set(string memberName, int value)
         {
+#if FN2_USER_SIGNED
             Metadata.Member member;
             if (
                 !s_nodeMetadata[m_MetadataId]
@@ -174,10 +206,14 @@ namespace FastNoise2.Bindings
             {
                 throw new ExternalException("Failed to set int value");
             }
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly void Set(string memberName, string enumValue)
         {
+#if FN2_USER_SIGNED
             Metadata.Member member;
             if (
                 !s_nodeMetadata[m_MetadataId]
@@ -202,10 +238,14 @@ namespace FastNoise2.Bindings
             {
                 throw new ExternalException("Failed to set enum value");
             }
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
+#if FN2_USER_SIGNED
             Metadata.Member member;
             if (
                 !s_nodeMetadata[m_MetadataId]
@@ -243,6 +283,9 @@ namespace FastNoise2.Bindings
                 default:
                     throw new ArgumentException(memberName + " cannot be set to a node lookup");
             }
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenUniformGrid2D(
@@ -256,6 +299,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenUniformGrid2D(
                 mNodeHandle,
@@ -270,6 +314,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenUniformGrid3D(
@@ -286,6 +333,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenUniformGrid3D(
                 mNodeHandle,
@@ -303,6 +351,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenUniformGrid4D(
@@ -322,6 +373,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenUniformGrid4D(
                 mNodeHandle,
@@ -342,6 +394,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenTileable2D(
@@ -353,6 +408,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenTileable2D(
                 mNodeHandle,
@@ -365,6 +421,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenPositionArray2D(
@@ -376,6 +435,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenPositionArray2D(
                 mNodeHandle,
@@ -389,6 +449,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenPositionArray3D(
@@ -402,6 +465,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenPositionArray3D(
                 mNodeHandle,
@@ -417,6 +481,9 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
         public readonly OutputMinMax GenPositionArray4D(
@@ -432,6 +499,7 @@ namespace FastNoise2.Bindings
             int seed
         )
         {
+#if FN2_USER_SIGNED
             float[] minMax = new float[2];
             fnGenPositionArray4D(
                 mNodeHandle,
@@ -449,16 +517,37 @@ namespace FastNoise2.Bindings
                 minMax
             );
             return new OutputMinMax(minMax);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
         }
 
-        public readonly float GenSingle2D(float x, float y, int seed) =>
-            fnGenSingle2D(mNodeHandle, x, y, seed);
+        public readonly float GenSingle2D(float x, float y, int seed)
+        {
+#if FN2_USER_SIGNED
+            return fnGenSingle2D(mNodeHandle, x, y, seed);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
-        public readonly float GenSingle3D(float x, float y, float z, int seed) =>
-            fnGenSingle3D(mNodeHandle, x, y, z, seed);
+        public readonly float GenSingle3D(float x, float y, float z, int seed)
+        {
+#if FN2_USER_SIGNED
+            return fnGenSingle3D(mNodeHandle, x, y, z, seed);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
-        public readonly float GenSingle4D(float x, float y, float z, float w, int seed) =>
-            fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
+        public readonly float GenSingle4D(float x, float y, float z, float w, int seed)
+        {
+#if FN2_USER_SIGNED
+            return fnGenSingle4D(mNodeHandle, x, y, z, w, seed);
+#else
+            throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
+#endif
+        }
 
         [NativeDisableUnsafePtrRestriction]
         internal IntPtr mNodeHandle;
@@ -522,6 +611,7 @@ namespace FastNoise2.Bindings
 
         static FastNoise()
         {
+#if FN2_USER_SIGNED
             int metadataCount = fnGetMetadataCount();
 
             s_nodeMetadata = new Metadata[metadataCount];
@@ -622,6 +712,10 @@ namespace FastNoise2.Bindings
 
                 s_nodeMetadata[id] = metadata;
             }
+#else
+            s_nodeMetadata = Array.Empty<Metadata>();
+            s_metadataNameLookup = new Dictionary<string, int>(0);
+#endif
         }
 
         // Append dimension char where neccessary
@@ -642,6 +736,7 @@ namespace FastNoise2.Bindings
         private static readonly Dictionary<string, int> s_metadataNameLookup;
         private static readonly Metadata[] s_nodeMetadata;
 
+#if FN2_USER_SIGNED
 #if UNITY_IOS && !UNITY_EDITOR
         private const string NATIVE_LIB = "__Internal";
 #else
@@ -991,6 +1086,7 @@ namespace FastNoise2.Bindings
             int nodeLookupIndex,
             float value
         );
+#endif // FN2_USER_SIGNED
 
         private bool m_IsDisposed;
         public readonly bool IsCreated => !m_IsDisposed && mNodeHandle != IntPtr.Zero;

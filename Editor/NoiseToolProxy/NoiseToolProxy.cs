@@ -101,14 +101,14 @@ namespace FastNoise2.Editor.NoiseToolProxy
 			return Application.platform switch
 			{
 				RuntimePlatform.OSXEditor or RuntimePlatform.OSXPlayer or RuntimePlatform.OSXServer =>
-					"Plugins/macos/bin/NoiseTool",
+					"Plugins/macos/bin/NodeEditor",
 				RuntimePlatform.WindowsPlayer
 				or RuntimePlatform.WindowsEditor
-				or RuntimePlatform.WindowsServer => "Plugins/windows/bin/NoiseTool.exe",
+				or RuntimePlatform.WindowsServer => "Plugins/windows/bin/NodeEditor.exe",
 				RuntimePlatform.Android
 				or RuntimePlatform.LinuxPlayer
 				or RuntimePlatform.LinuxEditor
-				or RuntimePlatform.LinuxServer => "Plugins/linux/bin/NoiseTool",
+				or RuntimePlatform.LinuxServer => "Plugins/linux/bin/NodeEditor",
 				_ => throw new ArgumentOutOfRangeException(),
 			};
 		}
