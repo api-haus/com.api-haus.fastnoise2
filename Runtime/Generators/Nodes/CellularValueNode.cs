@@ -1,4 +1,4 @@
-using FastNoise2.Bindings;
+using System.Collections.Generic;
 
 namespace FastNoise2.Generators
 {
@@ -13,22 +13,29 @@ namespace FastNoise2.Generators
 
 		internal CellularValueNode(DistanceFunction distFunc, int valueIndex,
 			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
-			: base(() =>
-			{
-				FastNoise fn = new("CellularValue");
-				fn.Set("DistanceFunction", distFunc.ToMetadataString());
-				fn.Set("ValueIndex", valueIndex);
-				gridJitter.Apply(fn, "GridJitter");
-				sizeJitter.Apply(fn, "SizeJitter");
-				minkowskiP.Apply(fn, "MinkowskiP");
-				return fn;
-			})
+			: base(MakeDescriptor(distFunc, valueIndex, gridJitter, sizeJitter, minkowskiP))
 		{
 			m_DistFunc = distFunc;
 			m_ValueIndex = valueIndex;
 			m_GridJitter = gridJitter;
 			m_SizeJitter = sizeJitter;
 			m_MinkowskiP = minkowskiP;
+		}
+
+		static NodeDescriptor MakeDescriptor(DistanceFunction distFunc, int valueIndex,
+			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
+		{
+			var vars = new Dictionary<string, int>
+			{
+				{ "DistanceFunction", EnumIndex("CellularValue",
+					"DistanceFunction", distFunc.ToMetadataString()) },
+				{ "ValueIndex", valueIndex }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			gridJitter.AddTo(hybrids, "GridJitter");
+			sizeJitter.AddTo(hybrids, "SizeJitter");
+			minkowskiP.AddTo(hybrids, "MinkowskiP");
+			return new NodeDescriptor("CellularValue", vars, hybrids: hybrids);
 		}
 
 		public CellularValueNode WithDistanceFunction(DistanceFunction value) =>

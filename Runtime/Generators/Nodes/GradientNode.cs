@@ -1,4 +1,5 @@
-using FastNoise2.Bindings;
+using System;
+using System.Collections.Generic;
 
 namespace FastNoise2.Generators
 {
@@ -11,21 +12,11 @@ namespace FastNoise2.Generators
 		readonly float m_Mx, m_My, m_Mz, m_Mw;
 		readonly float m_Ox, m_Oy, m_Oz, m_Ow;
 
+		static int B(float v) => BitConverter.SingleToInt32Bits(v);
+
 		internal GradientNode(float mx, float my, float mz, float mw,
 			float ox, float oy, float oz, float ow)
-			: base(() =>
-			{
-				FastNoise fn = new("Gradient");
-				fn.Set("MultiplierX", mx);
-				fn.Set("MultiplierY", my);
-				fn.Set("MultiplierZ", mz);
-				fn.Set("MultiplierW", mw);
-				fn.Set("OffsetX", ox);
-				fn.Set("OffsetY", oy);
-				fn.Set("OffsetZ", oz);
-				fn.Set("OffsetW", ow);
-				return fn;
-			})
+			: base(MakeDescriptor(mx, my, mz, mw, ox, oy, oz, ow))
 		{
 			m_Mx = mx;
 			m_My = my;
@@ -36,6 +27,24 @@ namespace FastNoise2.Generators
 			m_Oz = oz;
 			m_Ow = ow;
 		}
+
+		static NodeDescriptor MakeDescriptor(float mx, float my, float mz, float mw,
+			float ox, float oy, float oz, float ow) =>
+			new("Gradient",
+				variables: new Dictionary<string, int>
+				{
+					{ "MultiplierX", B(mx) },
+					{ "MultiplierY", B(my) },
+					{ "MultiplierZ", B(mz) },
+					{ "MultiplierW", B(mw) }
+				},
+				hybrids: new Dictionary<string, HybridValue>
+				{
+					{ "OffsetX", new HybridValue(ox) },
+					{ "OffsetY", new HybridValue(oy) },
+					{ "OffsetZ", new HybridValue(oz) },
+					{ "OffsetW", new HybridValue(ow) }
+				});
 
 		public GradientNode WithMultipliers(float x, float y, float z = 0f, float w = 0f) =>
 			new(x, y, z, w, m_Ox, m_Oy, m_Oz, m_Ow);

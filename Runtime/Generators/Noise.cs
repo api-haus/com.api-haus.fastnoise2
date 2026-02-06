@@ -1,4 +1,5 @@
-using FastNoise2.Bindings;
+using System;
+using System.Collections.Generic;
 
 namespace FastNoise2.Generators
 {
@@ -7,40 +8,29 @@ namespace FastNoise2.Generators
 	/// </summary>
 	public static class Noise
 	{
+		static int Bits(float value) => BitConverter.SingleToInt32Bits(value);
+
 		#region Basic
 
 		public static NoiseNode Constant(float value = 1f) =>
-			new(() =>
-			{
-				FastNoise fn = new("Constant");
-				fn.Set("Value", value);
-				return fn;
-			});
+			new(new NodeDescriptor("Constant",
+				new Dictionary<string, int> { { "Value", Bits(value) } }));
 
-		public static NoiseNode White(int seedOffset = 0) =>
-			new(() =>
-			{
-				FastNoise fn = new("White");
-				if (seedOffset != 0)
-					fn.Set("SeedOffset", seedOffset);
-				return fn;
-			});
+		public static NoiseNode White(int seedOffset = 0)
+		{
+			var vars = new Dictionary<string, int>();
+			if (seedOffset != 0)
+				vars["SeedOffset"] = seedOffset;
+			return new NoiseNode(new NodeDescriptor("White", vars));
+		}
 
 		public static NoiseNode Checkerboard(float featureScale = 100f) =>
-			new(() =>
-			{
-				FastNoise fn = new("Checkerboard");
-				fn.Set("FeatureScale", featureScale);
-				return fn;
-			});
+			new(new NodeDescriptor("Checkerboard",
+				new Dictionary<string, int> { { "FeatureScale", Bits(featureScale) } }));
 
 		public static NoiseNode SineWave(float featureScale = 100f) =>
-			new(() =>
-			{
-				FastNoise fn = new("SineWave");
-				fn.Set("FeatureScale", featureScale);
-				return fn;
-			});
+			new(new NodeDescriptor("SineWave",
+				new Dictionary<string, int> { { "FeatureScale", Bits(featureScale) } }));
 
 		public static GradientNode Gradient() => new(1f, 0f, 0f, 0f, 0f, 0f, 0f, 0f);
 
@@ -51,45 +41,28 @@ namespace FastNoise2.Generators
 
 		#region Coherent Noise
 
-		public static NoiseNode Simplex(float featureScale = 100f, int seedOffset = 0) =>
-			new(() =>
+		static NoiseNode CoherentNoise(string name, float featureScale, int seedOffset)
+		{
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("Simplex");
-				fn.Set("FeatureScale", featureScale);
-				if (seedOffset != 0)
-					fn.Set("SeedOffset", seedOffset);
-				return fn;
-			});
+				{ "FeatureScale", Bits(featureScale) }
+			};
+			if (seedOffset != 0)
+				vars["SeedOffset"] = seedOffset;
+			return new NoiseNode(new NodeDescriptor(name, vars));
+		}
+
+		public static NoiseNode Simplex(float featureScale = 100f, int seedOffset = 0) =>
+			CoherentNoise("Simplex", featureScale, seedOffset);
 
 		public static NoiseNode SuperSimplex(float featureScale = 100f, int seedOffset = 0) =>
-			new(() =>
-			{
-				FastNoise fn = new("SuperSimplex");
-				fn.Set("FeatureScale", featureScale);
-				if (seedOffset != 0)
-					fn.Set("SeedOffset", seedOffset);
-				return fn;
-			});
+			CoherentNoise("SuperSimplex", featureScale, seedOffset);
 
 		public static NoiseNode Perlin(float featureScale = 100f, int seedOffset = 0) =>
-			new(() =>
-			{
-				FastNoise fn = new("Perlin");
-				fn.Set("FeatureScale", featureScale);
-				if (seedOffset != 0)
-					fn.Set("SeedOffset", seedOffset);
-				return fn;
-			});
+			CoherentNoise("Perlin", featureScale, seedOffset);
 
 		public static NoiseNode Value(float featureScale = 100f, int seedOffset = 0) =>
-			new(() =>
-			{
-				FastNoise fn = new("Value");
-				fn.Set("FeatureScale", featureScale);
-				if (seedOffset != 0)
-					fn.Set("SeedOffset", seedOffset);
-				return fn;
-			});
+			CoherentNoise("Value", featureScale, seedOffset);
 
 		#endregion
 

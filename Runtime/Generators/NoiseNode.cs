@@ -1,61 +1,98 @@
+using System;
+using System.Collections.Generic;
 using FastNoise2.Bindings;
 
 namespace FastNoise2.Generators
 {
-	using System;
-
 	/// <summary>
-	/// Deferred noise graph node. Stores a closure that materializes a <see cref="FastNoise"/>
-	/// handle when <see cref="Build"/> is called. Fluent methods return new nodes that capture
-	/// the parent, forming an immutable computation graph.
+	/// Deferred noise graph node. Stores a <see cref="NodeDescriptor"/> that describes
+	/// the noise node and its parameters. Fluent methods return new nodes that reference
+	/// the parent descriptor, forming an immutable computation graph.
 	/// </summary>
 	public class NoiseNode
 	{
-		readonly Func<FastNoise> m_BuildFunc;
+		internal readonly NodeDescriptor m_Descriptor;
 
-		internal NoiseNode(Func<FastNoise> buildFunc)
+		internal NoiseNode(NodeDescriptor descriptor)
 		{
-			m_BuildFunc = buildFunc ?? throw new ArgumentNullException(nameof(buildFunc));
+			m_Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
 		}
+
+		/// <summary>
+		/// The underlying descriptor tree for this noise node.
+		/// </summary>
+		public NodeDescriptor Descriptor => m_Descriptor;
 
 		/// <summary>
 		/// Materializes the noise graph into a native <see cref="FastNoise"/> handle.
 		/// The caller owns the returned handle and must dispose it.
 		/// </summary>
-		public FastNoise Build() => m_BuildFunc();
+		public FastNoise Build() => NodeBuilder.Build(m_Descriptor);
+
+		/// <summary>
+		/// Encodes the noise graph into FN2's base64 binary format,
+		/// interoperable with the C++ NoiseTool.
+		/// </summary>
+		public string Encode() => NodeEncoder.Encode(m_Descriptor);
+
+		/// <summary>
+		/// Decodes an FN2 base64 encoded node tree string into a <see cref="NoiseNode"/>.
+		/// Returns a generic NoiseNode (not typed subclasses) since the base64 format
+		/// has no concept of the C# class hierarchy.
+		/// </summary>
+		public static NoiseNode Decode(string encodedNodeTree) =>
+			new(NodeDecoder.Decode(encodedNodeTree));
+
+		internal static int Bits(float value) => BitConverter.SingleToInt32Bits(value);
+
+		internal static int EnumIndex(string nodeName, string memberName, string enumValue)
+		{
+			FastNoise.Metadata meta = FastNoise.GetNodeMetadata(nodeName);
+			string key = memberName.Replace(" ", "").ToLower();
+			if (!meta.members.TryGetValue(key, out var member))
+				throw new ArgumentException($"Unknown member '{memberName}' on '{nodeName}'");
+			string enumKey = enumValue.Replace(" ", "").ToLower();
+			if (!member.enumNames.TryGetValue(enumKey, out int idx))
+				throw new ArgumentException($"Unknown enum value '{enumValue}' for '{memberName}'");
+			return idx;
+		}
 
 		#region Fractal
 
 		public NoiseNode Fbm(Hybrid gain = default, Hybrid weightedStrength = default,
 			int octaves = 3, float lacunarity = 2f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("FractalFBm");
-				fn.Set("Source", source.Build());
-				gain.Apply(fn, "Gain");
-				weightedStrength.Apply(fn, "WeightedStrength");
-				fn.Set("Octaves", octaves);
-				fn.Set("Lacunarity", lacunarity);
-				return fn;
-			});
+				{ "Octaves", octaves },
+				{ "Lacunarity", Bits(lacunarity) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			gain.AddTo(hybrids, "Gain");
+			weightedStrength.AddTo(hybrids, "WeightedStrength");
+			return new NoiseNode(new NodeDescriptor("FractalFBm", vars, nodes, hybrids));
 		}
 
 		public NoiseNode Ridged(Hybrid gain = default, Hybrid weightedStrength = default,
 			int octaves = 3, float lacunarity = 2f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("FractalRidged");
-				fn.Set("Source", source.Build());
-				gain.Apply(fn, "Gain");
-				weightedStrength.Apply(fn, "WeightedStrength");
-				fn.Set("Octaves", octaves);
-				fn.Set("Lacunarity", lacunarity);
-				return fn;
-			});
+				{ "Octaves", octaves },
+				{ "Lacunarity", Bits(lacunarity) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			gain.AddTo(hybrids, "Gain");
+			weightedStrength.AddTo(hybrids, "WeightedStrength");
+			return new NoiseNode(new NodeDescriptor("FractalRidged", vars, nodes, hybrids));
 		}
 
 		#endregion
@@ -64,95 +101,91 @@ namespace FastNoise2.Generators
 
 		public NoiseNode Min(Hybrid rhs)
 		{
-			NoiseNode lhs = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("Min");
-				fn.Set("LHS", lhs.Build());
-				rhs.Apply(fn, "RHS");
-				return fn;
-			});
+				{ "LHS", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			rhs.AddTo(hybrids, "RHS");
+			return new NoiseNode(new NodeDescriptor("Min", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode Max(Hybrid rhs)
 		{
-			NoiseNode lhs = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("Max");
-				fn.Set("LHS", lhs.Build());
-				rhs.Apply(fn, "RHS");
-				return fn;
-			});
+				{ "LHS", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			rhs.AddTo(hybrids, "RHS");
+			return new NoiseNode(new NodeDescriptor("Max", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode MinSmooth(Hybrid rhs, Hybrid smoothness = default)
 		{
-			NoiseNode lhs = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("MinSmooth");
-				fn.Set("LHS", lhs.Build());
-				rhs.Apply(fn, "RHS");
-				smoothness.Apply(fn, "Smoothness");
-				return fn;
-			});
+				{ "LHS", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			rhs.AddTo(hybrids, "RHS");
+			smoothness.AddTo(hybrids, "Smoothness");
+			return new NoiseNode(new NodeDescriptor("MinSmooth", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode MaxSmooth(Hybrid rhs, Hybrid smoothness = default)
 		{
-			NoiseNode lhs = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("MaxSmooth");
-				fn.Set("LHS", lhs.Build());
-				rhs.Apply(fn, "RHS");
-				smoothness.Apply(fn, "Smoothness");
-				return fn;
-			});
+				{ "LHS", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			rhs.AddTo(hybrids, "RHS");
+			smoothness.AddTo(hybrids, "Smoothness");
+			return new NoiseNode(new NodeDescriptor("MaxSmooth", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode Fade(NoiseNode b, Hybrid fade = default,
 			Hybrid fadeMin = default, Hybrid fadeMax = default,
 			FadeInterpolation interpolation = FadeInterpolation.Linear)
 		{
-			NoiseNode a = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("Fade");
-				fn.Set("A", a.Build());
-				fn.Set("B", b.Build());
-				fade.Apply(fn, "Fade");
-				fadeMin.Apply(fn, "FadeMin");
-				fadeMax.Apply(fn, "FadeMax");
-				fn.Set("Interpolation", interpolation.ToMetadataString());
-				return fn;
-			});
+				{ "Interpolation", EnumIndex("Fade", "Interpolation",
+					interpolation.ToMetadataString()) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "A", m_Descriptor },
+				{ "B", b.m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			fade.AddTo(hybrids, "Fade");
+			fadeMin.AddTo(hybrids, "FadeMin");
+			fadeMax.AddTo(hybrids, "FadeMax");
+			return new NoiseNode(new NodeDescriptor("Fade", vars, nodes, hybrids));
 		}
 
 		public NoiseNode PowFloat(Hybrid pow)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
-			{
-				FastNoise fn = new("PowFloat");
-				Hybrid sourceHybrid = source;
-				sourceHybrid.Apply(fn, "Value");
-				pow.Apply(fn, "Pow");
-				return fn;
-			});
+			var hybrids = new Dictionary<string, HybridValue>();
+			Hybrid sourceHybrid = this;
+			sourceHybrid.AddTo(hybrids, "Value");
+			pow.AddTo(hybrids, "Pow");
+			return new NoiseNode(new NodeDescriptor("PowFloat", hybrids: hybrids));
 		}
 
 		public NoiseNode PowInt(int pow = 2)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("PowInt");
-				fn.Set("Value", source.Build());
-				fn.Set("Pow", pow);
-				return fn;
-			});
+				{ "Pow", pow }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Value", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("PowInt", vars, nodes));
 		}
 
 		#endregion
@@ -162,47 +195,58 @@ namespace FastNoise2.Generators
 		public DomainWarpNode DomainWarpGradient(Hybrid warpAmplitude = default,
 			float featureScale = 100f)
 		{
-			NoiseNode source = this;
-			return new DomainWarpNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainWarpGradient");
-				fn.Set("Source", source.Build());
-				warpAmplitude.Apply(fn, "WarpAmplitude");
-				fn.Set("FeatureScale", featureScale);
-				return fn;
-			});
+				{ "FeatureScale", Bits(featureScale) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
+			return new DomainWarpNode(
+				new NodeDescriptor("DomainWarpGradient", vars, nodes, hybrids));
 		}
 
 		public DomainWarpNode DomainWarpSimplex(Hybrid warpAmplitude = default,
 			float featureScale = 100f,
 			VectorizationScheme scheme = VectorizationScheme.OrthogonalGradientMatrix)
 		{
-			NoiseNode source = this;
-			return new DomainWarpNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainWarpSimplex");
-				fn.Set("Source", source.Build());
-				warpAmplitude.Apply(fn, "WarpAmplitude");
-				fn.Set("FeatureScale", featureScale);
-				fn.Set("VectorizationScheme", scheme.ToMetadataString());
-				return fn;
-			});
+				{ "FeatureScale", Bits(featureScale) },
+				{ "VectorizationScheme", EnumIndex("DomainWarpSimplex",
+					"VectorizationScheme", scheme.ToMetadataString()) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
+			return new DomainWarpNode(
+				new NodeDescriptor("DomainWarpSimplex", vars, nodes, hybrids));
 		}
 
 		public DomainWarpNode DomainWarpSuperSimplex(Hybrid warpAmplitude = default,
 			float featureScale = 100f,
 			VectorizationScheme scheme = VectorizationScheme.OrthogonalGradientMatrix)
 		{
-			NoiseNode source = this;
-			return new DomainWarpNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainWarpSuperSimplex");
-				fn.Set("Source", source.Build());
-				warpAmplitude.Apply(fn, "WarpAmplitude");
-				fn.Set("FeatureScale", featureScale);
-				fn.Set("VectorizationScheme", scheme.ToMetadataString());
-				return fn;
-			});
+				{ "FeatureScale", Bits(featureScale) },
+				{ "VectorizationScheme", EnumIndex("DomainWarpSuperSimplex",
+					"VectorizationScheme", scheme.ToMetadataString()) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
+			return new DomainWarpNode(
+				new NodeDescriptor("DomainWarpSuperSimplex", vars, nodes, hybrids));
 		}
 
 		#endregion
@@ -211,273 +255,279 @@ namespace FastNoise2.Generators
 
 		public NoiseNode DomainScale(float scaling = 1f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainScale");
-				fn.Set("Source", source.Build());
-				fn.Set("Scaling", scaling);
-				return fn;
-			});
+				{ "Scaling", Bits(scaling) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("DomainScale", vars, nodes));
 		}
 
 		public NoiseNode DomainOffset(Hybrid x = default, Hybrid y = default,
 			Hybrid z = default, Hybrid w = default)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("DomainOffset");
-				fn.Set("Source", source.Build());
-				x.Apply(fn, "OffsetX");
-				y.Apply(fn, "OffsetY");
-				z.Apply(fn, "OffsetZ");
-				w.Apply(fn, "OffsetW");
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			x.AddTo(hybrids, "OffsetX");
+			y.AddTo(hybrids, "OffsetY");
+			z.AddTo(hybrids, "OffsetZ");
+			w.AddTo(hybrids, "OffsetW");
+			return new NoiseNode(new NodeDescriptor("DomainOffset", nodeLookups: nodes,
+				hybrids: hybrids));
 		}
 
 		public NoiseNode DomainRotate(float yaw = 0f, float pitch = 0f, float roll = 0f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainRotate");
-				fn.Set("Source", source.Build());
-				fn.Set("Yaw", yaw);
-				fn.Set("Pitch", pitch);
-				fn.Set("Roll", roll);
-				return fn;
-			});
+				{ "Yaw", Bits(yaw) },
+				{ "Pitch", Bits(pitch) },
+				{ "Roll", Bits(roll) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("DomainRotate", vars, nodes));
 		}
 
 		public NoiseNode DomainAxisScale(float x = 1f, float y = 1f,
 			float z = 1f, float w = 1f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainAxisScale");
-				fn.Set("Source", source.Build());
-				fn.Set("ScalingX", x);
-				fn.Set("ScalingY", y);
-				fn.Set("ScalingZ", z);
-				fn.Set("ScalingW", w);
-				return fn;
-			});
+				{ "ScalingX", Bits(x) },
+				{ "ScalingY", Bits(y) },
+				{ "ScalingZ", Bits(z) },
+				{ "ScalingW", Bits(w) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("DomainAxisScale", vars, nodes));
 		}
 
 		public NoiseNode DomainRotatePlane(
 			PlaneRotationType type = PlaneRotationType.ImproveXYPlanes)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("DomainRotatePlane");
-				fn.Set("Source", source.Build());
-				fn.Set("RotationType", type.ToMetadataString());
-				return fn;
-			});
+				{ "RotationType", EnumIndex("DomainRotatePlane", "RotationType",
+					type.ToMetadataString()) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("DomainRotatePlane", vars, nodes));
 		}
 
 		public NoiseNode SeedOffset(int offset = 0)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("SeedOffset");
-				fn.Set("Source", source.Build());
-				fn.Set("SeedOffset", offset);
-				return fn;
-			});
+				{ "SeedOffset", offset }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("SeedOffset", vars, nodes));
 		}
 
 		public NoiseNode Remap(Hybrid fromMin = default, Hybrid fromMax = default,
 			Hybrid toMin = default, Hybrid toMax = default)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("Remap");
-				fn.Set("Source", source.Build());
-				fromMin.Apply(fn, "FromMin");
-				fromMax.Apply(fn, "FromMax");
-				toMin.Apply(fn, "ToMin");
-				toMax.Apply(fn, "ToMax");
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			fromMin.AddTo(hybrids, "FromMin");
+			fromMax.AddTo(hybrids, "FromMax");
+			toMin.AddTo(hybrids, "ToMin");
+			toMax.AddTo(hybrids, "ToMax");
+			return new NoiseNode(new NodeDescriptor("Remap", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode ConvertRgba8(float min = -1f, float max = 1f)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("ConvertRGBA8");
-				fn.Set("Source", source.Build());
-				fn.Set("Min", min);
-				fn.Set("Max", max);
-				return fn;
-			});
+				{ "Min", Bits(min) },
+				{ "Max", Bits(max) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("ConvertRGBA8", vars, nodes));
 		}
 
 		public NoiseNode Terrace(float stepCount = 4f, Hybrid smoothness = default)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("Terrace");
-				fn.Set("Source", source.Build());
-				fn.Set("StepCount", stepCount);
-				smoothness.Apply(fn, "Smoothness");
-				return fn;
-			});
+				{ "StepCount", Bits(stepCount) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			smoothness.AddTo(hybrids, "Smoothness");
+			return new NoiseNode(new NodeDescriptor("Terrace", vars, nodes, hybrids));
 		}
 
 		public NoiseNode AddDimension(Hybrid newDimensionPosition = default)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("AddDimension");
-				fn.Set("Source", source.Build());
-				newDimensionPosition.Apply(fn, "NewDimensionPosition");
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			newDimensionPosition.AddTo(hybrids, "NewDimensionPosition");
+			return new NoiseNode(new NodeDescriptor("AddDimension", nodeLookups: nodes,
+				hybrids: hybrids));
 		}
 
 		public NoiseNode RemoveDimension(Dimension dimension = Dimension.W)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var vars = new Dictionary<string, int>
 			{
-				FastNoise fn = new("RemoveDimension");
-				fn.Set("Source", source.Build());
-				fn.Set("RemoveDimension", dimension.ToMetadataString());
-				return fn;
-			});
+				{ "RemoveDimension", EnumIndex("RemoveDimension", "RemoveDimension",
+					dimension.ToMetadataString()) }
+			};
+			var nodes = new Dictionary<string, NodeDescriptor>
+			{
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("RemoveDimension", vars, nodes));
 		}
 
 		public NoiseNode Cache()
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("GeneratorCache");
-				fn.Set("Source", source.Build());
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("GeneratorCache", nodeLookups: nodes));
 		}
 
 		public NoiseNode PingPong(Hybrid strength = default)
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("PingPong");
-				fn.Set("Source", source.Build());
-				strength.Apply(fn, "PingPongStrength");
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			strength.AddTo(hybrids, "PingPongStrength");
+			return new NoiseNode(new NodeDescriptor("PingPong", nodeLookups: nodes,
+				hybrids: hybrids));
 		}
 
 		public NoiseNode Abs()
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("Abs");
-				fn.Set("Source", source.Build());
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("Abs", nodeLookups: nodes));
 		}
 
 		public NoiseNode SignedSqrt()
 		{
-			NoiseNode source = this;
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new("SignedSquareRoot");
-				fn.Set("Source", source.Build());
-				return fn;
-			});
+				{ "Source", m_Descriptor }
+			};
+			return new NoiseNode(new NodeDescriptor("SignedSquareRoot", nodeLookups: nodes));
 		}
 
 		#endregion
 
 		#region Operators
 
-		static NoiseNode BinaryOp(string nodeType, NoiseNode lhs, Hybrid rhs)
+		// LHS=NodeLookup, RHS=Hybrid (for Add, Multiply)
+		static NoiseNode BinaryOpNodeLhs(string nodeType, NoiseNode lhs, Hybrid rhs)
 		{
-			return new NoiseNode(() =>
+			var nodes = new Dictionary<string, NodeDescriptor>
 			{
-				FastNoise fn = new(nodeType);
-				fn.Set("LHS", lhs.Build());
-				rhs.Apply(fn, "RHS");
-				return fn;
-			});
+				{ "LHS", lhs.m_Descriptor }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			rhs.AddTo(hybrids, "RHS");
+			return new NoiseNode(new NodeDescriptor(nodeType, nodeLookups: nodes,
+				hybrids: hybrids));
 		}
 
-		static NoiseNode BinaryOpGeneratorSources(string nodeType, NoiseNode lhs, NoiseNode rhs)
+		// LHS=Hybrid, RHS=Hybrid (for Subtract, Divide, Modulus)
+		static NoiseNode BinaryOpBothHybrid(string nodeType, NoiseNode lhs, Hybrid rhs)
 		{
-			return new NoiseNode(() =>
+			var hybrids = new Dictionary<string, HybridValue>
 			{
-				FastNoise fn = new(nodeType);
-				fn.Set("LHS", lhs.Build());
-				fn.Set("RHS", rhs.Build());
-				return fn;
-			});
+				{ "LHS", new HybridValue(lhs.m_Descriptor) }
+			};
+			rhs.AddTo(hybrids, "RHS");
+			return new NoiseNode(new NodeDescriptor(nodeType, hybrids: hybrids));
 		}
 
 		// Add: LHS is GeneratorSource, RHS is HybridSource
 		public static NoiseNode operator +(NoiseNode lhs, NoiseNode rhs) =>
-			BinaryOpGeneratorSources("Add", lhs, rhs);
+			BinaryOpNodeLhs("Add", lhs, rhs);
 
 		public static NoiseNode operator +(NoiseNode lhs, float rhs) =>
-			BinaryOp("Add", lhs, rhs);
+			BinaryOpNodeLhs("Add", lhs, rhs);
 
 		public static NoiseNode operator +(float lhs, NoiseNode rhs) =>
-			BinaryOp("Add", Noise.Constant(lhs), rhs);
+			BinaryOpNodeLhs("Add", Noise.Constant(lhs), rhs);
 
 		// Subtract: both HybridSource
 		public static NoiseNode operator -(NoiseNode lhs, NoiseNode rhs) =>
-			BinaryOp("Subtract", lhs, rhs);
+			BinaryOpBothHybrid("Subtract", lhs, rhs);
 
 		public static NoiseNode operator -(NoiseNode lhs, float rhs) =>
-			BinaryOp("Subtract", lhs, rhs);
+			BinaryOpBothHybrid("Subtract", lhs, rhs);
 
 		public static NoiseNode operator -(float lhs, NoiseNode rhs) =>
-			BinaryOp("Subtract", Noise.Constant(lhs), rhs);
+			BinaryOpBothHybrid("Subtract", Noise.Constant(lhs), rhs);
 
 		// Multiply: LHS is GeneratorSource, RHS is HybridSource
 		public static NoiseNode operator *(NoiseNode lhs, NoiseNode rhs) =>
-			BinaryOpGeneratorSources("Multiply", lhs, rhs);
+			BinaryOpNodeLhs("Multiply", lhs, rhs);
 
 		public static NoiseNode operator *(NoiseNode lhs, float rhs) =>
-			BinaryOp("Multiply", lhs, rhs);
+			BinaryOpNodeLhs("Multiply", lhs, rhs);
 
 		public static NoiseNode operator *(float lhs, NoiseNode rhs) =>
-			BinaryOp("Multiply", Noise.Constant(lhs), rhs);
+			BinaryOpNodeLhs("Multiply", Noise.Constant(lhs), rhs);
 
 		// Divide: both HybridSource
 		public static NoiseNode operator /(NoiseNode lhs, NoiseNode rhs) =>
-			BinaryOp("Divide", lhs, rhs);
+			BinaryOpBothHybrid("Divide", lhs, rhs);
 
 		public static NoiseNode operator /(NoiseNode lhs, float rhs) =>
-			BinaryOp("Divide", lhs, rhs);
+			BinaryOpBothHybrid("Divide", lhs, rhs);
 
 		public static NoiseNode operator /(float lhs, NoiseNode rhs) =>
-			BinaryOp("Divide", Noise.Constant(lhs), rhs);
+			BinaryOpBothHybrid("Divide", Noise.Constant(lhs), rhs);
 
 		// Modulus: both HybridSource
 		public static NoiseNode operator %(NoiseNode lhs, NoiseNode rhs) =>
-			BinaryOp("Modulus", lhs, rhs);
+			BinaryOpBothHybrid("Modulus", lhs, rhs);
 
 		public static NoiseNode operator %(NoiseNode lhs, float rhs) =>
-			BinaryOp("Modulus", lhs, rhs);
+			BinaryOpBothHybrid("Modulus", lhs, rhs);
 
 		public static NoiseNode operator %(float lhs, NoiseNode rhs) =>
-			BinaryOp("Modulus", Noise.Constant(lhs), rhs);
+			BinaryOpBothHybrid("Modulus", Noise.Constant(lhs), rhs);
 
 		// Negate: node * -1
 		public static NoiseNode operator -(NoiseNode node) => node * -1f;

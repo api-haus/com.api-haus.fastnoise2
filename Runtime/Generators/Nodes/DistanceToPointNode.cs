@@ -1,4 +1,4 @@
-using FastNoise2.Bindings;
+using System.Collections.Generic;
 
 namespace FastNoise2.Generators
 {
@@ -14,18 +14,7 @@ namespace FastNoise2.Generators
 
 		internal DistanceToPointNode(DistanceFunction distFunc,
 			float px, float py, float pz, float pw, float minkowskiP = 0f)
-			: base(() =>
-			{
-				FastNoise fn = new("DistanceToPoint");
-				fn.Set("DistanceFunction", distFunc.ToMetadataString());
-				fn.Set("PointX", px);
-				fn.Set("PointY", py);
-				fn.Set("PointZ", pz);
-				fn.Set("PointW", pw);
-				if (distFunc == DistanceFunction.Minkowski)
-					fn.Set("MinkowskiP", minkowskiP);
-				return fn;
-			})
+			: base(MakeDescriptor(distFunc, px, py, pz, pw, minkowskiP))
 		{
 			m_DistFunc = distFunc;
 			m_Px = px;
@@ -33,6 +22,25 @@ namespace FastNoise2.Generators
 			m_Pz = pz;
 			m_Pw = pw;
 			m_MinkowskiP = minkowskiP;
+		}
+
+		static NodeDescriptor MakeDescriptor(DistanceFunction distFunc,
+			float px, float py, float pz, float pw, float minkowskiP)
+		{
+			var vars = new Dictionary<string, int>
+			{
+				{ "DistanceFunction", EnumIndex("DistanceToPoint",
+					"DistanceFunction", distFunc.ToMetadataString()) }
+			};
+			var hybrids = new Dictionary<string, HybridValue>
+			{
+				{ "PointX", new HybridValue(px) },
+				{ "PointY", new HybridValue(py) },
+				{ "PointZ", new HybridValue(pz) },
+				{ "PointW", new HybridValue(pw) },
+				{ "MinkowskiP", new HybridValue(minkowskiP) }
+			};
+			return new NodeDescriptor("DistanceToPoint", vars, hybrids: hybrids);
 		}
 
 		public DistanceToPointNode WithDistanceFunction(DistanceFunction value) =>

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using FastNoise2.Bindings;
 
 namespace FastNoise2.Generators
@@ -38,5 +39,11 @@ namespace FastNoise2.Generators
 			else
 				target.Set(memberName, m_Float);
 		}
+
+		internal HybridValue ToHybridValue() =>
+			m_IsNode ? new HybridValue(m_Node.m_Descriptor) : new HybridValue(m_Float);
+
+		internal void AddTo(Dictionary<string, HybridValue> dict, string name) =>
+			dict[name] = ToHybridValue();
 	}
 }

@@ -509,6 +509,15 @@ namespace FastNoise2.Bindings
             return meta.members.Values.Where(m => m.type == Metadata.Member.Type.Hybrid);
         }
 
+        internal static int MetadataCount => s_nodeMetadata.Length;
+
+        internal static Metadata GetMetadataById(int id)
+        {
+            if (id < 0 || id >= s_nodeMetadata.Length)
+                return null;
+            return s_nodeMetadata[id];
+        }
+
         #endregion
 
         static FastNoise()

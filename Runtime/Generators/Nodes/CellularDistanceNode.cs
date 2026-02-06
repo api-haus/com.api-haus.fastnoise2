@@ -1,4 +1,4 @@
-using FastNoise2.Bindings;
+using System.Collections.Generic;
 
 namespace FastNoise2.Generators
 {
@@ -15,18 +15,8 @@ namespace FastNoise2.Generators
 		internal CellularDistanceNode(DistanceFunction distFunc,
 			CellularReturnType returnType, int distIdx0, int distIdx1,
 			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
-			: base(() =>
-			{
-				FastNoise fn = new("CellularDistance");
-				fn.Set("DistanceFunction", distFunc.ToMetadataString());
-				fn.Set("ReturnType", returnType.ToMetadataString());
-				fn.Set("DistanceIndex0", distIdx0);
-				fn.Set("DistanceIndex1", distIdx1);
-				gridJitter.Apply(fn, "GridJitter");
-				sizeJitter.Apply(fn, "SizeJitter");
-				minkowskiP.Apply(fn, "MinkowskiP");
-				return fn;
-			})
+			: base(MakeDescriptor(distFunc, returnType, distIdx0, distIdx1,
+				gridJitter, sizeJitter, minkowskiP))
 		{
 			m_DistFunc = distFunc;
 			m_ReturnType = returnType;
@@ -35,6 +25,26 @@ namespace FastNoise2.Generators
 			m_GridJitter = gridJitter;
 			m_SizeJitter = sizeJitter;
 			m_MinkowskiP = minkowskiP;
+		}
+
+		static NodeDescriptor MakeDescriptor(DistanceFunction distFunc,
+			CellularReturnType returnType, int distIdx0, int distIdx1,
+			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
+		{
+			var vars = new Dictionary<string, int>
+			{
+				{ "DistanceFunction", EnumIndex("CellularDistance",
+					"DistanceFunction", distFunc.ToMetadataString()) },
+				{ "ReturnType", EnumIndex("CellularDistance",
+					"ReturnType", returnType.ToMetadataString()) },
+				{ "DistanceIndex0", distIdx0 },
+				{ "DistanceIndex1", distIdx1 }
+			};
+			var hybrids = new Dictionary<string, HybridValue>();
+			gridJitter.AddTo(hybrids, "GridJitter");
+			sizeJitter.AddTo(hybrids, "SizeJitter");
+			minkowskiP.AddTo(hybrids, "MinkowskiP");
+			return new NodeDescriptor("CellularDistance", vars, hybrids: hybrids);
 		}
 
 		public CellularDistanceNode WithDistanceFunction(DistanceFunction value) =>
