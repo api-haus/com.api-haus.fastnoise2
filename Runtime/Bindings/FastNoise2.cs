@@ -4,6 +4,7 @@ namespace FastNoise2.Bindings
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using Unity.Collections;
@@ -105,7 +106,6 @@ namespace FastNoise2.Bindings
                 ? new DisposeNoiseJob(this).Schedule(inputDeps)
                 : inputDeps;
 
-        [BurstDiscard]
         public static FastNoise FromEncodedNodeTree(string encodedNodeTree)
         {
             IntPtr nodeHandle = fnNewFromEncodedNodeTree(encodedNodeTree);
@@ -154,7 +154,6 @@ namespace FastNoise2.Bindings
             }
         }
 
-        [BurstDiscard]
         public readonly void Set(string memberName, int value)
         {
             Metadata.Member member;
@@ -177,7 +176,6 @@ namespace FastNoise2.Bindings
             }
         }
 
-        [BurstDiscard]
         public readonly void Set(string memberName, string enumValue)
         {
             Metadata.Member member;
@@ -206,7 +204,6 @@ namespace FastNoise2.Bindings
             }
         }
 
-        [BurstDiscard]
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
             Metadata.Member member;
@@ -221,20 +218,27 @@ namespace FastNoise2.Bindings
             switch (member.type)
             {
                 case Metadata.Member.Type.NodeLookup:
-                    if (!fnSetNodeLookup(mNodeHandle, member.index, nodeLookup.mNodeHandle))
+                {
+                    // C API expects pointer-to-pointer: it dereferences as SmartNode (single mPtr field)
+                    IntPtr lookupHandle = nodeLookup.mNodeHandle;
+                    if (!fnSetNodeLookup(mNodeHandle, member.index, ref lookupHandle))
                     {
                         throw new ExternalException("Failed to set node lookup");
                     }
 
                     break;
+                }
 
                 case Metadata.Member.Type.Hybrid:
-                    if (!fnSetHybridNodeLookup(mNodeHandle, member.index, nodeLookup.mNodeHandle))
+                {
+                    IntPtr lookupHandle = nodeLookup.mNodeHandle;
+                    if (!fnSetHybridNodeLookup(mNodeHandle, member.index, ref lookupHandle))
                     {
                         throw new ExternalException("Failed to set node lookup");
                     }
 
                     break;
+                }
 
                 default:
                     throw new ArgumentException(memberName + " cannot be set to a node lookup");
@@ -243,11 +247,12 @@ namespace FastNoise2.Bindings
 
         public readonly OutputMinMax GenUniformGrid2D(
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int xSize,
-            int ySize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            int xCount,
+            int yCount,
+            float xStepSize,
+            float yStepSize,
             int seed
         )
         {
@@ -255,11 +260,12 @@ namespace FastNoise2.Bindings
             fnGenUniformGrid2D(
                 mNodeHandle,
                 noiseOut,
-                xStart,
-                yStart,
-                xSize,
-                ySize,
-                frequency,
+                xOffset,
+                yOffset,
+                xCount,
+                yCount,
+                xStepSize,
+                yStepSize,
                 seed,
                 minMax
             );
@@ -268,13 +274,15 @@ namespace FastNoise2.Bindings
 
         public readonly OutputMinMax GenUniformGrid3D(
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
             int seed
         )
         {
@@ -282,13 +290,15 @@ namespace FastNoise2.Bindings
             fnGenUniformGrid3D(
                 mNodeHandle,
                 noiseOut,
-                xStart,
-                yStart,
-                zStart,
-                xSize,
-                ySize,
-                zSize,
-                frequency,
+                xOffset,
+                yOffset,
+                zOffset,
+                xCount,
+                yCount,
+                zCount,
+                xStepSize,
+                yStepSize,
+                zStepSize,
                 seed,
                 minMax
             );
@@ -297,15 +307,18 @@ namespace FastNoise2.Bindings
 
         public readonly OutputMinMax GenUniformGrid4D(
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int wStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            int wSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            int wCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
+            float wStepSize,
             int seed
         )
         {
@@ -313,15 +326,18 @@ namespace FastNoise2.Bindings
             fnGenUniformGrid4D(
                 mNodeHandle,
                 noiseOut,
-                xStart,
-                yStart,
-                zStart,
-                wStart,
-                xSize,
-                ySize,
-                zSize,
-                wSize,
-                frequency,
+                xOffset,
+                yOffset,
+                zOffset,
+                wOffset,
+                xCount,
+                yCount,
+                zCount,
+                wCount,
+                xStepSize,
+                yStepSize,
+                zStepSize,
+                wStepSize,
                 seed,
                 minMax
             );
@@ -332,12 +348,22 @@ namespace FastNoise2.Bindings
             float[] noiseOut,
             int xSize,
             int ySize,
-            float frequency,
+            float xStepSize,
+            float yStepSize,
             int seed
         )
         {
             float[] minMax = new float[2];
-            fnGenTileable2D(mNodeHandle, noiseOut, xSize, ySize, frequency, seed, minMax);
+            fnGenTileable2D(
+                mNodeHandle,
+                noiseOut,
+                xSize,
+                ySize,
+                xStepSize,
+                yStepSize,
+                seed,
+                minMax
+            );
             return new OutputMinMax(minMax);
         }
 
@@ -463,6 +489,28 @@ namespace FastNoise2.Bindings
             public Dictionary<string, Member> members;
         }
 
+        #region Metadata Introspection
+
+        public static IReadOnlyCollection<string> NodeTypes => s_metadataNameLookup.Keys;
+
+        public static Metadata GetNodeMetadata(string nodeName)
+        {
+            if (!s_metadataNameLookup.TryGetValue(FormatLookup(nodeName), out int id))
+            {
+                throw new ArgumentException("Failed to find metadata name: " + nodeName);
+            }
+
+            return s_nodeMetadata[id];
+        }
+
+        public static IEnumerable<Metadata.Member> GetHybridMembers(string nodeName)
+        {
+            Metadata meta = GetNodeMetadata(nodeName);
+            return meta.members.Values.Where(m => m.type == Metadata.Member.Type.Hybrid);
+        }
+
+        #endregion
+
         static FastNoise()
         {
             int metadataCount = fnGetMetadataCount();
@@ -585,22 +633,19 @@ namespace FastNoise2.Bindings
         private static readonly Dictionary<string, int> s_metadataNameLookup;
         private static readonly Metadata[] s_nodeMetadata;
 
-#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN || UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX || UNITY_EDITOR_LINUX || UNITY_EMBEDDED_LINUX || UNITY_STANDALONE_LINUX || UNITY_ANDROID
-        private const string NATIVE_LIB = "FastNoise";
-#elif UNITY_IOS
-        // On iOS plugins are statically linked into
-        // the executable, so we have to use __Internal as the
-        // library name.
+#if UNITY_IOS && !UNITY_EDITOR
         private const string NATIVE_LIB = "__Internal";
+#else
+        private const string NATIVE_LIB = "FastNoise";
 #endif
 
         [DllImport(NATIVE_LIB)]
-        internal static extern IntPtr fnNewFromMetadata(int id, uint simdLevel = 0);
+        internal static extern IntPtr fnNewFromMetadata(int id, uint simdLevel = ~0u);
 
         [DllImport(NATIVE_LIB)]
         internal static extern IntPtr fnNewFromEncodedNodeTree(
             [MarshalAs(UnmanagedType.LPStr)] string encodedNodeTree,
-            uint simdLevel = 0
+            uint simdLevel = ~0u
         );
 
         [DllImport(NATIVE_LIB)]
@@ -613,46 +658,52 @@ namespace FastNoise2.Bindings
         internal static extern int fnGetMetadataID(IntPtr nodeHandle);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid2D(
+        internal static extern void fnGenUniformGrid2D(
             IntPtr nodeHandle,
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int xSize,
-            int ySize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            int xCount,
+            int yCount,
+            float xStepSize,
+            float yStepSize,
             int seed,
             float[] outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid3D(
+        internal static extern void fnGenUniformGrid3D(
             IntPtr nodeHandle,
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
             int seed,
             float[] outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGenUniformGrid4D(
+        internal static extern void fnGenUniformGrid4D(
             IntPtr nodeHandle,
             float[] noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int wStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            int wSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            int wCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
+            float wStepSize,
             int seed,
             float[] outputMinMax
         );
@@ -663,7 +714,8 @@ namespace FastNoise2.Bindings
             float[] noiseOut,
             int xSize,
             int ySize,
-            float frequency,
+            float xStepSize,
+            float yStepSize,
             int seed,
             float[] outputMinMax
         );
@@ -716,46 +768,52 @@ namespace FastNoise2.Bindings
         #region Unsafe versions
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid2D(
+        internal static extern unsafe void fnGenUniformGrid2D(
             IntPtr nodeHandle,
             void* noiseOut,
-            int xStart,
-            int yStart,
-            int xSize,
-            int ySize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            int xCount,
+            int yCount,
+            float xStepSize,
+            float yStepSize,
             int seed,
             void* outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid3D(
+        internal static extern unsafe void fnGenUniformGrid3D(
             IntPtr nodeHandle,
             void* noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
             int seed,
             void* outputMinMax
         );
 
         [DllImport(NATIVE_LIB)]
-        internal static extern unsafe uint fnGenUniformGrid4D(
+        internal static extern unsafe void fnGenUniformGrid4D(
             IntPtr nodeHandle,
             void* noiseOut,
-            int xStart,
-            int yStart,
-            int zStart,
-            int wStart,
-            int xSize,
-            int ySize,
-            int zSize,
-            int wSize,
-            float frequency,
+            float xOffset,
+            float yOffset,
+            float zOffset,
+            float wOffset,
+            int xCount,
+            int yCount,
+            int zCount,
+            int wCount,
+            float xStepSize,
+            float yStepSize,
+            float zStepSize,
+            float wStepSize,
             int seed,
             void* outputMinMax
         );
@@ -766,7 +824,8 @@ namespace FastNoise2.Bindings
             void* noiseOut,
             int xSize,
             int ySize,
-            float frequency,
+            float xStepSize,
+            float yStepSize,
             int seed,
             void* outputMinMax
         );
@@ -897,7 +956,7 @@ namespace FastNoise2.Bindings
         internal static extern bool fnSetNodeLookup(
             IntPtr nodeHandle,
             int nodeLookupIndex,
-            IntPtr nodeLookupHandle
+            ref IntPtr nodeLookupHandle
         );
 
         // Hybrid
@@ -914,7 +973,7 @@ namespace FastNoise2.Bindings
         internal static extern bool fnSetHybridNodeLookup(
             IntPtr nodeHandle,
             int nodeLookupIndex,
-            IntPtr nodeLookupHandle
+            ref IntPtr nodeLookupHandle
         );
 
         [DllImport(NATIVE_LIB)]

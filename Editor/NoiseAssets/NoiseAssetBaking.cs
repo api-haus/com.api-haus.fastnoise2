@@ -8,9 +8,9 @@ using UnityEngine.Rendering;
 
 namespace FastNoise2.Editor.NoiseAssets
 {
-	using Bindings;
 	using Authoring.NoiseAsset;
 	using Authoring.NoiseGraph;
+	using Bindings;
 
 	public static class NoiseAssetBaking
 	{
@@ -68,6 +68,7 @@ namespace FastNoise2.Editor.NoiseAssets
 				noiseAsset.offset.y,
 				noiseAsset.resolution.x,
 				noiseAsset.resolution.y,
+				noiseAsset.frequency,
 				noiseAsset.frequency,
 				noiseAsset.seed
 			);
@@ -146,6 +147,8 @@ namespace FastNoise2.Editor.NoiseAssets
 				noiseAsset.resolution.x,
 				noiseAsset.resolution.y,
 				noiseAsset.resolution.z,
+				noiseAsset.frequency,
+				noiseAsset.frequency,
 				noiseAsset.frequency,
 				noiseAsset.seed
 			);

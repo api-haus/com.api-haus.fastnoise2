@@ -100,9 +100,8 @@ namespace FastNoise2.Editor.NoiseToolProxy
 		{
 			return Application.platform switch
 			{
-				RuntimePlatform.OSXEditor
-				or RuntimePlatform.OSXPlayer
-				or RuntimePlatform.OSXServer => "Plugins/macos/bin/NoiseTool",
+				RuntimePlatform.OSXEditor or RuntimePlatform.OSXPlayer or RuntimePlatform.OSXServer =>
+					"Plugins/macos/bin/NoiseTool",
 				RuntimePlatform.WindowsPlayer
 				or RuntimePlatform.WindowsEditor
 				or RuntimePlatform.WindowsServer => "Plugins/windows/bin/NoiseTool.exe",

@@ -26,11 +26,7 @@ namespace FastNoise2.Editor
 			EditorGUI.BeginProperty(position, label, property);
 
 			// Draw label
-			position = EditorGUI.PrefixLabel(
-				position,
-				GUIUtility.GetControlID(FocusType.Passive),
-				label
-			);
+			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
 			// Don't make child fields be indented
 			int indent = EditorGUI.indentLevel;
@@ -58,7 +54,8 @@ namespace FastNoise2.Editor
 			);
 			bool isButtonClicked = EditorGUI.LinkButton(buttonRect, "Edit Noise");
 
-			if (isButtonClicked) OnEditButtonClicked();
+			if (isButtonClicked)
+				OnEditButtonClicked();
 
 			// Set indent back to what it was
 			EditorGUI.indentLevel = indent;

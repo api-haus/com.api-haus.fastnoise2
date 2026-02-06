@@ -27,8 +27,8 @@ namespace FastNoise2.Authoring.NoiseGraph
 
 		public static implicit operator string(FastNoiseGraph graph) => graph.EncodedValue;
 
-		public static implicit operator FastNoiseGraph(string encodedGraph) => new()
-			{ encodedGraph = encodedGraph };
+		public static implicit operator FastNoiseGraph(string encodedGraph) =>
+			new() { encodedGraph = encodedGraph };
 
 		public override string ToString() => EncodedValue;
 	}
@@ -37,10 +37,7 @@ namespace FastNoise2.Authoring.NoiseGraph
 	{
 		public static FastNoise Instantiate(this FastNoiseGraph graph)
 		{
-			Debug.Assert(
-				!string.IsNullOrWhiteSpace(graph.EncodedValue),
-				nameof(graph.EncodedValue)
-			);
+			Debug.Assert(!string.IsNullOrWhiteSpace(graph.EncodedValue), nameof(graph.EncodedValue));
 			FastNoise noise = FastNoise.FromEncodedNodeTree(graph.EncodedValue);
 
 			return noise;
