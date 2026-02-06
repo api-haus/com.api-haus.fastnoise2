@@ -1,0 +1,53 @@
+/* ─── Unified property-port part ─── */
+.fn2-property-port-part {
+    padding: 4px 0;
+}
+
+/* ─── Member row: horizontal layout ─── */
+.fn2-member-row {
+    flex-direction: row;
+    align-items: center;
+    padding: 1px 0;
+    min-height: 22px;
+}
+
+/* Output row: spacer pushes port to the right */
+.fn2-member-spacer {
+    flex-grow: 1;
+}
+
+/* ─── Port slot ─── */
+.fn2-member-port-slot {
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ─── Editor slot (value fields) ─── */
+.fn2-member-editor-slot {
+    flex-grow: 1;
+    flex-shrink: 1;
+    min-width: 60px;
+}
+
+/* ─── Hybrid row: hide value editor when connected ─── */
+.fn2-member-row--connected .fn2-member-editor-slot {
+    display: none;
+}
+
+/* ─── Texture preview ─── */
+.fn2-texture-preview-part {
+    align-items: center;
+    padding: 4px;
+    border-top-width: 1px;
+    border-top-color: rgba(0, 0, 0, 0.2);
+    margin-top: 2px;
+}
+
+.fn2-preview-image {
+    width: 128px;
+    height: 128px;
+    border-width: 1px;
+    border-color: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+}
