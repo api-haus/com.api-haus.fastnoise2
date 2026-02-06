@@ -45,5 +45,30 @@ namespace FastNoise2.Editor.GraphEditor
 				return userModel.Node;
 			return null;
 		}
+
+		/// <summary>
+		/// Applies <see cref="FN2BridgeCallbacks.WindowIcon"/> to any open
+		/// <see cref="GraphViewEditorWindowImp"/> whose loaded graph is an FN2 graph.
+		/// Called from EditorApplication.update in the FN2 editor assembly.
+		/// </summary>
+		public static void ApplyWindowIcons()
+		{
+			if (FN2BridgeCallbacks.WindowIcon == null || FN2BridgeCallbacks.IsFN2Graph == null)
+				return;
+
+			foreach (var window in Resources.FindObjectsOfTypeAll<GraphViewEditorWindowImp>())
+			{
+				var tool = window.GraphTool;
+				if (tool == null || tool.Icon == FN2BridgeCallbacks.WindowIcon)
+					continue;
+
+				if (tool.ToolState?.GraphModel is GraphModelImp graphModel
+					&& graphModel.Graph != null
+					&& FN2BridgeCallbacks.IsFN2Graph(graphModel.Graph))
+				{
+					tool.Icon = FN2BridgeCallbacks.WindowIcon;
+				}
+			}
+		}
 	}
 }

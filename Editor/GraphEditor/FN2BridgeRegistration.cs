@@ -22,6 +22,13 @@ namespace FastNoise2.Editor.GraphEditor
 			FN2BridgeCallbacks.GetMemberInfos = GetMemberInfos;
 
 			FN2BridgeCallbacks.RenderNodePreview = RenderNodePreview;
+
+			FN2BridgeCallbacks.IsFN2Graph = graph => graph is FastNoiseEditorGraph;
+
+			FN2BridgeCallbacks.WindowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(
+				"Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph_Grey.png");
+
+			EditorApplication.update += GraphToolkitBridge.ApplyWindowIcons;
 		}
 
 		static FN2BridgeMemberInfo[] GetMemberInfos(string nodeTypeName)

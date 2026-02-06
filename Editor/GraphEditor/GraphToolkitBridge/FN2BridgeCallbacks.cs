@@ -56,5 +56,16 @@ namespace FastNoise2.Editor.GraphEditor
 		/// Parameters: node, width, height. Returns null on failure.
 		/// </summary>
 		public static Func<Unity.GraphToolkit.Editor.Node, int, int, Texture2D> RenderNodePreview;
+
+		/// <summary>
+		/// Returns true if the given Graph is an FN2 editor graph.
+		/// </summary>
+		public static Func<Unity.GraphToolkit.Editor.Graph, bool> IsFN2Graph;
+
+		/// <summary>
+		/// Optional icon to display in the graph editor window title bar.
+		/// Set by the FN2 editor assembly at startup.
+		/// </summary>
+		public static Texture2D WindowIcon;
 	}
 }
