@@ -3,10 +3,9 @@
 namespace FastNoise2.Bindings
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
+    using FastNoise2.Generators;
     using Unity.Collections;
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Jobs;
@@ -64,11 +63,8 @@ namespace FastNoise2.Bindings
         public FastNoise(string metadataName)
         {
 #if FN2_USER_SIGNED
-            if (!s_metadataNameLookup.TryGetValue(FormatLookup(metadataName), out m_MetadataId))
-            {
-                throw new ArgumentException("Failed to find metadata name: " + metadataName);
-            }
-
+            var def = FN2NodeRegistry.GetNodeDef(metadataName);
+            m_MetadataId = def.Id;
             m_IsDisposed = false;
             mNodeHandle = fnNewFromMetadata(m_MetadataId);
 #else
@@ -150,31 +146,20 @@ namespace FastNoise2.Bindings
         public readonly void Set(string memberName, float value)
         {
 #if FN2_USER_SIGNED
-            Metadata.Member member;
-            if (
-                !s_nodeMetadata[m_MetadataId]
-                    .members.TryGetValue(FormatLookup(memberName), out member)
-            )
-            {
+            var def = FN2NodeRegistry.GetNodeDefById(m_MetadataId);
+            if (!def.TryGetMember(FormatLookup(memberName), out var member))
                 throw new ArgumentException("Failed to find member name: " + memberName);
-            }
 
-            switch (member.type)
+            switch (member.Type)
             {
-                case Metadata.Member.Type.Float:
-                    if (!fnSetVariableFloat(mNodeHandle, member.index, value))
-                    {
+                case FN2MemberType.Float:
+                    if (!fnSetVariableFloat(mNodeHandle, member.Index, value))
                         throw new ExternalException("Failed to set float value");
-                    }
-
                     break;
 
-                case Metadata.Member.Type.Hybrid:
-                    if (!fnSetHybridFloat(mNodeHandle, member.index, value))
-                    {
+                case FN2MemberType.Hybrid:
+                    if (!fnSetHybridFloat(mNodeHandle, member.Index, value))
                         throw new ExternalException("Failed to set float value");
-                    }
-
                     break;
 
                 default:
@@ -188,24 +173,15 @@ namespace FastNoise2.Bindings
         public readonly void Set(string memberName, int value)
         {
 #if FN2_USER_SIGNED
-            Metadata.Member member;
-            if (
-                !s_nodeMetadata[m_MetadataId]
-                    .members.TryGetValue(FormatLookup(memberName), out member)
-            )
-            {
+            var def = FN2NodeRegistry.GetNodeDefById(m_MetadataId);
+            if (!def.TryGetMember(FormatLookup(memberName), out var member))
                 throw new ArgumentException("Failed to find member name: " + memberName);
-            }
 
-            if (member.type != Metadata.Member.Type.Int)
-            {
+            if (member.Type != FN2MemberType.Int)
                 throw new ArgumentException(memberName + " cannot be set to an int value");
-            }
 
-            if (!fnSetVariableIntEnum(mNodeHandle, member.index, value))
-            {
+            if (!fnSetVariableIntEnum(mNodeHandle, member.Index, value))
                 throw new ExternalException("Failed to set int value");
-            }
 #else
             throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
 #endif
@@ -214,30 +190,18 @@ namespace FastNoise2.Bindings
         public readonly void Set(string memberName, string enumValue)
         {
 #if FN2_USER_SIGNED
-            Metadata.Member member;
-            if (
-                !s_nodeMetadata[m_MetadataId]
-                    .members.TryGetValue(FormatLookup(memberName), out member)
-            )
-            {
+            var def = FN2NodeRegistry.GetNodeDefById(m_MetadataId);
+            if (!def.TryGetMember(FormatLookup(memberName), out var member))
                 throw new ArgumentException("Failed to find member name: " + memberName);
-            }
 
-            if (member.type != Metadata.Member.Type.Enum)
-            {
+            if (member.Type != FN2MemberType.Enum)
                 throw new ArgumentException(memberName + " cannot be set to an enum value");
-            }
 
-            int enumIdx;
-            if (!member.enumNames.TryGetValue(FormatLookup(enumValue), out enumIdx))
-            {
+            if (!member.TryGetEnumIndex(enumValue, out int enumIdx))
                 throw new ArgumentException("Failed to find enum value: " + enumValue);
-            }
 
-            if (!fnSetVariableIntEnum(mNodeHandle, member.index, enumIdx))
-            {
+            if (!fnSetVariableIntEnum(mNodeHandle, member.Index, enumIdx))
                 throw new ExternalException("Failed to set enum value");
-            }
 #else
             throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
 #endif
@@ -246,37 +210,25 @@ namespace FastNoise2.Bindings
         public readonly void Set(string memberName, FastNoise nodeLookup)
         {
 #if FN2_USER_SIGNED
-            Metadata.Member member;
-            if (
-                !s_nodeMetadata[m_MetadataId]
-                    .members.TryGetValue(FormatLookup(memberName), out member)
-            )
-            {
+            var def = FN2NodeRegistry.GetNodeDefById(m_MetadataId);
+            if (!def.TryGetMember(FormatLookup(memberName), out var member))
                 throw new ArgumentException("Failed to find member name: " + memberName);
-            }
 
-            switch (member.type)
+            switch (member.Type)
             {
-                case Metadata.Member.Type.NodeLookup:
+                case FN2MemberType.NodeLookup:
                 {
-                    // C API expects pointer-to-pointer: it dereferences as SmartNode (single mPtr field)
                     IntPtr lookupHandle = nodeLookup.mNodeHandle;
-                    if (!fnSetNodeLookup(mNodeHandle, member.index, ref lookupHandle))
-                    {
+                    if (!fnSetNodeLookup(mNodeHandle, member.Index, ref lookupHandle))
                         throw new ExternalException("Failed to set node lookup");
-                    }
-
                     break;
                 }
 
-                case Metadata.Member.Type.Hybrid:
+                case FN2MemberType.Hybrid:
                 {
                     IntPtr lookupHandle = nodeLookup.mNodeHandle;
-                    if (!fnSetHybridNodeLookup(mNodeHandle, member.index, ref lookupHandle))
-                    {
+                    if (!fnSetHybridNodeLookup(mNodeHandle, member.Index, ref lookupHandle))
                         throw new ExternalException("Failed to set node lookup");
-                    }
-
                     break;
                 }
 
@@ -554,187 +506,8 @@ namespace FastNoise2.Bindings
 
         private int m_MetadataId;
 
-        public class Metadata
-        {
-            public struct Member
-            {
-                public enum Type
-                {
-                    Float,
-                    Int,
-                    Enum,
-                    NodeLookup,
-                    Hybrid,
-                }
-
-                public string name;
-                public Type type;
-                public int index;
-                public Dictionary<string, int> enumNames;
-            }
-
-            public int id;
-            public string name;
-            public Dictionary<string, Member> members;
-        }
-
-        #region Metadata Introspection
-
-        public static IReadOnlyCollection<string> NodeTypes => s_metadataNameLookup.Keys;
-
-        public static Metadata GetNodeMetadata(string nodeName)
-        {
-            if (!s_metadataNameLookup.TryGetValue(FormatLookup(nodeName), out int id))
-            {
-                throw new ArgumentException("Failed to find metadata name: " + nodeName);
-            }
-
-            return s_nodeMetadata[id];
-        }
-
-        public static IEnumerable<Metadata.Member> GetHybridMembers(string nodeName)
-        {
-            Metadata meta = GetNodeMetadata(nodeName);
-            return meta.members.Values.Where(m => m.type == Metadata.Member.Type.Hybrid);
-        }
-
-        internal static int MetadataCount => s_nodeMetadata.Length;
-
-        internal static Metadata GetMetadataById(int id)
-        {
-            if (id < 0 || id >= s_nodeMetadata.Length)
-                return null;
-            return s_nodeMetadata[id];
-        }
-
-        #endregion
-
-        static FastNoise()
-        {
-#if FN2_USER_SIGNED
-            int metadataCount = fnGetMetadataCount();
-
-            s_nodeMetadata = new Metadata[metadataCount];
-            s_metadataNameLookup = new Dictionary<string, int>(metadataCount);
-
-            // Collect metadata for all FastNoise node classes
-            for (int id = 0; id < metadataCount; id++)
-            {
-                Metadata metadata = new();
-
-                metadata.id = id;
-                metadata.name = FormatLookup(Marshal.PtrToStringAnsi(fnGetMetadataName(id)));
-                //Console.WriteLine(id + " - " + metadata.name);
-                s_metadataNameLookup.Add(metadata.name, id);
-
-                int variableCount = fnGetMetadataVariableCount(id);
-                int nodeLookupCount = fnGetMetadataNodeLookupCount(id);
-                int hybridCount = fnGetMetadataHybridCount(id);
-                metadata.members = new Dictionary<string, Metadata.Member>(
-                    variableCount + nodeLookupCount + hybridCount
-                );
-
-                // Init variables
-                for (int variableIdx = 0; variableIdx < variableCount; variableIdx++)
-                {
-                    Metadata.Member member = new();
-
-                    member.name = FormatLookup(
-                        Marshal.PtrToStringAnsi(fnGetMetadataVariableName(id, variableIdx))
-                    );
-                    member.type = (Metadata.Member.Type)fnGetMetadataVariableType(id, variableIdx);
-                    member.index = variableIdx;
-
-                    member.name = FormatDimensionMember(
-                        member.name,
-                        fnGetMetadataVariableDimensionIdx(id, variableIdx)
-                    );
-
-                    // Get enum names
-                    if (member.type == Metadata.Member.Type.Enum)
-                    {
-                        int enumCount = fnGetMetadataEnumCount(id, variableIdx);
-                        member.enumNames = new Dictionary<string, int>(enumCount);
-
-                        for (int enumIdx = 0; enumIdx < enumCount; enumIdx++)
-                        {
-                            member.enumNames.Add(
-                                FormatLookup(
-                                    Marshal.PtrToStringAnsi(
-                                        fnGetMetadataEnumName(id, variableIdx, enumIdx)
-                                    )
-                                ),
-                                enumIdx
-                            );
-                        }
-                    }
-
-                    metadata.members.Add(member.name, member);
-                }
-
-                // Init node lookups
-                for (int nodeLookupIdx = 0; nodeLookupIdx < nodeLookupCount; nodeLookupIdx++)
-                {
-                    Metadata.Member member = new();
-
-                    member.name = FormatLookup(
-                        Marshal.PtrToStringAnsi(fnGetMetadataNodeLookupName(id, nodeLookupIdx))
-                    );
-                    member.type = Metadata.Member.Type.NodeLookup;
-                    member.index = nodeLookupIdx;
-
-                    member.name = FormatDimensionMember(
-                        member.name,
-                        fnGetMetadataNodeLookupDimensionIdx(id, nodeLookupIdx)
-                    );
-
-                    metadata.members.Add(member.name, member);
-                }
-
-                // Init hybrids
-                for (int hybridIdx = 0; hybridIdx < hybridCount; hybridIdx++)
-                {
-                    Metadata.Member member = new();
-
-                    member.name = FormatLookup(
-                        Marshal.PtrToStringAnsi(fnGetMetadataHybridName(id, hybridIdx))
-                    );
-                    member.type = Metadata.Member.Type.Hybrid;
-                    member.index = hybridIdx;
-
-                    member.name = FormatDimensionMember(
-                        member.name,
-                        fnGetMetadataHybridDimensionIdx(id, hybridIdx)
-                    );
-
-                    metadata.members.Add(member.name, member);
-                }
-
-                s_nodeMetadata[id] = metadata;
-            }
-#else
-            s_nodeMetadata = Array.Empty<Metadata>();
-            s_metadataNameLookup = new Dictionary<string, int>(0);
-#endif
-        }
-
-        // Append dimension char where neccessary
-        private static string FormatDimensionMember(string name, int dimIdx)
-        {
-            if (dimIdx >= 0)
-            {
-                char[] dimSuffix = new char[] { 'x', 'y', 'z', 'w' };
-                name += dimSuffix[dimIdx];
-            }
-
-            return name;
-        }
-
         // Ignores spaces and caps, harder to mistype strings
         private static string FormatLookup(string s) => s.Replace(" ", "").ToLower();
-
-        private static readonly Dictionary<string, int> s_metadataNameLookup;
-        private static readonly Metadata[] s_nodeMetadata;
 
 #if FN2_USER_SIGNED
 #if UNITY_IOS && !UNITY_EDITOR

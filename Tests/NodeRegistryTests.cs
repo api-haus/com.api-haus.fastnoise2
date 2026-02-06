@@ -173,82 +173,21 @@ namespace FastNoise2.Tests
 
 #if FN2_USER_SIGNED
 		[Test]
-		public void Validate_RegistryIdsMatchNative()
+		public void Validate_RegistryPopulatedFromNative()
 		{
-			int nativeCount = FastNoise.MetadataCount;
-			Assert.That(FN2NodeRegistry.NodeCount, Is.EqualTo(nativeCount),
-				$"Registry has {FN2NodeRegistry.NodeCount} nodes, native has {nativeCount}");
+			// Registry is now populated from native C API — sanity check
+			Assert.That(FN2NodeRegistry.NodeCount, Is.GreaterThan(0),
+				"Registry should have nodes populated from native");
 
-			for (int id = 0; id < nativeCount; id++)
+			for (int id = 0; id < FN2NodeRegistry.NodeCount; id++)
 			{
-				FastNoise.Metadata nativeMeta = FastNoise.GetMetadataById(id);
-				FN2NodeDef registryDef = FN2NodeRegistry.GetNodeDefById(id);
-
-				Assert.That(registryDef, Is.Not.Null,
-					$"Registry missing node at ID {id} (native: '{nativeMeta.name}')");
-
-				Assert.That(registryDef.NodeName.Replace(" ", "").ToLower(),
-					Is.EqualTo(nativeMeta.name),
-					$"Name mismatch at ID {id}: registry='{registryDef.NodeName}' native='{nativeMeta.name}'");
-
-				// Validate member count
-				Assert.That(registryDef.Members.Length, Is.EqualTo(nativeMeta.members.Count),
-					$"Member count mismatch for '{registryDef.NodeName}': " +
-					$"registry={registryDef.Members.Length} native={nativeMeta.members.Count}");
-
-				// Validate each member
-				foreach (var nativeKv in nativeMeta.members)
-				{
-					Assert.That(registryDef.TryGetMember(nativeKv.Key, out var regMember), Is.True,
-						$"Registry missing member '{nativeKv.Key}' on '{registryDef.NodeName}'");
-
-					var nativeMember = nativeKv.Value;
-
-					// Type match
-					FN2MemberType expectedType = nativeMember.type switch
-					{
-						FastNoise.Metadata.Member.Type.Float => FN2MemberType.Float,
-						FastNoise.Metadata.Member.Type.Int => FN2MemberType.Int,
-						FastNoise.Metadata.Member.Type.Enum => FN2MemberType.Enum,
-						FastNoise.Metadata.Member.Type.NodeLookup => FN2MemberType.NodeLookup,
-						FastNoise.Metadata.Member.Type.Hybrid => FN2MemberType.Hybrid,
-						_ => throw new Exception($"Unknown native type: {nativeMember.type}")
-					};
-					Assert.That(regMember.Type, Is.EqualTo(expectedType),
-						$"Type mismatch for '{nativeKv.Key}' on '{registryDef.NodeName}': " +
-						$"registry={regMember.Type} native={nativeMember.type}");
-
-					// Index match
-					Assert.That(regMember.Index, Is.EqualTo(nativeMember.index),
-						$"Index mismatch for '{nativeKv.Key}' on '{registryDef.NodeName}': " +
-						$"registry={regMember.Index} native={nativeMember.index}");
-
-					// Enum values match
-					if (nativeMember.type == FastNoise.Metadata.Member.Type.Enum)
-					{
-						Assert.That(regMember.EnumValues, Is.Not.Null,
-							$"Registry enum values null for '{nativeKv.Key}' on '{registryDef.NodeName}'");
-
-						foreach (var enumKv in nativeMember.enumNames)
-						{
-							bool found = false;
-							for (int i = 0; i < regMember.EnumValues.Length; i++)
-							{
-								if (regMember.EnumValues[i].Replace(" ", "").ToLower() == enumKv.Key)
-								{
-									Assert.That(i, Is.EqualTo(enumKv.Value),
-										$"Enum index mismatch for '{enumKv.Key}' in '{nativeKv.Key}' " +
-										$"on '{registryDef.NodeName}': registry={i} native={enumKv.Value}");
-									found = true;
-									break;
-								}
-							}
-							Assert.That(found, Is.True,
-								$"Registry missing enum value '{enumKv.Key}' for '{nativeKv.Key}' " +
-								$"on '{registryDef.NodeName}'");
-						}
-					}
-				}
+				FN2NodeDef def = FN2NodeRegistry.GetNodeDefById(id);
+				Assert.That(def, Is.Not.Null, $"Node at ID {id} is null");
+				Assert.That(def.Id, Is.EqualTo(id), $"ID mismatch at index {id}");
+				Assert.That(def.NodeName, Is.Not.Null.And.Not.Empty,
+					$"Node at ID {id} has null/empty name");
+				Assert.That(def.Members, Is.Not.Null,
+					$"Node '{def.NodeName}' at ID {id} has null members");
 			}
 		}
 

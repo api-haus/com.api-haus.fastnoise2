@@ -12,24 +12,24 @@ namespace FastNoise2.Generators
 		{
 #if FN2_USER_SIGNED
 			FastNoise fn = new(descriptor.NodeName);
-			FastNoise.Metadata meta = FastNoise.GetNodeMetadata(descriptor.NodeName);
+			FN2NodeDef def = FN2NodeRegistry.GetNodeDef(descriptor.NodeName);
 
 			foreach (var kv in descriptor.Variables)
 			{
-				if (!meta.members.TryGetValue(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 
-				switch (member.type)
+				switch (member.Type)
 				{
-					case FastNoise.Metadata.Member.Type.Float:
-						FastNoise.fnSetVariableFloat(fn.mNodeHandle, member.index,
+					case FN2MemberType.Float:
+						FastNoise.fnSetVariableFloat(fn.mNodeHandle, member.Index,
 							BitConverter.Int32BitsToSingle(kv.Value));
 						break;
 
-					case FastNoise.Metadata.Member.Type.Int:
-					case FastNoise.Metadata.Member.Type.Enum:
-						FastNoise.fnSetVariableIntEnum(fn.mNodeHandle, member.index, kv.Value);
+					case FN2MemberType.Int:
+					case FN2MemberType.Enum:
+						FastNoise.fnSetVariableIntEnum(fn.mNodeHandle, member.Index, kv.Value);
 						break;
 
 					default:
@@ -40,18 +40,18 @@ namespace FastNoise2.Generators
 
 			foreach (var kv in descriptor.NodeLookups)
 			{
-				if (!meta.members.TryGetValue(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 
 				FastNoise child = Build(kv.Value);
 				IntPtr childHandle = child.mNodeHandle;
-				FastNoise.fnSetNodeLookup(fn.mNodeHandle, member.index, ref childHandle);
+				FastNoise.fnSetNodeLookup(fn.mNodeHandle, member.Index, ref childHandle);
 			}
 
 			foreach (var kv in descriptor.Hybrids)
 			{
-				if (!meta.members.TryGetValue(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 
@@ -59,11 +59,11 @@ namespace FastNoise2.Generators
 				{
 					FastNoise child = Build(kv.Value.NodeValue);
 					IntPtr childHandle = child.mNodeHandle;
-					FastNoise.fnSetHybridNodeLookup(fn.mNodeHandle, member.index, ref childHandle);
+					FastNoise.fnSetHybridNodeLookup(fn.mNodeHandle, member.Index, ref childHandle);
 				}
 				else
 				{
-					FastNoise.fnSetHybridFloat(fn.mNodeHandle, member.index, kv.Value.FloatValue);
+					FastNoise.fnSetHybridFloat(fn.mNodeHandle, member.Index, kv.Value.FloatValue);
 				}
 			}
 

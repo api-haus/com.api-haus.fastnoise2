@@ -9,6 +9,7 @@ namespace FastNoise2.Tests
 {
 	using System.Collections.Generic;
 	using Bindings;
+	using Generators;
 
 	public class BindingTests
 	{
@@ -134,25 +135,26 @@ namespace FastNoise2.Tests
 		[Test]
 		public void MetadataIntrospection()
 		{
-			// NodeTypes should contain expected entries
-			IReadOnlyCollection<string> nodeTypes = FastNoise.NodeTypes;
-			Assert.That(nodeTypes.Count, Is.GreaterThan(0));
-			Assert.That(nodeTypes, Does.Contain("simplex"));
-			Assert.That(nodeTypes, Does.Contain("cellulardistance"));
-			Assert.That(nodeTypes, Does.Contain("fractalfbm"));
+			// AllNodeNames should contain expected entries
+			string[] nodeNames = FN2NodeRegistry.AllNodeNames;
+			Assert.That(nodeNames.Length, Is.GreaterThan(0));
+			Assert.That(nodeNames, Does.Contain("Simplex"));
+			Assert.That(nodeNames, Does.Contain("CellularDistance"));
+			Assert.That(nodeNames, Does.Contain("FractalFBm"));
 
-			// GetNodeMetadata returns valid data
-			FastNoise.Metadata meta = FastNoise.GetNodeMetadata("Simplex");
-			Assert.That(meta, Is.Not.Null);
-			Assert.That(meta.members, Is.Not.Null);
+			// GetNodeDef returns valid data
+			FN2NodeDef def = FN2NodeRegistry.GetNodeDef("Simplex");
+			Assert.That(def, Is.Not.Null);
+			Assert.That(def.Members, Is.Not.Null);
 
-			// GetHybridMembers returns correct results for nodes with hybrids
-			List<FastNoise.Metadata.Member> fbmHybrids = FastNoise.GetHybridMembers("FractalFBm").ToList();
+			// Hybrid members on FractalFBm
+			FN2NodeDef fbmDef = FN2NodeRegistry.GetNodeDef("FractalFBm");
+			var fbmHybrids = fbmDef.GetMembersOfType(FN2MemberType.Hybrid);
 			Assert.That(fbmHybrids.Count, Is.GreaterThan(0));
-			Assert.That(fbmHybrids.All(m => m.type == FastNoise.Metadata.Member.Type.Hybrid), Is.True);
+			Assert.That(fbmHybrids.TrueForAll(m => m.Type == FN2MemberType.Hybrid), Is.True);
 
 			// Invalid name throws
-			Assert.Throws<ArgumentException>(() => FastNoise.GetNodeMetadata("NonExistentNode"));
+			Assert.Throws<ArgumentException>(() => FN2NodeRegistry.GetNodeDef("NonExistentNode"));
 		}
 
 		private static void GenerateBitmap(FastNoise fastNoise, string filename, ushort size = 512)

@@ -29,6 +29,23 @@ namespace FastNoise2.Generators
 			Index = index;
 			EnumValues = enumValues;
 		}
+
+		public bool TryGetEnumIndex(string enumValue, out int index)
+		{
+			index = -1;
+			if (EnumValues == null)
+				return false;
+			string key = enumValue.Replace(" ", "");
+			for (int i = 0; i < EnumValues.Length; i++)
+			{
+				if (string.Equals(EnumValues[i], key, StringComparison.OrdinalIgnoreCase))
+				{
+					index = i;
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 
 	internal sealed class FN2NodeDef
