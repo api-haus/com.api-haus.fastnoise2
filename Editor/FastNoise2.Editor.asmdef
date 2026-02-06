@@ -3,7 +3,6 @@
 	"rootNamespace": "FastNoise2",
 	"references": [
 		"FastNoise2.Authoring",
-		"Unity.EditorCoroutines.Editor",
 		"FastNoise2.Runtime",
 		"Unity.Collections",
 		"Unity.Mathematics",
@@ -18,6 +17,12 @@
 	"precompiledReferences": [],
 	"autoReferenced": false,
 	"defineConstraints": [],
-	"versionDefines": [],
+	"versionDefines": [
+		{
+			"name": "com.unity.graphtoolkit",
+			"expression": "",
+			"define": "FN2_HAS_GRAPH_TOOLKIT"
+		}
+	],
 	"noEngineReferences": false
 }

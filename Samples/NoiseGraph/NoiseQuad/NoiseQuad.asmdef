@@ -1,0 +1,17 @@
+{
+	"name": "FN2.Samples.NoiseGraph.NoiseQuad",
+	"rootNamespace": "FastNoise2.Samples",
+	"references": [
+		"FastNoise2.Runtime",
+		"FastNoise2.Authoring"
+	],
+	"includePlatforms": [],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": true,
+	"defineConstraints": [],
+	"versionDefines": [],
+	"noEngineReferences": false
+}

@@ -59,7 +59,6 @@ For native texture containers and sampling utilities, see the optional companion
 
 | Dependency | Version | Required |
 |---|---|---|
-| `com.unity.editorcoroutines` | 1.0.0 | Yes |
 | Unity.Burst | — | Runtime ref |
 | Unity.Collections | — | Runtime ref |
 | Unity.Mathematics | — | Runtime ref |

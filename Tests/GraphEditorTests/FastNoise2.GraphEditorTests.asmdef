@@ -1,0 +1,36 @@
+{
+	"name": "FastNoise2.GraphEditorTests",
+	"rootNamespace": "FastNoise2.Tests",
+	"references": [
+		"FastNoise2.Runtime",
+		"FastNoise2.Authoring",
+		"FastNoise2.GraphEditor",
+		"Unity.GraphToolkit.Editor",
+		"Unity.GraphToolkit.Common.Editor",
+		"Unity.Collections",
+		"UnityEngine.TestRunner",
+		"UnityEditor.TestRunner"
+	],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": true,
+	"precompiledReferences": [
+		"nunit.framework.dll"
+	],
+	"autoReferenced": false,
+	"defineConstraints": [
+		"UNITY_INCLUDE_TESTS",
+		"FN2_HAS_GRAPH_TOOLKIT"
+	],
+	"versionDefines": [
+		{
+			"name": "com.unity.graphtoolkit",
+			"expression": "",
+			"define": "FN2_HAS_GRAPH_TOOLKIT"
+		}
+	],
+	"noEngineReferences": false
+}

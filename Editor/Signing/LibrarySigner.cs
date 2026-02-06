@@ -112,18 +112,17 @@ namespace FastNoise2.Editor.Signing
 			{
 				case RuntimePlatform.OSXEditor:
 					paths.Add("Plugins/macos/lib/libFastNoise.dylib");
-					paths.Add("Plugins/macos/bin/NodeEditor");
 					break;
 				case RuntimePlatform.LinuxEditor:
 					paths.Add("Plugins/linux/lib/libFastNoise.so");
-					paths.Add("Plugins/linux/bin/NodeEditor");
 					break;
 				// Windows: no signing needed
 			}
 			return paths;
 		}
 
-		static string GetPackageRoot() => NoiseToolProxy.NoiseToolProxy.GetPackageRoot();
+		static string GetPackageRoot() =>
+			System.IO.Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
 
 		static void RunShell(string command)
 		{

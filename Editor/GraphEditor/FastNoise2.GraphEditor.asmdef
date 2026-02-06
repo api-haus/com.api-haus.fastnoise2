@@ -1,0 +1,29 @@
+{
+	"name": "FastNoise2.GraphEditor",
+	"rootNamespace": "FastNoise2",
+	"references": [
+		"FastNoise2.Runtime",
+		"FastNoise2.Authoring",
+		"Unity.GraphToolkit.Editor",
+		"Unity.GraphToolkit.Common.Editor"
+	],
+	"includePlatforms": [
+		"Editor"
+	],
+	"excludePlatforms": [],
+	"allowUnsafeCode": false,
+	"overrideReferences": false,
+	"precompiledReferences": [],
+	"autoReferenced": false,
+	"defineConstraints": [
+		"FN2_HAS_GRAPH_TOOLKIT"
+	],
+	"versionDefines": [
+		{
+			"name": "com.unity.graphtoolkit",
+			"expression": "",
+			"define": "FN2_HAS_GRAPH_TOOLKIT"
+		}
+	],
+	"noEngineReferences": false
+}

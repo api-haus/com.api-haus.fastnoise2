@@ -1,117 +1,49 @@
 using System;
-using FastNoise2.Authoring.NoiseGraph;
 using UnityEditor;
 using UnityEngine;
+using FastNoise2.Authoring.NoiseGraph;
 
 namespace FastNoise2.Editor
 {
 	[CustomPropertyDrawer(typeof(FastNoiseGraph))]
 	public class FastNoiseGraphPropertyDrawer : PropertyDrawer
 	{
-		private const int EDIT_BUTTON_WIDTH = 60;
-		private const int PADDING = 5;
-		private const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
-
-		private static Action<FastNoiseGraphPropertyDrawer, bool> s_editorWasActivatedAction;
-
-		private bool m_IsEditing;
-		private SerializedProperty m_Property;
+		const int BUTTON_WIDTH = 50;
+		const int PADDING = 4;
+		const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
 
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
-			m_Property = property;
-
-			// Using BeginProperty / EndProperty on the parent property means that
-			// prefab override logic works on the entire property.
 			EditorGUI.BeginProperty(position, label, property);
-
-			// Draw label
 			position = EditorGUI.PrefixLabel(position, GUIUtility.GetControlID(FocusType.Passive), label);
 
-			// Don't make child fields be indented
 			int indent = EditorGUI.indentLevel;
 			EditorGUI.indentLevel = 0;
 
-			// Calculate rects
-			Rect encodedValueRect = new(
-				position.x,
-				position.y,
-				position.width - EDIT_BUTTON_WIDTH - PADDING,
-				position.height
-			);
-			Rect buttonRect = new(
-				position.x + (position.width - EDIT_BUTTON_WIDTH),
-				position.y,
-				EDIT_BUTTON_WIDTH,
-				position.height
-			);
+			// Layout: [encoded field] [Copy] [Paste]
+			float buttonsWidth = BUTTON_WIDTH * 2 + PADDING * 2;
+			Rect fieldRect = new(position.x, position.y, position.width - buttonsWidth, position.height);
+			Rect copyRect = new(fieldRect.xMax + PADDING, position.y, BUTTON_WIDTH, position.height);
+			Rect pasteRect = new(copyRect.xMax + PADDING, position.y, BUTTON_WIDTH, position.height);
 
-			// Draw fields - pass GUIContent.none to each so they are drawn without labels
-			EditorGUI.PropertyField(
-				encodedValueRect,
-				property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH),
-				GUIContent.none
-			);
-			bool isButtonClicked = EditorGUI.LinkButton(buttonRect, "Edit Noise");
+			var encodedProp = property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH);
+			EditorGUI.PropertyField(fieldRect, encodedProp, GUIContent.none);
 
-			if (isButtonClicked)
-				OnEditButtonClicked();
+			if (GUI.Button(copyRect, "Copy"))
+				EditorGUIUtility.systemCopyBuffer = encodedProp.stringValue;
 
-			// Set indent back to what it was
-			EditorGUI.indentLevel = indent;
-
-			s_editorWasActivatedAction -= OnEditorWasActivated;
-			s_editorWasActivatedAction += OnEditorWasActivated;
-
-			EditorGUI.EndProperty();
-		}
-
-		private void OnEditorWasActivated(FastNoiseGraphPropertyDrawer editor, bool wasActivated)
-		{
-			if (wasActivated && editor != this)
-				OnDeactivate();
-		}
-
-		private void OnEditButtonClicked()
-		{
-			if (m_IsEditing)
-				OnDeactivate();
-			else
-				OnActivate();
-		}
-
-		private void OnActivate()
-		{
-			if (m_IsEditing)
-				return;
-			m_IsEditing = true;
-
-			s_editorWasActivatedAction?.Invoke(this, true);
-
-			System.Diagnostics.Process myProcess = NoiseToolProxy.NoiseToolProxy.LaunchNoiseTool();
-			myProcess.Exited += (_, _) =>
+			if (GUI.Button(pasteRect, "Paste"))
 			{
-				OnDeactivate(true);
-			};
+				string clipboard = EditorGUIUtility.systemCopyBuffer;
+				if (!string.IsNullOrEmpty(clipboard))
+				{
+					encodedProp.stringValue = clipboard;
+					property.serializedObject.ApplyModifiedProperties();
+				}
+			}
 
-			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings += OnCopiedNodeSettings;
-		}
-
-		private void OnCopiedNodeSettings(string encodedNode)
-		{
-			m_Property.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH).stringValue = encodedNode;
-			m_Property.serializedObject.ApplyModifiedProperties();
-		}
-
-		private void OnDeactivate(bool force = false)
-		{
-			NoiseToolProxy.NoiseToolProxy.CopiedNodeSettings -= OnCopiedNodeSettings;
-
-			if (!m_IsEditing && !force)
-				return;
-			m_IsEditing = false;
-
-			s_editorWasActivatedAction?.Invoke(this, false);
+			EditorGUI.indentLevel = indent;
+			EditorGUI.EndProperty();
 		}
 	}
 }
