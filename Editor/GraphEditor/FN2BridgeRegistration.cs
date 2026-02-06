@@ -25,10 +25,16 @@ namespace FastNoise2.Editor.GraphEditor
 
 			FN2BridgeCallbacks.IsFN2Graph = graph => graph is FastNoiseEditorGraph;
 
+			FN2BridgeCallbacks.CompileFullGraph = graph =>
+				FastNoiseGraphCompiler.Compile(graph as FastNoiseEditorGraph);
+
+			FN2BridgeCallbacks.RenderPreviewWithFrequency = FastNoisePreview.RenderPreview;
+
 			FN2BridgeCallbacks.WindowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(
 				"Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph_Grey.png");
 
 			EditorApplication.update += GraphToolkitBridge.ApplyWindowIcons;
+			EditorApplication.update += GraphToolkitBridge.ApplyWindowCustomizations;
 		}
 
 		static FN2BridgeMemberInfo[] GetMemberInfos(string nodeTypeName)

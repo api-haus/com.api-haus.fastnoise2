@@ -63,6 +63,18 @@ namespace FastNoise2.Editor.GraphEditor
 		public static Func<Unity.GraphToolkit.Editor.Graph, bool> IsFN2Graph;
 
 		/// <summary>
+		/// Compiles the entire graph from its output node to an encoded string.
+		/// Parameter: graph. Returns null on failure.
+		/// </summary>
+		public static Func<Unity.GraphToolkit.Editor.Graph, string> CompileFullGraph;
+
+		/// <summary>
+		/// Renders a noise preview from an encoded string with custom frequency.
+		/// Parameters: encoded, width, height, frequency. Returns null on failure.
+		/// </summary>
+		public static Func<string, int, int, float, Texture2D> RenderPreviewWithFrequency;
+
+		/// <summary>
 		/// Optional icon to display in the graph editor window title bar.
 		/// Set by the FN2 editor assembly at startup.
 		/// </summary>

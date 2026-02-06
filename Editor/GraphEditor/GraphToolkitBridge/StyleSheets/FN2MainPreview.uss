@@ -1,0 +1,32 @@
+.fn2-main-preview {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 144px;
+    background-color: #202020;
+    border-width: 1px;
+    border-color: #121212;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.fn2-main-preview__header {
+    background-color: #282828;
+    padding: 4px 8px;
+    border-bottom-width: 1px;
+    border-bottom-color: #121212;
+}
+
+.fn2-main-preview__title {
+    color: #878787;
+    font-size: 11px;
+    -unity-font-style: bold;
+}
+
+.fn2-main-preview__image {
+    width: 128px;
+    height: 128px;
+    margin: 8px;
+    align-self: center;
+    border-radius: 3px;
+}

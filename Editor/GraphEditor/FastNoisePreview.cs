@@ -10,6 +10,11 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		public static Texture2D RenderPreview(string encoded, int width, int height)
 		{
+			return RenderPreview(encoded, width, height, 0.02f);
+		}
+
+		public static Texture2D RenderPreview(string encoded, int width, int height, float frequency)
+		{
 #if FN2_USER_SIGNED
 			if (string.IsNullOrEmpty(encoded))
 				return null;
@@ -21,7 +26,7 @@ namespace FastNoise2.Editor.GraphEditor
 			try
 			{
 				float[] noiseData = new float[width * height];
-				noise.GenUniformGrid2D(noiseData, 0f, 0f, width, height, 0.02f, 0.02f, 1337);
+				noise.GenUniformGrid2D(noiseData, 0f, 0f, width, height, frequency, frequency, 1337);
 
 				var texture = new Texture2D(width, height, TextureFormat.R8, false)
 				{

@@ -36,6 +36,15 @@ namespace FastNoise2.Editor.GraphEditor
 			AddToClassList(fn2UssClassName);
 			GraphElementHelper.AddStylesheet(this, "FN2NodeView.uss",
 				"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
+
+			// Move output port into preview container for overlay positioning
+			var outputRow = this.Q(className: "fn2-member-row--output");
+			var preview = this.Q(className: "fn2-texture-preview-part");
+			if (outputRow != null && preview != null)
+			{
+				outputRow.RemoveFromHierarchy();
+				preview.Add(outputRow);
+			}
 		}
 	}
 }

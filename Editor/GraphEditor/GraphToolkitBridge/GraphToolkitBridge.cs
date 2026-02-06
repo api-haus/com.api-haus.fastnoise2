@@ -1,4 +1,7 @@
+using UnityEditor;
+using UnityEditor.Overlays;
 using UnityEngine;
+using UnityEngine.UIElements;
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 
@@ -10,6 +13,19 @@ namespace FastNoise2.Editor.GraphEditor
 	/// </summary>
 	public static class GraphToolkitBridge
 	{
+		const string SentinelName = "fn2-graph-customized";
+
+		static readonly string[] k_OverlaysToHide =
+		{
+			"gtf-blackboard",
+			"gtf-options",
+			"gtf-error-notifications",
+			"gtf-breadcrumbs",
+		};
+
+		static StyleSheet s_WindowStyleSheet;
+		static StyleSheet s_MainPreviewStyleSheet;
+
 		public static INode CreateNode(Graph graph, Node node, Vector2 position)
 		{
 			GraphModelImp impl = graph.m_Implementation;
@@ -69,6 +85,68 @@ namespace FastNoise2.Editor.GraphEditor
 					tool.Icon = FN2BridgeCallbacks.WindowIcon;
 				}
 			}
+		}
+
+		/// <summary>
+		/// Hides unused overlays, injects window-level USS, and adds a Main Preview
+		/// element to any open FN2 graph editor windows. Guarded by a sentinel element
+		/// so customizations are applied only once per window.
+		/// Called from EditorApplication.update in the FN2 editor assembly.
+		/// </summary>
+		public static void ApplyWindowCustomizations()
+		{
+			if (FN2BridgeCallbacks.IsFN2Graph == null)
+				return;
+
+			foreach (var window in Resources.FindObjectsOfTypeAll<GraphViewEditorWindowImp>())
+			{
+				var tool = window.GraphTool;
+				if (tool?.ToolState?.GraphModel is not GraphModelImp graphModel
+					|| graphModel.Graph == null
+					|| !FN2BridgeCallbacks.IsFN2Graph(graphModel.Graph))
+					continue;
+
+				var graphView = window.rootVisualElement.Q<GraphView>();
+				if (graphView == null)
+					continue;
+
+				// Guard: skip if already customized
+				if (graphView.Q(SentinelName) != null)
+					continue;
+
+				// Hide overlays
+				foreach (string overlayId in k_OverlaysToHide)
+					HideOverlay(window, overlayId);
+
+				// Inject window-level USS
+				if (s_WindowStyleSheet == null)
+					s_WindowStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss");
+				if (s_WindowStyleSheet != null)
+					window.rootVisualElement.styleSheets.Add(s_WindowStyleSheet);
+
+				// Inject Main Preview USS
+				if (s_MainPreviewStyleSheet == null)
+					s_MainPreviewStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2MainPreview.uss");
+				if (s_MainPreviewStyleSheet != null)
+					window.rootVisualElement.styleSheets.Add(s_MainPreviewStyleSheet);
+
+				// Add Main Preview
+				var mainPreview = new FN2MainPreview();
+				graphView.Add(mainPreview);
+
+				// Add invisible sentinel
+				var sentinel = new VisualElement { name = SentinelName };
+				sentinel.style.display = DisplayStyle.None;
+				graphView.Add(sentinel);
+			}
+		}
+
+		static void HideOverlay(EditorWindow window, string overlayId)
+		{
+			if (window.TryGetOverlay(overlayId, out Overlay overlay))
+				overlay.displayed = false;
 		}
 	}
 }
