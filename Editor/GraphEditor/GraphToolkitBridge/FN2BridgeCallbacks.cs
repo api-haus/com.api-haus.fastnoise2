@@ -75,6 +75,12 @@ namespace FastNoise2.Editor.GraphEditor
 		public static Func<string, int, int, float, Texture2D> RenderPreviewWithFrequency;
 
 		/// <summary>
+		/// Shared preview frequency/scale used by both the main preview and node previews.
+		/// Adjusted by scroll-wheel on the main preview element.
+		/// </summary>
+		public static float PreviewFrequency = 0.02f;
+
+		/// <summary>
 		/// Optional icon to display in the graph editor window title bar.
 		/// Set by the FN2 editor assembly at startup.
 		/// </summary>

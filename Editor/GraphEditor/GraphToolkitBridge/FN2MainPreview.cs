@@ -14,13 +14,11 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		const int PreviewSize = 128;
 		const long UpdateIntervalMs = 500;
-		const float DefaultFrequency = 0.02f;
 		const float MinFrequency = 0.001f;
 		const float MaxFrequency = 0.2f;
 		const float ScrollMultiplier = 1.1f;
 
 		readonly Image m_Image;
-		float m_Frequency = DefaultFrequency;
 		string m_LastEncoded;
 		Texture2D m_CachedTexture;
 
@@ -53,7 +51,8 @@ namespace FastNoise2.Editor.GraphEditor
 		void OnWheel(WheelEvent evt)
 		{
 			float factor = evt.delta.y > 0 ? ScrollMultiplier : 1f / ScrollMultiplier;
-			m_Frequency = Mathf.Clamp(m_Frequency * factor, MinFrequency, MaxFrequency);
+			FN2BridgeCallbacks.PreviewFrequency = Mathf.Clamp(
+				FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
 
 			// Force re-render at new frequency
 			RenderFromEncoded(m_LastEncoded);
@@ -103,7 +102,7 @@ namespace FastNoise2.Editor.GraphEditor
 				return;
 
 			var newTexture = FN2BridgeCallbacks.RenderPreviewWithFrequency(
-				encoded, PreviewSize, PreviewSize, m_Frequency);
+				encoded, PreviewSize, PreviewSize, FN2BridgeCallbacks.PreviewFrequency);
 
 			if (m_CachedTexture != null && m_CachedTexture != newTexture)
 				Object.DestroyImmediate(m_CachedTexture);

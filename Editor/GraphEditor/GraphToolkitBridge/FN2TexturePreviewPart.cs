@@ -10,7 +10,7 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		public static readonly string ussClassName = "fn2-texture-preview-part";
 		const int PreviewSize = 128;
-		const long TickIntervalMs = 50; // 20 Hz
+		const long TickIntervalMs = 16; // ~60 Hz
 
 		// --- Shared round-robin state ---
 		static readonly List<FN2TexturePreviewPart> s_Parts = new();
@@ -44,12 +44,17 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Image.AddToClassList("fn2-preview-image");
 			m_Root.Add(m_Image);
 
-			parent.Add(m_Root);
-
-			s_Parts.Add(this);
-			EnsureTickLoop();
-
+			m_Root.RegisterCallback<AttachToPanelEvent>(OnAttach);
 			m_Root.RegisterCallback<DetachFromPanelEvent>(OnDetach);
+
+			parent.Add(m_Root);
+		}
+
+		void OnAttach(AttachToPanelEvent _)
+		{
+			if (!s_Parts.Contains(this))
+				s_Parts.Add(this);
+			EnsureTickLoop();
 		}
 
 		void OnDetach(DetachFromPanelEvent _)

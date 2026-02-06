@@ -90,7 +90,7 @@ namespace FastNoise2.Editor.GraphEditor
 			if (string.IsNullOrEmpty(encoded))
 				return null;
 
-			return FastNoisePreview.RenderPreview(encoded, width, height);
+			return FastNoisePreview.RenderPreview(encoded, width, height, FN2BridgeCallbacks.PreviewFrequency);
 		}
 	}
 }
