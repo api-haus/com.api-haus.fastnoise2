@@ -47,14 +47,20 @@ namespace FastNoise2.Generators
 
 		internal static int EnumIndex(string nodeName, string memberName, string enumValue)
 		{
-			FastNoise.Metadata meta = FastNoise.GetNodeMetadata(nodeName);
+			FN2NodeDef def = FN2NodeRegistry.GetNodeDef(nodeName);
 			string key = memberName.Replace(" ", "").ToLower();
-			if (!meta.members.TryGetValue(key, out var member))
+			if (!def.TryGetMember(key, out var member))
 				throw new ArgumentException($"Unknown member '{memberName}' on '{nodeName}'");
+			if (member.EnumValues == null)
+				throw new ArgumentException($"Member '{memberName}' on '{nodeName}' is not an enum");
 			string enumKey = enumValue.Replace(" ", "").ToLower();
-			if (!member.enumNames.TryGetValue(enumKey, out int idx))
-				throw new ArgumentException($"Unknown enum value '{enumValue}' for '{memberName}'");
-			return idx;
+			for (int i = 0; i < member.EnumValues.Length; i++)
+			{
+				if (member.EnumValues[i].Replace(" ", "").Equals(enumKey,
+						StringComparison.OrdinalIgnoreCase))
+					return i;
+			}
+			throw new ArgumentException($"Unknown enum value '{enumValue}' for '{memberName}'");
 		}
 
 		#region Fractal

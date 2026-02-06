@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using FastNoise2.Bindings;
 
 namespace FastNoise2.Generators
 {
@@ -43,11 +41,10 @@ namespace FastNoise2.Generators
 				return referenceNodes[refId];
 			}
 
-			FastNoise.Metadata meta = FastNoise.GetMetadataById(nodeId);
-			if (meta == null) return null;
+			FN2NodeDef def = FN2NodeRegistry.GetNodeDefById(nodeId);
+			if (def == null) return null;
 
-			// Recover the proper node name from metadata
-			string nodeName = GetProperNodeName(meta);
+			string nodeName = def.NodeName;
 
 			var variables = new Dictionary<string, int>();
 			var nodeLookups = new Dictionary<string, NodeDescriptor>();
@@ -63,9 +60,9 @@ namespace FastNoise2.Generators
 				if (!stream.TryReadInt32(out int value))
 					return null;
 
-				string memberName = FindVariableMemberByIndex(meta, memberIndex);
-				if (memberName != null)
-					variables[memberName] = value;
+				var member = def.FindVariableMemberByIndex(memberIndex);
+				if (member.HasValue)
+					variables[member.Value.Name] = value;
 
 				if (!stream.TryReadMemberLookup(out memberType, out memberIndex))
 					return null;
@@ -75,15 +72,14 @@ namespace FastNoise2.Generators
 			if (memberType == TypeLookup)
 			{
 				int count = memberIndex;
-				var lookupMembers = GetMembersOfType(meta,
-					FastNoise.Metadata.Member.Type.NodeLookup);
+				var lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
 
 				for (int i = 0; i < count; i++)
 				{
 					NodeDescriptor child = DeserialiseNodeDataInternal(stream, referenceNodes);
 					if (i < lookupMembers.Count && child != null)
 					{
-						nodeLookups[lookupMembers[i].name] = child;
+						nodeLookups[lookupMembers[i].Name] = child;
 					}
 					// If child is null or extra, we still consumed the bytes
 				}
@@ -98,17 +94,17 @@ namespace FastNoise2.Generators
 				if (memberType == TypeHybridLookup)
 				{
 					NodeDescriptor child = DeserialiseNodeDataInternal(stream, referenceNodes);
-					string memberName = FindHybridMemberByIndex(meta, memberIndex);
-					if (memberName != null && child != null)
-						hybrids[memberName] = new HybridValue(child);
+					var member = def.FindHybridMemberByIndex(memberIndex);
+					if (member.HasValue && child != null)
+						hybrids[member.Value.Name] = new HybridValue(child);
 				}
 				else if (memberType == TypeHybridVariable)
 				{
 					if (!stream.TryReadInt32(out int bits))
 						return null;
-					string memberName = FindHybridMemberByIndex(meta, memberIndex);
-					if (memberName != null)
-						hybrids[memberName] = new HybridValue(BitConverter.Int32BitsToSingle(bits));
+					var member = def.FindHybridMemberByIndex(memberIndex);
+					if (member.HasValue)
+						hybrids[member.Value.Name] = new HybridValue(BitConverter.Int32BitsToSingle(bits));
 				}
 
 				if (!stream.TryReadMemberLookup(out memberType, out memberIndex))
@@ -119,51 +115,6 @@ namespace FastNoise2.Generators
 			referenceNodes.Add(descriptor);
 			return descriptor;
 		}
-
-		/// <summary>
-		/// The metadata name is stored lowercased. We need to recover the proper-cased
-		/// name from the native library.
-		/// </summary>
-		static string GetProperNodeName(FastNoise.Metadata meta)
-		{
-#if FN2_USER_SIGNED
-			IntPtr namePtr = FastNoise.fnGetMetadataName(meta.id);
-			return System.Runtime.InteropServices.Marshal.PtrToStringAnsi(namePtr);
-#else
-			throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
-#endif
-		}
-
-		static string FindVariableMemberByIndex(FastNoise.Metadata meta, int index)
-		{
-			foreach (var kv in meta.members)
-			{
-				var m = kv.Value;
-				if (m.index == index && (m.type == FastNoise.Metadata.Member.Type.Float
-						|| m.type == FastNoise.Metadata.Member.Type.Int
-						|| m.type == FastNoise.Metadata.Member.Type.Enum))
-					return kv.Key;
-			}
-			return null;
-		}
-
-		static string FindHybridMemberByIndex(FastNoise.Metadata meta, int index)
-		{
-			foreach (var kv in meta.members)
-			{
-				if (kv.Value.index == index &&
-					kv.Value.type == FastNoise.Metadata.Member.Type.Hybrid)
-					return kv.Key;
-			}
-			return null;
-		}
-
-		static List<FastNoise.Metadata.Member> GetMembersOfType(FastNoise.Metadata meta,
-			FastNoise.Metadata.Member.Type type) =>
-			meta.members.Values
-				.Where(m => m.type == type)
-				.OrderBy(m => m.index)
-				.ToList();
 
 		/// <summary>
 		/// Streaming byte reader with NodeEnd stack decompression.

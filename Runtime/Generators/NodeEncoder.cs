@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using FastNoise2.Bindings;
 
 namespace FastNoise2.Generators
 {
@@ -45,36 +43,35 @@ namespace FastNoise2.Generators
 				return true;
 			}
 
-			FastNoise.Metadata meta = FastNoise.GetNodeMetadata(descriptor.NodeName);
+			FN2NodeDef def = FN2NodeRegistry.GetNodeDef(descriptor.NodeName);
 
 			// Node ID
 			FlushNodeEndStack(stream, ref nodeEndStack);
-			stream.Add((byte)meta.id);
+			stream.Add((byte)def.Id);
 
 			// Resolve member indices and emit variables
-			// We serialize all values (no default-skip optimization)
 			foreach (var kv in descriptor.Variables)
 			{
 				string key = FormatLookup(kv.Key);
-				if (!meta.members.TryGetValue(key, out var member))
+				if (!def.TryGetMember(key, out var member))
 					throw new ArgumentException(
 						$"Unknown variable '{kv.Key}' on '{descriptor.NodeName}'");
 
-				AddMemberLookup(stream, ref nodeEndStack, TypeVariable, (byte)member.index);
+				AddMemberLookup(stream, ref nodeEndStack, TypeVariable, (byte)member.Index);
 				AddInt32(stream, ref nodeEndStack, kv.Value);
 			}
 
-			// Count node lookups from metadata, emit TypeLookup header
-			int nodeLookupCount = CountMembersOfType(meta, FastNoise.Metadata.Member.Type.NodeLookup);
+			// Count node lookups, emit TypeLookup header
+			int nodeLookupCount = def.NodeLookupCount;
 			if (nodeLookupCount > 0)
 			{
 				AddMemberLookup(stream, ref nodeEndStack, TypeLookup, (byte)nodeLookupCount);
 
 				// Emit children in metadata order
-				var lookupMembers = GetMembersOfType(meta, FastNoise.Metadata.Member.Type.NodeLookup);
+				var lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
 				foreach (var member in lookupMembers)
 				{
-					string originalName = FindOriginalName(descriptor.NodeLookups, member.name);
+					string originalName = FindOriginalName(descriptor.NodeLookups, member.LookupKey);
 					if (originalName != null && descriptor.NodeLookups.TryGetValue(originalName,
 							out var child))
 					{
@@ -86,18 +83,18 @@ namespace FastNoise2.Generators
 					{
 						// Node lookup not provided — emit a Constant node as fallback
 						FlushNodeEndStack(stream, ref nodeEndStack);
-						var constMeta = FastNoise.GetNodeMetadata("Constant");
-						stream.Add((byte)constMeta.id);
+						FN2NodeDef constDef = FN2NodeRegistry.GetNodeDef("Constant");
+						stream.Add((byte)constDef.Id);
 						PushNodeEnd(ref nodeEndStack);
 					}
 				}
 			}
 
 			// Emit hybrids in metadata order
-			var hybridMembers = GetMembersOfType(meta, FastNoise.Metadata.Member.Type.Hybrid);
+			var hybridMembers = def.GetMembersOfType(FN2MemberType.Hybrid);
 			foreach (var member in hybridMembers)
 			{
-				string originalName = FindOriginalName(descriptor.Hybrids, member.name);
+				string originalName = FindOriginalName(descriptor.Hybrids, member.LookupKey);
 				if (originalName == null)
 					continue; // hybrid not specified, use default
 
@@ -105,7 +102,7 @@ namespace FastNoise2.Generators
 				if (hv.IsNode)
 				{
 					AddMemberLookup(stream, ref nodeEndStack, TypeHybridLookup,
-						(byte)member.index);
+						(byte)member.Index);
 					if (!SerialiseNodeDataInternal(hv.NodeValue, stream, ref nodeEndStack,
 							referenceIds))
 						return false;
@@ -113,7 +110,7 @@ namespace FastNoise2.Generators
 				else
 				{
 					AddMemberLookup(stream, ref nodeEndStack, TypeHybridVariable,
-						(byte)member.index);
+						(byte)member.Index);
 					AddInt32(stream, ref nodeEndStack,
 						BitConverter.SingleToInt32Bits(hv.FloatValue));
 				}
@@ -170,17 +167,6 @@ namespace FastNoise2.Generators
 			stream.Add((byte)(value & 0xFF));
 			stream.Add((byte)((value >> 8) & 0xFF));
 		}
-
-		static int CountMembersOfType(FastNoise.Metadata meta,
-			FastNoise.Metadata.Member.Type type) =>
-			meta.members.Values.Count(m => m.type == type);
-
-		static List<FastNoise.Metadata.Member> GetMembersOfType(FastNoise.Metadata meta,
-			FastNoise.Metadata.Member.Type type) =>
-			meta.members.Values
-				.Where(m => m.type == type)
-				.OrderBy(m => m.index)
-				.ToList();
 
 		/// <summary>
 		/// Find the original (case-preserving) key in a dictionary that matches a
