@@ -19,7 +19,7 @@ namespace FastNoise2.Authoring.NoiseGraph
 		public FixedString4096Bytes Fixed4096 => new(encodedGraph);
 
 		[SerializeField]
-		private string encodedGraph = "DQAFAAAAAAAAQAgAAAAAAD8AAAAAAA==";
+		private string encodedGraph = "Bg@AMhCBA==";
 
 		public string EncodedValue => encodedGraph;
 

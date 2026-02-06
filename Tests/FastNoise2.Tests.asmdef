@@ -3,6 +3,7 @@
 	"rootNamespace": "FastNoise2.Tests",
 	"references": [
 		"FastNoise2.Runtime",
+		"FastNoise2.Authoring",
 		"Unity.Burst",
 		"Unity.Collections",
 		"Unity.Mathematics",
