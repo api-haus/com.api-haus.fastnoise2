@@ -31,7 +31,7 @@ namespace FastNoise2.Editor.GraphEditor
 			{
 				float[] data = new float[width * height];
 				var pan = FN2BridgeCallbacks.PanOffset;
-				noise.GenUniformGrid2D(data, pan.x, pan.y, width, height, frequency, frequency, 1337);
+				var minMax = noise.GenUniformGrid2D(data, pan.x, pan.y, width, height, frequency, frequency, 1337);
 
 				var texture = new Texture2D(width, height, TextureFormat.RFloat, false)
 				{
@@ -39,9 +39,19 @@ namespace FastNoise2.Editor.GraphEditor
 					wrapMode = TextureWrapMode.Clamp
 				};
 
-				// Remap [-1,1] to [0,1]
-				for (int i = 0; i < data.Length; i++)
-					data[i] = data[i] * 0.5f + 0.5f;
+				// Normalize to actual data range so peaks are consistent across zoom levels
+				float range = minMax.max - minMax.min;
+				if (range < 1e-6f)
+				{
+					for (int i = 0; i < data.Length; i++)
+						data[i] = 0.5f;
+				}
+				else
+				{
+					float invRange = 1f / range;
+					for (int i = 0; i < data.Length; i++)
+						data[i] = (data[i] - minMax.min) * invRange;
+				}
 
 				texture.SetPixelData(data, 0);
 				texture.Apply(false, false);

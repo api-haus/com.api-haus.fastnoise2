@@ -84,20 +84,9 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 float cp = cos(_CamPitch);
                 float3 camDir = float3(cp * sin(_CamYaw), sin(_CamPitch), -cp * cos(_CamYaw));
 
-                // Auto-frame: sample heightmap grid to find actual height range
-                float s0 = tex2Dlod(_HeightMap, float4(0.50, 0.50, 0, 0)).r;
-                float s1 = tex2Dlod(_HeightMap, float4(0.25, 0.25, 0, 0)).r;
-                float s2 = tex2Dlod(_HeightMap, float4(0.75, 0.25, 0, 0)).r;
-                float s3 = tex2Dlod(_HeightMap, float4(0.25, 0.75, 0, 0)).r;
-                float s4 = tex2Dlod(_HeightMap, float4(0.75, 0.75, 0, 0)).r;
-                float s5 = tex2Dlod(_HeightMap, float4(0.50, 0.25, 0, 0)).r;
-                float s6 = tex2Dlod(_HeightMap, float4(0.50, 0.75, 0, 0)).r;
-                float s7 = tex2Dlod(_HeightMap, float4(0.25, 0.50, 0, 0)).r;
-                float s8 = tex2Dlod(_HeightMap, float4(0.75, 0.50, 0, 0)).r;
-                float hMin = min(min(min(min(s0,s1),min(s2,s3)),min(min(s4,s5),min(s6,s7))),s8) * _HeightScale;
-                float hMax = max(max(max(max(s0,s1),max(s2,s3)),max(max(s4,s5),max(s6,s7))),s8) * _HeightScale;
-                float midH = (hMin + hMax) * 0.5;
-                float halfH = max((hMax - hMin) * 0.5, 0.01);
+                // Frame based on theoretical height range for consistent scale across zoom
+                float midH = _HeightScale * 0.5;
+                float halfH = max(_HeightScale * 0.5, 0.01);
 
                 float3 camTarget = float3(0.5, midH, 0.5);
                 float radius = length(float3(0.5, halfH, 0.5));
