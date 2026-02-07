@@ -69,6 +69,7 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 
 			s_Material.SetTexture("_HeightMap", heightmap);
+			s_Material.SetFloat("_CamDist", FN2BridgeCallbacks.CameraDistance);
 			Graphics.Blit(null, target, s_Material);
 		}
 	}

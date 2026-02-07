@@ -18,6 +18,8 @@ namespace FastNoise2.Editor.GraphEditor
 		const float MinFrequency = 0.001f;
 		const float MaxFrequency = 0.2f;
 		const float ScrollMultiplier = 1.1f;
+		const float MinCamDist = 0.3f;
+		const float MaxCamDist = 3.0f;
 
 		readonly Label m_Title;
 		readonly Button m_ModeToggle;
@@ -96,13 +98,21 @@ namespace FastNoise2.Editor.GraphEditor
 		void OnWheel(WheelEvent evt)
 		{
 			float factor = evt.delta.y > 0 ? ScrollMultiplier : 1f / ScrollMultiplier;
-			FN2BridgeCallbacks.PreviewFrequency = Mathf.Clamp(
-				FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
 
-			// Force re-render at new frequency
-			m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
+			if (FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+			{
+				FN2BridgeCallbacks.CameraDistance = Mathf.Clamp(
+					FN2BridgeCallbacks.CameraDistance * factor, MinCamDist, MaxCamDist);
+				m_Widget.SetCameraDistance(FN2BridgeCallbacks.CameraDistance);
+			}
+			else
+			{
+				FN2BridgeCallbacks.PreviewFrequency = Mathf.Clamp(
+					FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
+				m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
+			}
+
 			FN2EditorUpdate.NotifyGraphChanged();
-
 			evt.StopPropagation();
 		}
 

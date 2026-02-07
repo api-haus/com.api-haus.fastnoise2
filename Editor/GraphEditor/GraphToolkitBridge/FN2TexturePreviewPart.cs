@@ -20,6 +20,7 @@ namespace FastNoise2.Editor.GraphEditor
 		static int s_ScanGeneration;
 		static int s_ScanIndex;
 		static float s_LastFrequency;
+		static float s_LastCamDist;
 		static FN2PreviewWidget.PreviewMode s_LastMode;
 
 		// --- Instance ---
@@ -99,13 +100,16 @@ namespace FastNoise2.Editor.GraphEditor
 			if (s_Parts.Count == 0 || FN2BridgeCallbacks.CompileNodeSubtree == null)
 				return;
 
-			// Phase 1: Detect global setting changes (frequency / mode)
+			// Phase 1: Detect global setting changes (frequency / mode / camera distance)
 			float currentFrequency = FN2BridgeCallbacks.PreviewFrequency;
+			float currentCamDist = FN2BridgeCallbacks.CameraDistance;
 			var currentMode = FN2PreviewWidget.Mode;
 
-			if (currentFrequency != s_LastFrequency || currentMode != s_LastMode)
+			if (currentFrequency != s_LastFrequency || currentCamDist != s_LastCamDist
+				|| currentMode != s_LastMode)
 			{
 				s_LastFrequency = currentFrequency;
+				s_LastCamDist = currentCamDist;
 				s_LastMode = currentMode;
 				for (int i = 0; i < s_Parts.Count; i++)
 					s_Parts[i].m_Dirty = true;

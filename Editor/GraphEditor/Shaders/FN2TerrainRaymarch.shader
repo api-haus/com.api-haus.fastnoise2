@@ -4,6 +4,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
     {
         _HeightMap ("Heightmap", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 0.15
+        _CamDist ("Camera Distance", Float) = 1.0
     }
 
     SubShader
@@ -20,13 +21,14 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             sampler2D _HeightMap;
             float _HeightScale;
+            float _CamDist;
 
             static const float3 BG_COLOR = float3(0.0863, 0.0863, 0.0863); // #161616
             static const float3 COLOR_LOW = float3(0.1098, 0.1098, 0.1098); // #1C1C1C
             static const float3 COLOR_HIGH = float3(0.1804, 0.1804, 0.1804); // #2E2E2E
 
-            static const float3 CAM_POS = float3(0.5, 0.6, -0.2);
             static const float3 CAM_TARGET = float3(0.5, 0.0, 0.5);
+            static const float3 CAM_DIR = normalize(float3(0.5, 0.6, -0.2) - float3(0.5, 0.0, 0.5));
             static const float3 LIGHT_DIR = normalize(float3(0.4, 0.8, -0.3));
 
             static const int MAX_STEPS = 128;
@@ -69,7 +71,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             float3 getCameraRay(float2 uv)
             {
-                float3 forward = normalize(CAM_TARGET - CAM_POS);
+                float3 forward = -CAM_DIR;
                 float3 right = normalize(cross(float3(0, 1, 0), forward));
                 float3 up = cross(forward, right);
                 return normalize(forward + (uv.x - 0.5) * right * 1.2 + (uv.y - 0.5) * up * 1.2);
@@ -77,7 +79,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float3 ro = CAM_POS;
+                float3 ro = CAM_TARGET + CAM_DIR * _CamDist;
                 float3 rd = getCameraRay(i.uv);
 
                 float t = 0.0;
@@ -89,7 +91,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
                     float3 p = ro + rd * t;
 
                     // Out of bounds check
-                    if (p.x < -0.1 || p.x > 1.1 || p.z < -0.1 || p.z > 1.1 || t > 3.0)
+                    if (p.x < -0.1 || p.x > 1.1 || p.z < -0.1 || p.z > 1.1 || t > 3.0 * _CamDist)
                         break;
 
                     float2 xz = saturate(p.xz);
@@ -141,8 +143,8 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
                 float3 color = terrainColor * lighting * ao;
 
-                // Distance fog
-                float fogFactor = smoothstep(0.5, 2.5, t);
+                // Distance fog (scaled with camera distance)
+                float fogFactor = smoothstep(0.5 * _CamDist, 2.5 * _CamDist, t);
                 color = lerp(color, BG_COLOR, fogFactor);
 
                 return fixed4(color, 1);

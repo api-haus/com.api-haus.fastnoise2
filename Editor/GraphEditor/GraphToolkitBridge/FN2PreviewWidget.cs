@@ -24,6 +24,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 		string m_LastEncoded;
 		float m_LastFrequency;
+		float m_LastCamDist;
 		PreviewMode m_LastMode;
 
 		Texture2D m_CachedTexture;
@@ -57,14 +58,27 @@ namespace FastNoise2.Editor.GraphEditor
 		/// </summary>
 		public void SetEncoded(string encoded, float frequency)
 		{
-			if (encoded == m_LastEncoded && Mathf.Approximately(frequency, m_LastFrequency) && Mode == m_LastMode)
+			float camDist = FN2BridgeCallbacks.CameraDistance;
+			if (encoded == m_LastEncoded && Mathf.Approximately(frequency, m_LastFrequency)
+				&& Mathf.Approximately(camDist, m_LastCamDist) && Mode == m_LastMode)
 				return;
 
 			m_LastEncoded = encoded;
 			m_LastFrequency = frequency;
+			m_LastCamDist = camDist;
 			m_LastMode = Mode;
 
 			Render(encoded, frequency);
+		}
+
+		/// <summary>
+		/// Update camera distance and re-render in heightfield mode.
+		/// </summary>
+		public void SetCameraDistance(float dist)
+		{
+			m_LastCamDist = dist;
+			if (Mode == PreviewMode.Heightfield)
+				Render(m_LastEncoded, m_LastFrequency);
 		}
 
 		/// <summary>
