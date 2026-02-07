@@ -117,6 +117,12 @@ namespace FastNoise2.Editor.GraphEditor
 		public static float CameraDistance = 1.0f;
 
 		/// <summary>
+		/// Height scale for the 3D heightfield preview shader.
+		/// Adjusted by the vertical slider in the main preview.
+		/// </summary>
+		public static float HeightScale = 0.15f;
+
+		/// <summary>
 		/// Pan offset in noise space, applied as xOffset/yOffset when generating noise.
 		/// Adjusted by left-mouse-button drag on the preview.
 		/// </summary>
@@ -139,6 +145,12 @@ namespace FastNoise2.Editor.GraphEditor
 		/// Bridge code syncs this with FN2PreviewWidget.Mode.
 		/// </summary>
 		public static int PreviewModeValue;
+
+		/// <summary>
+		/// Preview size in pixels for cross-assembly access.
+		/// Synced by FN2MainPreview on resize and graph load/save.
+		/// </summary>
+		public static int PreviewSizeValue = 128;
 
 		/// <summary>
 		/// Loads persisted preview state from the given graph into the static fields.

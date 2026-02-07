@@ -37,7 +37,6 @@ MonoBehaviour:
         - rid: 4858403389312860316
         - rid: 4858403389312860328
         - rid: 4858403389312860337
-        - rid: 4858403389312860366
         m_GraphWireModels:
         - rid: 4858403389312860309
         - rid: 4858403389312860322
@@ -45,7 +44,6 @@ MonoBehaviour:
         - rid: 4858403389312860335
         - rid: 4858403389312860338
         - rid: 4858403389312860350
-        - rid: 4858403389312860392
         m_GraphStickyNoteModels: []
         m_GraphPlacematModels: []
         m_GraphVariableModels: []
@@ -55,10 +53,10 @@ MonoBehaviour:
         m_LocalSubgraphs: []
         m_LastKnownBounds:
           serializedVersion: 2
-          x: -380.5
+          x: -381.5
           y: -251.5
-          width: 1929.5
-          height: 1024
+          width: 1930.5
+          height: 885
         m_GraphElementMetaData:
         - m_Guid:
             m_Value0: 1599275097827902374
@@ -164,22 +162,6 @@ MonoBehaviour:
             Hash: 726d3d362ce6f59e8dca1d28bfc4a5f5
           m_Category: 2
           m_Index: 5
-        - m_Guid:
-            m_Value0: 13787467209897932217
-            m_Value1: 4003529827057775721
-          m_HashGuid:
-            serializedVersion: 2
-            Hash: b9f54fd660ec56bf69b475852a658f37
-          m_Category: 0
-          m_Index: 7
-        - m_Guid:
-            m_Value0: 16239432607776512217
-            m_Value1: 16993935108061260817
-          m_HashGuid:
-            serializedVersion: 2
-            Hash: d9186aa4ea0d5ee111ec076cf195d6eb
-          m_Category: 2
-          m_Index: 6
         m_EntryPoint:
           rid: 4858403388348694653
         m_Graph:
@@ -199,12 +181,14 @@ MonoBehaviour:
     - rid: 4858403388348694652
       type: {class: FastNoiseEditorGraph, ns: FastNoise2.Editor.GraphEditor, asm: FastNoise2.GraphEditor}
       data:
-        m_PreviewFrequency: 0.001
-        m_PanOffsetX: 4.727512
-        m_PanOffsetY: 2.3589342
-        m_CameraYaw: 2.6749997
-        m_CameraPitch: 0.61999995
+        m_PreviewFrequency: 0.07289055
+        m_PanOffsetX: -16.918453
+        m_PanOffsetY: 3.7069428
+        m_CameraYaw: 1.4549958
+        m_CameraPitch: 0.7599998
         m_PreviewMode: 0
+        m_PreviewSize: 265
+        m_HeightScale: 0.058999985
     - rid: 4858403388348694653
       type: {class: UserNodeModelImp, ns: Unity.GraphToolkit.Editor.Implementation, asm: Unity.GraphToolkit.Editor}
       data:
@@ -328,7 +312,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 634b8f153a43d409b1fc8d928f629392
         m_Version: 2
-        m_Position: {x: 72.5, y: 48}
+        m_Position: {x: 40.53479, y: 8.931427}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -381,7 +365,7 @@ MonoBehaviour:
     - rid: 4858403389312860285
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: -0.5
+        m_Value: -1
     - rid: 4858403389312860286
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -413,7 +397,7 @@ MonoBehaviour:
           - hyb_val_fade
           - hyb_val_fademin
           - hyb_val_fademax
-          values: 00000000000000bf0000803f
+          values: 00000000000080bf0000803f
     - rid: 4858403389312860296
       type: {class: UserNodeModelImp, ns: Unity.GraphToolkit.Editor.Implementation, asm: Unity.GraphToolkit.Editor}
       data:
@@ -424,7 +408,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 5c9627770de40222faa59c323fc245f8
         m_Version: 2
-        m_Position: {x: 467.5, y: -61}
+        m_Position: {x: 472.2307, y: -21.57753}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -465,11 +449,11 @@ MonoBehaviour:
     - rid: 4858403389312860297
       type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 10
+        m_Value: 11
     - rid: 4858403389312860298
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 2
+        m_Value: 2.57
     - rid: 4858403389312860299
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -494,7 +478,7 @@ MonoBehaviour:
           keys:
           - var_octaves
           - var_lacunarity
-          values: 0a00000000000040
+          values: 0b000000e17a2440
         hybridDefaults:
           keys:
           - hyb_val_gain
@@ -542,7 +526,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: a43c4c0da107eb258e3f84ecf644110f
         m_Version: 2
-        m_Position: {x: -365.5, y: 72.5}
+        m_Position: {x: -381.4826, y: 49.414032}
         m_Title: Perlin
         m_Tooltip: 
         m_NodePreviewModel:
@@ -577,7 +561,7 @@ MonoBehaviour:
     - rid: 4858403389312860317
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 2.8
+        m_Value: 3
     - rid: 4858403389312860318
       type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -599,7 +583,7 @@ MonoBehaviour:
           - var_seedoffset
           - var_outputmin
           - var_outputmax
-          values: 3333334009010000000080bf0000803f
+          values: 0000404009010000000080bf0000803f
         hybridDefaults:
           keys: []
           values: 
@@ -645,7 +629,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: c71bb7ab63ac9a7ccf6755ffcc1cc64b
         m_Version: 2
-        m_Position: {x: -347, y: 373}
+        m_Position: {x: -377.18936, y: 344.58643}
         m_Title: Perlin
         m_Tooltip: 
         m_NodePreviewModel:
@@ -680,7 +664,7 @@ MonoBehaviour:
     - rid: 4858403389312860329
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 2.46
+        m_Value: 32
     - rid: 4858403389312860330
       type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -692,7 +676,7 @@ MonoBehaviour:
     - rid: 4858403389312860332
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 1
+        m_Value: 2.76
     - rid: 4858403389312860333
       type: {class: Perlin, ns: FastNoise2.Editor.GraphEditor.Nodes, asm: FastNoise2.GraphEditor}
       data:
@@ -702,7 +686,7 @@ MonoBehaviour:
           - var_seedoffset
           - var_outputmin
           - var_outputmax
-          values: a4701d4000020000000080bf0000803f
+          values: 0000004200020000000080bfd7a33040
         hybridDefaults:
           keys: []
           values: 
@@ -780,7 +764,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 95da73bc5469c60ad35ada296bdcfa03
         m_Version: 2
-        m_Position: {x: 851.8603, y: 59.41017}
+        m_Position: {x: 833.9723, y: 43.14836}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -887,7 +871,7 @@ MonoBehaviour:
     - rid: 4858403389312860346
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 0.1
+        m_Value: 0.08
     - rid: 4858403389312860347
       type: {class: 'Constant`1[[FastNoise2.Editor.GraphEditor.NoiseSignal, FastNoise2.GraphEditor]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data: 
@@ -910,7 +894,7 @@ MonoBehaviour:
         hybridDefaults:
           keys:
           - hyb_val_warpamplitude
-          values: cdcccc3d
+          values: 0ad7a33d
     - rid: 4858403389312860350
       type: {class: WireModel, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -943,170 +927,3 @@ MonoBehaviour:
           m_PortDirection: 1
           m_PortOrientation: 0
           m_Title: Source
-    - rid: 4858403389312860366
-      type: {class: UserNodeModelImp, ns: Unity.GraphToolkit.Editor.Implementation, asm: Unity.GraphToolkit.Editor}
-      data:
-        m_Guid:
-          m_Value0: 13787467209897932217
-          m_Value1: 4003529827057775721
-        m_HashGuid:
-          serializedVersion: 2
-          Hash: b9f54fd660ec56bf69b475852a658f37
-        m_Version: 2
-        m_Position: {x: 402.5, y: 313.5}
-        m_Title: 
-        m_Tooltip: 
-        m_NodePreviewModel:
-          rid: -2
-        m_State: 0
-        m_InputConstantsById:
-          m_KeyList:
-          - __option_var_featurescale
-          - __option_var_seedoffset
-          - __option_var_outputmin
-          - __option_var_outputmax
-          - __option_var_distancefunction
-          - __option_var_distanceindex0
-          - __option_var_distanceindex1
-          - __option_var_returntype
-          - __option_hyb_val_minkowskip
-          - __option_hyb_val_gridjitter
-          - __option_hyb_val_sizejitter
-          - hyb_minkowskip
-          - hyb_gridjitter
-          - hyb_sizejitter
-          m_ValueList:
-          - rid: 4858403389312860367
-          - rid: 4858403389312860368
-          - rid: 4858403389312860369
-          - rid: 4858403389312860370
-          - rid: 4858403389312860371
-          - rid: 4858403389312860372
-          - rid: 4858403389312860373
-          - rid: 4858403389312860374
-          - rid: 4858403389312860375
-          - rid: 4858403389312860376
-          - rid: 4858403389312860377
-          - rid: 4858403389312860378
-          - rid: 4858403389312860379
-          - rid: 4858403389312860380
-        m_InputPortInfos:
-          expandedPortsById:
-            m_KeyList: []
-            m_ValueList: 
-        m_OutputPortInfos:
-          expandedPortsById:
-            m_KeyList: []
-            m_ValueList: 
-        m_Collapsed: 0
-        m_CurrentModeIndex: 0
-        m_ElementColor:
-          m_Color: {r: 0, g: 0, b: 0, a: 0}
-          m_HasUserColor: 0
-        m_Node:
-          rid: 4858403389312860381
-    - rid: 4858403389312860367
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 5.41
-    - rid: 4858403389312860368
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860369
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860370
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 6.16
-    - rid: 4858403389312860371
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860372
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860373
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860374
-      type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860375
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 0
-    - rid: 4858403389312860376
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 1
-    - rid: 4858403389312860377
-      type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Value: 1
-    - rid: 4858403389312860378
-      type: {class: 'Constant`1[[FastNoise2.Editor.GraphEditor.NoiseSignal, FastNoise2.GraphEditor]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data: 
-    - rid: 4858403389312860379
-      type: {class: 'Constant`1[[FastNoise2.Editor.GraphEditor.NoiseSignal, FastNoise2.GraphEditor]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data: 
-    - rid: 4858403389312860380
-      type: {class: 'Constant`1[[FastNoise2.Editor.GraphEditor.NoiseSignal, FastNoise2.GraphEditor]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data: 
-    - rid: 4858403389312860381
-      type: {class: CellularDistance, ns: FastNoise2.Editor.GraphEditor.Nodes, asm: FastNoise2.GraphEditor}
-      data:
-        variableValues:
-          keys:
-          - var_featurescale
-          - var_seedoffset
-          - var_outputmin
-          - var_outputmax
-          - var_distancefunction
-          - var_distanceindex0
-          - var_distanceindex1
-          - var_returntype
-          values: b81ead400000000000000000b81ec54000000000000000000000000000000000
-        hybridDefaults:
-          keys:
-          - hyb_val_minkowskip
-          - hyb_val_gridjitter
-          - hyb_val_sizejitter
-          values: 000000000000803f0000803f
-    - rid: 4858403389312860392
-      type: {class: WireModel, ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
-      data:
-        m_Guid:
-          m_Value0: 16239432607776512217
-          m_Value1: 16993935108061260817
-        m_HashGuid:
-          serializedVersion: 2
-          Hash: d9186aa4ea0d5ee111ec076cf195d6eb
-        m_Version: 2
-        m_FromPortReference:
-          m_NodeModelGuid:
-            m_Value0: 13787467209897932217
-            m_Value1: 4003529827057775721
-          m_NodeModelHashGuid:
-            serializedVersion: 2
-            Hash: b9f54fd660ec56bf69b475852a658f37
-          m_UniqueId: output
-          m_PortDirection: 2
-          m_PortOrientation: 0
-          m_Title: Output
-        m_ToPortReference:
-          m_NodeModelGuid:
-            m_Value0: 776423798427867797
-            m_Value1: 286783879113235155
-          m_NodeModelHashGuid:
-            serializedVersion: 2
-            Hash: 95da73bc5469c60ad35ada296bdcfa03
-          m_UniqueId: hyb_warpamplitude
-          m_PortDirection: 1
-          m_PortOrientation: 0
-          m_Title: WarpAmplitude

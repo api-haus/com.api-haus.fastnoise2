@@ -14,7 +14,9 @@ namespace FastNoise2.Editor.GraphEditor
 	/// </summary>
 	class FN2MainPreview : VisualElement
 	{
-		const int PreviewSize = 128;
+		const int DefaultPreviewSize = 128;
+		const int MinPreviewSize = 64;
+		const int MaxPreviewSize = 512;
 		const double DebounceDelaySec = 0.2;
 		const float MinFrequency = 0.001f;
 		const float MaxFrequency = 0.2f;
@@ -22,22 +24,31 @@ namespace FastNoise2.Editor.GraphEditor
 		const float OrbitSpeed = 0.01f;
 		const float OrbitPitchMin = 0.3f;
 		const float OrbitPitchMax = 1.1f;
+		const float MinHeightScale = 0.02f;
+		const float MaxHeightScale = 0.5f;
+		const float HeightDragSpeed = 0.003f;
 
 		enum DragMode { None, Orbit, Pan }
 
 		readonly Label m_Title;
 		readonly Button m_ModeToggle;
 		readonly FN2PreviewWidget m_Widget;
+		readonly VisualElement m_ResizeHandle;
+		readonly VisualElement m_HeightHandle;
 		readonly Debounce m_Debounce;
 		string m_LastEncoded;
 
 		DragMode m_DragMode;
 		int m_DragButton = -1;
+		bool m_Resizing;
+		bool m_HeightDragging;
+		int m_PreviewSize;
 		Vector2 m_LastPointerPos;
 		Graph m_LoadedGraph;
 
 		public FN2MainPreview()
 		{
+			m_PreviewSize = DefaultPreviewSize;
 			AddToClassList("fn2-main-preview");
 
 			// Header
@@ -57,8 +68,26 @@ namespace FastNoise2.Editor.GraphEditor
 			Add(header);
 
 			// Preview widget
-			m_Widget = new FN2PreviewWidget(PreviewSize);
+			m_Widget = new FN2PreviewWidget(m_PreviewSize);
 			Add(m_Widget);
+
+			// Resize handle at top-left corner (element is anchored bottom-right)
+			m_ResizeHandle = new VisualElement();
+			m_ResizeHandle.AddToClassList("fn2-main-preview__resize-handle");
+			m_ResizeHandle.RegisterCallback<PointerDownEvent>(OnResizeDown);
+			m_ResizeHandle.RegisterCallback<PointerMoveEvent>(OnResizeMove);
+			m_ResizeHandle.RegisterCallback<PointerUpEvent>(OnResizeUp);
+			Add(m_ResizeHandle);
+
+			// Height scale handle (3D mode only, drag vertically to adjust)
+			m_HeightHandle = new Label("\u2195");
+			m_HeightHandle.AddToClassList("fn2-main-preview__height-handle");
+			m_HeightHandle.tooltip = "Drag vertically to adjust height scale";
+			m_HeightHandle.RegisterCallback<PointerDownEvent>(OnHeightDown);
+			m_HeightHandle.RegisterCallback<PointerMoveEvent>(OnHeightMove);
+			m_HeightHandle.RegisterCallback<PointerUpEvent>(OnHeightUp);
+			Add(m_HeightHandle);
+			UpdateHeightHandleVisibility();
 
 			// Scroll-wheel zoom on the entire element
 			RegisterCallback<WheelEvent>(OnWheel);
@@ -69,6 +98,8 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Widget.RegisterCallback<PointerUpEvent>(OnPointerUp);
 
 			m_Debounce = new Debounce(UpdatePreview, DebounceDelaySec);
+
+			ApplySize();
 
 			RegisterCallback<AttachToPanelEvent>(OnAttach);
 			RegisterCallback<DetachFromPanelEvent>(OnDetach);
@@ -103,9 +134,54 @@ namespace FastNoise2.Editor.GraphEditor
 				: FN2PreviewWidget.PreviewMode.Texture;
 
 			m_ModeToggle.text = GetModeLabel();
+			UpdateHeightHandleVisibility();
 			m_Widget.Refresh();
 			FN2EditorUpdate.NotifyGraphChanged();
 			SaveState();
+		}
+
+		void OnHeightDown(PointerDownEvent evt)
+		{
+			if (evt.button != 0)
+				return;
+
+			m_HeightDragging = true;
+			m_LastPointerPos = evt.position;
+			m_HeightHandle.CapturePointer(evt.pointerId);
+			evt.StopPropagation();
+		}
+
+		void OnHeightMove(PointerMoveEvent evt)
+		{
+			if (!m_HeightDragging)
+				return;
+
+			float deltaY = evt.position.y - m_LastPointerPos.y;
+			m_LastPointerPos = evt.position;
+
+			// Drag up = increase height scale
+			FN2BridgeCallbacks.HeightScale = Mathf.Clamp(
+				FN2BridgeCallbacks.HeightScale - deltaY * HeightDragSpeed,
+				MinHeightScale, MaxHeightScale);
+			m_Widget.UpdateHeightScale();
+			evt.StopPropagation();
+		}
+
+		void OnHeightUp(PointerUpEvent evt)
+		{
+			if (!m_HeightDragging)
+				return;
+
+			m_HeightDragging = false;
+			m_HeightHandle.ReleasePointer(evt.pointerId);
+			evt.StopPropagation();
+			SaveState();
+		}
+
+		void UpdateHeightHandleVisibility()
+		{
+			m_HeightHandle.style.display = FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield
+				? DisplayStyle.Flex : DisplayStyle.None;
 		}
 
 		static string GetModeLabel()
@@ -120,7 +196,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 			if (evt.button == 0 && FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
 				m_DragMode = DragMode.Orbit;
-			else if (evt.button == 1 || evt.button == 2)
+			else if (evt.button == 0 || evt.button == 1 || evt.button == 2)
 				m_DragMode = DragMode.Pan;
 			else
 				return;
@@ -179,6 +255,55 @@ namespace FastNoise2.Editor.GraphEditor
 			SaveState();
 		}
 
+		void OnResizeDown(PointerDownEvent evt)
+		{
+			if (evt.button != 0)
+				return;
+
+			m_Resizing = true;
+			m_LastPointerPos = evt.position;
+			m_ResizeHandle.CapturePointer(evt.pointerId);
+			evt.StopPropagation();
+		}
+
+		void OnResizeMove(PointerMoveEvent evt)
+		{
+			if (!m_Resizing)
+				return;
+
+			Vector2 delta = (Vector2)evt.position - m_LastPointerPos;
+			m_LastPointerPos = evt.position;
+
+			// Top-left handle on bottom-right anchored element:
+			// dragging up/left = bigger, down/right = smaller
+			float sizeDelta = -(delta.x + delta.y) * 0.5f;
+			int newSize = Mathf.Clamp(Mathf.RoundToInt(m_PreviewSize + sizeDelta), MinPreviewSize, MaxPreviewSize);
+			if (newSize == m_PreviewSize)
+				return;
+
+			m_PreviewSize = newSize;
+			ApplySize();
+			m_Widget.SetDisplaySize(newSize);
+			evt.StopPropagation();
+		}
+
+		void OnResizeUp(PointerUpEvent evt)
+		{
+			if (!m_Resizing)
+				return;
+
+			m_Resizing = false;
+			m_ResizeHandle.ReleasePointer(evt.pointerId);
+			m_Widget.Resize(m_PreviewSize);
+			evt.StopPropagation();
+			SaveState();
+		}
+
+		void ApplySize()
+		{
+			style.width = m_PreviewSize + 16;
+		}
+
 		void OnWheel(WheelEvent evt)
 		{
 			float factor = evt.delta.y > 0 ? ScrollMultiplier : 1f / ScrollMultiplier;
@@ -188,9 +313,9 @@ namespace FastNoise2.Editor.GraphEditor
 			// Zoom toward cursor: keep the noise-space point under the cursor fixed.
 			// Grid maps screenX directly, screenY is inverted (texture bottom = screen bottom).
 			Vector2 localPos = m_Widget.WorldToLocal(evt.mousePosition);
-			localPos.x = Mathf.Clamp(localPos.x, 0, PreviewSize);
-			localPos.y = Mathf.Clamp(localPos.y, 0, PreviewSize);
-			Vector2 cursorGrid = new Vector2(localPos.x, PreviewSize - localPos.y);
+			localPos.x = Mathf.Clamp(localPos.x, 0, m_PreviewSize);
+			localPos.y = Mathf.Clamp(localPos.y, 0, m_PreviewSize);
+			Vector2 cursorGrid = new Vector2(localPos.x, m_PreviewSize - localPos.y);
 
 			FN2BridgeCallbacks.PanOffset += cursorGrid * (oldFreq - newFreq);
 			FN2BridgeCallbacks.PreviewFrequency = newFreq;
@@ -222,6 +347,7 @@ namespace FastNoise2.Editor.GraphEditor
 				return;
 
 			FN2BridgeCallbacks.PreviewModeValue = (int)FN2PreviewWidget.Mode;
+			FN2BridgeCallbacks.PreviewSizeValue = m_PreviewSize;
 			FN2BridgeCallbacks.SavePreviewState?.Invoke(m_LoadedGraph);
 		}
 
@@ -242,6 +368,10 @@ namespace FastNoise2.Editor.GraphEditor
 				FN2BridgeCallbacks.LoadPreviewState?.Invoke(graph);
 				FN2PreviewWidget.Mode = (FN2PreviewWidget.PreviewMode)FN2BridgeCallbacks.PreviewModeValue;
 				m_ModeToggle.text = GetModeLabel();
+				m_PreviewSize = Mathf.Clamp(FN2BridgeCallbacks.PreviewSizeValue, MinPreviewSize, MaxPreviewSize);
+				UpdateHeightHandleVisibility();
+				ApplySize();
+				m_Widget.Resize(m_PreviewSize);
 			}
 
 			string encoded;

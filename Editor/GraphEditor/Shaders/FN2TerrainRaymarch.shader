@@ -4,7 +4,6 @@ Shader "Hidden/FN2/TerrainRaymarch"
     {
         _HeightMap ("Heightmap", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 0.15
-        _CamDist ("Camera Distance", Float) = 1.0
         _CamYaw ("Camera Yaw", Float) = 0.0
         _CamPitch ("Camera Pitch", Float) = 0.7
     }
@@ -23,7 +22,6 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             sampler2D _HeightMap;
             float _HeightScale;
-            float _CamDist;
             float _CamYaw;
             float _CamPitch;
 
@@ -31,11 +29,10 @@ Shader "Hidden/FN2/TerrainRaymarch"
             static const float3 COLOR_LOW = float3(0.1098, 0.1098, 0.1098); // #1C1C1C
             static const float3 COLOR_HIGH = float3(0.1804, 0.1804, 0.1804); // #2E2E2E
 
-            static const float3 CAM_TARGET = float3(0.5, 0.0, 0.5);
             static const float3 LIGHT_DIR = normalize(float3(0.4, 0.8, -0.3));
 
-            static const int MAX_STEPS = 128;
-            static const int BINARY_STEPS = 6;
+            static const int MAX_STEPS = 192;
+            static const int BINARY_STEPS = 8;
             static const float EPS = 1.0 / 512.0;
 
             struct appdata
@@ -60,7 +57,9 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             float sampleHeight(float2 xz)
             {
-                return tex2Dlod(_HeightMap, float4(xz, 0, 0)).r * _HeightScale;
+                // Zero out samples outside [0,1] to avoid clamping artifacts at edges
+                float2 inside = step(0, xz) * step(xz, 1);
+                return tex2Dlod(_HeightMap, float4(saturate(xz), 0, 0)).r * _HeightScale * inside.x * inside.y;
             }
 
             float3 calcNormal(float2 xz)
@@ -85,7 +84,25 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 float cp = cos(_CamPitch);
                 float3 camDir = float3(cp * sin(_CamYaw), sin(_CamPitch), -cp * cos(_CamYaw));
 
-                float3 ro = CAM_TARGET + camDir * _CamDist;
+                // Auto-frame: sample heightmap grid to find actual height range
+                float s0 = tex2Dlod(_HeightMap, float4(0.50, 0.50, 0, 0)).r;
+                float s1 = tex2Dlod(_HeightMap, float4(0.25, 0.25, 0, 0)).r;
+                float s2 = tex2Dlod(_HeightMap, float4(0.75, 0.25, 0, 0)).r;
+                float s3 = tex2Dlod(_HeightMap, float4(0.25, 0.75, 0, 0)).r;
+                float s4 = tex2Dlod(_HeightMap, float4(0.75, 0.75, 0, 0)).r;
+                float s5 = tex2Dlod(_HeightMap, float4(0.50, 0.25, 0, 0)).r;
+                float s6 = tex2Dlod(_HeightMap, float4(0.50, 0.75, 0, 0)).r;
+                float s7 = tex2Dlod(_HeightMap, float4(0.25, 0.50, 0, 0)).r;
+                float s8 = tex2Dlod(_HeightMap, float4(0.75, 0.50, 0, 0)).r;
+                float hMin = min(min(min(min(s0,s1),min(s2,s3)),min(min(s4,s5),min(s6,s7))),s8) * _HeightScale;
+                float hMax = max(max(max(max(s0,s1),max(s2,s3)),max(max(s4,s5),max(s6,s7))),s8) * _HeightScale;
+                float midH = (hMin + hMax) * 0.5;
+                float halfH = max((hMax - hMin) * 0.5, 0.01);
+
+                float3 camTarget = float3(0.5, midH, 0.5);
+                float radius = length(float3(0.5, halfH, 0.5));
+                float camDist = radius / 0.55;
+                float3 ro = camTarget + camDir * camDist;
                 float3 rd = getCameraRay(i.uv, camDir);
 
                 // Ray-AABB intersection to find valid march range
@@ -105,6 +122,9 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 float t = tEnter;
                 bool hit = false;
 
+                // Scale step conservatism with height: steeper terrain needs smaller steps
+                float adaptFactor = min(0.5, 0.075 / max(_HeightScale, 0.01));
+
                 // Raymarch
                 for (int s = 0; s < MAX_STEPS; s++)
                 {
@@ -113,8 +133,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
                     if (t > tExit)
                         break;
 
-                    float2 xz = saturate(p.xz);
-                    float h = sampleHeight(xz);
+                    float h = sampleHeight(p.xz);
                     float diff = p.y - h;
 
                     if (diff < 0.0005)
@@ -126,7 +145,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
                         {
                             float tM = (tA + tB) * 0.5;
                             float3 pM = ro + rd * tM;
-                            float hM = sampleHeight(saturate(pM.xz));
+                            float hM = sampleHeight(pM.xz);
                             if (pM.y < hM)
                                 tB = tM;
                             else
@@ -138,18 +157,17 @@ Shader "Hidden/FN2/TerrainRaymarch"
                     }
 
                     // Adaptive step size — larger steps when far from surface
-                    t += max(diff * 0.5, 0.002);
+                    t += max(diff * adaptFactor, 0.001);
                 }
 
                 if (!hit)
                     return fixed4(BG_COLOR, 1);
 
                 float3 p = ro + rd * t;
-                float2 xz = saturate(p.xz);
-                float h = sampleHeight(xz);
+                float h = sampleHeight(p.xz);
 
                 // Normal and lighting
-                float3 n = calcNormal(xz);
+                float3 n = calcNormal(p.xz);
                 float ndotl = max(dot(n, LIGHT_DIR), 0.0);
                 float lighting = 0.4 + 0.6 * ndotl;
 
@@ -163,7 +181,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 float3 color = terrainColor * lighting * ao;
 
                 // Distance fog (scaled with camera distance)
-                float fogFactor = smoothstep(0.5 * _CamDist, 2.5 * _CamDist, t);
+                float fogFactor = smoothstep(0.5 * camDist, 2.5 * camDist, t);
                 color = lerp(color, BG_COLOR, fogFactor);
 
                 return fixed4(color, 1);

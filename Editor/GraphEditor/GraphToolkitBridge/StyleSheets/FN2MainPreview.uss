@@ -2,12 +2,12 @@
     position: absolute;
     bottom: 16px;
     right: 16px;
-    width: 144px;
     background-color: #202020;
     border-width: 1px;
     border-color: #121212;
     border-radius: 4px;
     overflow: hidden;
+    padding-bottom: 8px;
 }
 
 .fn2-main-preview__header {
@@ -24,14 +24,6 @@
     color: #878787;
     font-size: 11px;
     -unity-font-style: bold;
-}
-
-.fn2-main-preview__image {
-    width: 128px;
-    height: 128px;
-    margin: 8px;
-    align-self: center;
-    border-radius: 3px;
 }
 
 .fn2-main-preview__mode-toggle {
@@ -51,4 +43,41 @@
 .fn2-main-preview__mode-toggle:hover {
     background-color: #3E3E3E;
     color: #B0B0B0;
+}
+
+.fn2-main-preview__resize-handle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 16px;
+    height: 16px;
+    cursor: resize-up-left;
+}
+
+.fn2-main-preview__resize-handle:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+.fn2-main-preview__height-handle {
+    position: absolute;
+    right: 4px;
+    top: 29px;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    background-color: rgba(136, 136, 136, 0.4);
+    border-width: 1px;
+    border-color: rgba(255, 255, 255, 0.1);
+    cursor: slide-arrow;
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.6);
+    -unity-text-align: middle-center;
+    padding: 0;
+    margin: 0;
+}
+
+.fn2-main-preview__height-handle:hover {
+    background-color: rgba(170, 170, 170, 0.6);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.9);
 }

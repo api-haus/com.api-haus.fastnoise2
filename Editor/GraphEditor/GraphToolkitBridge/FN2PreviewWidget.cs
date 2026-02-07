@@ -21,11 +21,10 @@ namespace FastNoise2.Editor.GraphEditor
 		static RenderTexture s_SharedRT;
 
 		readonly Image m_Image;
-		readonly int m_PreviewSize;
+		int m_PreviewSize;
 
 		string m_LastEncoded;
 		float m_LastFrequency;
-		float m_LastCamDist;
 		Vector2 m_LastPanOffset;
 		float m_LastYaw;
 		float m_LastPitch;
@@ -62,36 +61,24 @@ namespace FastNoise2.Editor.GraphEditor
 		/// </summary>
 		public void SetEncoded(string encoded, float frequency)
 		{
-			float camDist = FN2BridgeCallbacks.CameraDistance;
 			Vector2 pan = FN2BridgeCallbacks.PanOffset;
 			float yaw = FN2BridgeCallbacks.CameraYaw;
 			float pitch = FN2BridgeCallbacks.CameraPitch;
 
 			if (encoded == m_LastEncoded && Mathf.Abs(frequency - m_LastFrequency) < 1e-6f
-				&& Mathf.Abs(camDist - m_LastCamDist) < 1e-6f && pan == m_LastPanOffset
+				&& pan == m_LastPanOffset
 				&& Mathf.Abs(yaw - m_LastYaw) < 1e-6f && Mathf.Abs(pitch - m_LastPitch) < 1e-6f
 				&& Mode == m_LastMode)
 				return;
 
 			m_LastEncoded = encoded;
 			m_LastFrequency = frequency;
-			m_LastCamDist = camDist;
 			m_LastPanOffset = pan;
 			m_LastYaw = yaw;
 			m_LastPitch = pitch;
 			m_LastMode = Mode;
 
 			Render(encoded, frequency);
-		}
-
-		/// <summary>
-		/// Update camera distance and re-blit in heightfield mode (no heightmap regen).
-		/// </summary>
-		public void SetCameraDistance(float dist)
-		{
-			m_LastCamDist = dist;
-			if (Mode == PreviewMode.Heightfield)
-				BlitAndReadback();
 		}
 
 		/// <summary>
@@ -109,6 +96,35 @@ namespace FastNoise2.Editor.GraphEditor
 		{
 			if (Mode == PreviewMode.Heightfield)
 				BlitAndReadback();
+		}
+
+		/// <summary>
+		/// Re-blit the cached heightmap with updated height scale (no heightmap regen).
+		/// </summary>
+		public void UpdateHeightScale()
+		{
+			if (Mode == PreviewMode.Heightfield)
+				BlitAndReadback();
+		}
+
+		/// <summary>
+		/// Update the displayed image size without regenerating textures (for live resize feedback).
+		/// </summary>
+		public void SetDisplaySize(int size)
+		{
+			m_Image.style.width = size;
+			m_Image.style.height = size;
+		}
+
+		/// <summary>
+		/// Change the internal preview size, update display, and force a full re-render.
+		/// </summary>
+		public void Resize(int newSize)
+		{
+			m_PreviewSize = newSize;
+			m_Image.style.width = newSize;
+			m_Image.style.height = newSize;
+			Render(m_LastEncoded, m_LastFrequency);
 		}
 
 		/// <summary>
@@ -203,7 +219,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 		static void EnsureSharedRT(int size)
 		{
-			if (s_SharedRT != null && s_SharedRT.width >= size && s_SharedRT.height >= size)
+			if (s_SharedRT != null && s_SharedRT.width == size && s_SharedRT.height == size)
 				return;
 
 			if (s_SharedRT != null)

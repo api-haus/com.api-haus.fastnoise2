@@ -16,6 +16,8 @@ namespace FastNoise2.Editor.GraphEditor
 		[SerializeField] float m_CameraYaw;
 		[SerializeField] float m_CameraPitch = 0.7f;
 		[SerializeField] int m_PreviewMode;
+		[SerializeField] int m_PreviewSize = 128;
+		[SerializeField] float m_HeightScale = 0.15f;
 
 		internal void LoadPreviewState()
 		{
@@ -24,6 +26,8 @@ namespace FastNoise2.Editor.GraphEditor
 			FN2BridgeCallbacks.CameraYaw = m_CameraYaw;
 			FN2BridgeCallbacks.CameraPitch = m_CameraPitch;
 			FN2BridgeCallbacks.PreviewModeValue = m_PreviewMode;
+			FN2BridgeCallbacks.PreviewSizeValue = m_PreviewSize;
+			FN2BridgeCallbacks.HeightScale = m_HeightScale;
 		}
 
 		internal void SavePreviewState()
@@ -34,6 +38,8 @@ namespace FastNoise2.Editor.GraphEditor
 			m_CameraYaw = FN2BridgeCallbacks.CameraYaw;
 			m_CameraPitch = FN2BridgeCallbacks.CameraPitch;
 			m_PreviewMode = FN2BridgeCallbacks.PreviewModeValue;
+			m_PreviewSize = FN2BridgeCallbacks.PreviewSizeValue;
+			m_HeightScale = FN2BridgeCallbacks.HeightScale;
 		}
 
 		[MenuItem("Assets/Create/FastNoise2/Noise Graph")]
