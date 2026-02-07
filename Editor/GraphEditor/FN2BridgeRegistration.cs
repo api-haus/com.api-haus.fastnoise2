@@ -20,6 +20,7 @@ namespace FastNoise2.Editor.GraphEditor
 				node is FN2EditorNode fn2Node ? fn2Node.NodeTypeName : null;
 
 			FN2BridgeCallbacks.GetMemberInfos = GetMemberInfos;
+			FN2BridgeCallbacks.GetNodeDescription = FN2Descriptions.GetNodeDescription;
 
 			FN2BridgeCallbacks.RenderNodePreview = RenderNodePreview;
 
@@ -72,6 +73,7 @@ namespace FastNoise2.Editor.GraphEditor
 					LookupKey = m.LookupKey,
 					Type = (FN2BridgeMemberType)(int)m.Type,
 					EnumValues = m.EnumValues,
+					Tooltip = FN2Descriptions.GetMemberDescription(nodeTypeName, m.LookupKey),
 				};
 
 				// Map member type to port/option IDs used by FN2EditorNode

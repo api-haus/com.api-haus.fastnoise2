@@ -227,8 +227,20 @@ namespace FastNoise2.Editor.GraphEditor
 				{
 					var constants = new List<Constant> { option.PortModel.EmbeddedValue };
 					var ownerModels = new List<GraphElementModel> { option.PortModel };
-					var editor = InlineValueEditor.CreateEditorForConstants(
-						ownerView.RootView, ownerModels, constants, member.Name);
+
+					BaseModelPropertyField editor;
+					if (member.Type == FN2BridgeMemberType.Enum &&
+						member.EnumValues is { Length: > 0 })
+					{
+						editor = new FN2EnumField(ownerView.RootView, constants,
+							ownerModels, member.EnumValues, member.Name);
+					}
+					else
+					{
+						editor = InlineValueEditor.CreateEditorForConstants(
+							ownerView.RootView, ownerModels, constants, member.Name);
+					}
+
 					if (editor != null)
 					{
 						editorSlot.Add(editor);
@@ -237,6 +249,9 @@ namespace FastNoise2.Editor.GraphEditor
 					}
 				}
 			}
+
+			if (!string.IsNullOrEmpty(member.Tooltip))
+				editorSlot.tooltip = member.Tooltip;
 
 			state.EditorSlot = editorSlot;
 			row.Add(editorSlot);

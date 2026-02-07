@@ -27,6 +27,7 @@ namespace FastNoise2.Editor.GraphEditor
 		public string PortId;
 		public string OptionId;
 		public string[] EnumValues;
+		public string Tooltip;
 	}
 
 	/// <summary>
@@ -115,6 +116,11 @@ namespace FastNoise2.Editor.GraphEditor
 		/// Returns the FN2 node type name (e.g. "Simplex") for a given node.
 		/// </summary>
 		public static Func<Unity.GraphToolkit.Editor.Node, string> GetNodeTypeName;
+
+		/// <summary>
+		/// Returns a tooltip description for the given node type name, or null if none.
+		/// </summary>
+		public static Func<string, string> GetNodeDescription;
 
 		/// <summary>
 		/// Returns ordered member metadata for a given node type name.

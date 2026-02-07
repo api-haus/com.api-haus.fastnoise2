@@ -40,6 +40,7 @@ namespace FastNoise2.Editor.GraphEditor
 				"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
 
 			ApplyCategoryColoring();
+			ApplyNodeTooltip();
 			AddPreviewButton();
 		}
 
@@ -63,6 +64,28 @@ namespace FastNoise2.Editor.GraphEditor
 			sheen.AddToClassList("fn2-node-sheen");
 			sheen.style.backgroundImage = FN2NodeCategory.SheenTexture;
 			titleContainer.Insert(0, sheen);
+		}
+
+		void ApplyNodeTooltip()
+		{
+			if (FN2BridgeCallbacks.GetNodeDescription == null)
+				return;
+
+			var userNodeModel = Model as IUserNodeModelImp;
+			if (userNodeModel == null)
+				return;
+
+			string nodeTypeName = FN2BridgeCallbacks.GetNodeTypeName?.Invoke(userNodeModel.Node);
+			if (string.IsNullOrEmpty(nodeTypeName))
+				return;
+
+			string desc = FN2BridgeCallbacks.GetNodeDescription(nodeTypeName);
+			if (string.IsNullOrEmpty(desc))
+				return;
+
+			var titleContainer = this.Q(className: "ge-node__title-icon-container");
+			if (titleContainer != null)
+				titleContainer.tooltip = desc;
 		}
 
 		void AddPreviewButton()
