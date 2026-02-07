@@ -2,7 +2,7 @@ using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static Unity.Mathematics.math;
+
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -10,7 +10,7 @@ namespace FastNoise2.Editor.GraphEditor
 	/// Floating Main Preview element positioned at the bottom-right of the GraphView.
 	/// Compiles the full graph (or a preview override node's subtree) and renders
 	/// via <see cref="FN2PreviewWidget"/> in either flat texture or heightfield mode.
-	/// Supports scroll-wheel zoom, left-button pan, and hover orbit (3D).
+	/// Supports scroll-wheel zoom, middle/right-button pan, and left-button orbit (3D).
 	/// </summary>
 	class FN2MainPreview : VisualElement
 	{
@@ -19,11 +19,11 @@ namespace FastNoise2.Editor.GraphEditor
 		const float MinFrequency = 0.001f;
 		const float MaxFrequency = 0.2f;
 		const float ScrollMultiplier = 1.1f;
-		const float MinCamDist = 0.3f;
-		const float MaxCamDist = 3.0f;
-		const float OrbitYawRange = 0.8f;
+		const float OrbitSpeed = 0.01f;
 		const float OrbitPitchMin = 0.3f;
 		const float OrbitPitchMax = 1.1f;
+
+		enum DragMode { None, Orbit, Pan }
 
 		readonly Label m_Title;
 		readonly Button m_ModeToggle;
@@ -31,8 +31,10 @@ namespace FastNoise2.Editor.GraphEditor
 		readonly Debounce m_Debounce;
 		string m_LastEncoded;
 
-		bool m_IsPanning;
+		DragMode m_DragMode;
+		int m_DragButton = -1;
 		Vector2 m_LastPointerPos;
+		Graph m_LoadedGraph;
 
 		public FN2MainPreview()
 		{
@@ -61,7 +63,7 @@ namespace FastNoise2.Editor.GraphEditor
 			// Scroll-wheel zoom on the entire element
 			RegisterCallback<WheelEvent>(OnWheel);
 
-			// Pan (left-button drag) and orbit (hover, 3D only) on the widget
+			// Pan (middle/right drag) and orbit (left drag, 3D only) on the widget
 			m_Widget.RegisterCallback<PointerDownEvent>(OnPointerDown);
 			m_Widget.RegisterCallback<PointerMoveEvent>(OnPointerMove);
 			m_Widget.RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -75,6 +77,7 @@ namespace FastNoise2.Editor.GraphEditor
 		void OnAttach(AttachToPanelEvent evt)
 		{
 			m_LastEncoded = null;
+			m_LoadedGraph = null;
 			FN2EditorUpdate.Register(m_Debounce);
 			FN2EditorUpdate.GraphChanged += OnGraphChanged;
 			m_Debounce.Signal();
@@ -82,8 +85,10 @@ namespace FastNoise2.Editor.GraphEditor
 
 		void OnDetach(DetachFromPanelEvent evt)
 		{
+			SaveState();
 			FN2EditorUpdate.GraphChanged -= OnGraphChanged;
 			FN2EditorUpdate.Unregister(m_Debounce);
+			m_LoadedGraph = null;
 		}
 
 		void OnGraphChanged()
@@ -100,6 +105,7 @@ namespace FastNoise2.Editor.GraphEditor
 			m_ModeToggle.text = GetModeLabel();
 			m_Widget.Refresh();
 			FN2EditorUpdate.NotifyGraphChanged();
+			SaveState();
 		}
 
 		static string GetModeLabel()
@@ -109,10 +115,17 @@ namespace FastNoise2.Editor.GraphEditor
 
 		void OnPointerDown(PointerDownEvent evt)
 		{
-			if (evt.button != 0)
+			if (m_DragMode != DragMode.None)
 				return;
 
-			m_IsPanning = true;
+			if (evt.button == 0 && FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+				m_DragMode = DragMode.Orbit;
+			else if (evt.button == 1 || evt.button == 2)
+				m_DragMode = DragMode.Pan;
+			else
+				return;
+
+			m_DragButton = evt.button;
 			m_LastPointerPos = evt.position;
 			m_Widget.CapturePointer(evt.pointerId);
 			evt.StopPropagation();
@@ -120,48 +133,96 @@ namespace FastNoise2.Editor.GraphEditor
 
 		void OnPointerMove(PointerMoveEvent evt)
 		{
-			if (m_IsPanning)
-			{
-				Vector2 delta = (Vector2)evt.position - m_LastPointerPos;
-				m_LastPointerPos = evt.position;
+			if (m_DragMode == DragMode.None)
+				return;
 
-				FN2BridgeCallbacks.PanOffset -= new Vector2(delta.x, -delta.y) * FN2BridgeCallbacks.PreviewFrequency;
+			Vector2 delta = (Vector2)evt.position - m_LastPointerPos;
+			m_LastPointerPos = evt.position;
+
+			if (m_DragMode == DragMode.Pan)
+			{
+				Vector2 screenDelta = new Vector2(delta.x, -delta.y);
+
+				if (FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+				{
+					float yaw = FN2BridgeCallbacks.CameraYaw;
+					float c = Mathf.Cos(yaw);
+					float s = Mathf.Sin(yaw);
+					screenDelta = new Vector2(
+						screenDelta.x * c - screenDelta.y * s,
+						screenDelta.x * s + screenDelta.y * c);
+				}
+
+				FN2BridgeCallbacks.PanOffset -= screenDelta * FN2BridgeCallbacks.PreviewFrequency;
 				m_Widget.SetPanOffset();
-				evt.StopPropagation();
 			}
-			else if (FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+			else
 			{
-				Vector2 localPos = m_Widget.WorldToLocal(evt.position);
-				float normalizedX = saturate(localPos.x / PreviewSize);
-				float normalizedY = saturate(localPos.y / PreviewSize);
-
-				FN2BridgeCallbacks.CameraYaw = (normalizedX - 0.5f) * 2f * OrbitYawRange;
-				FN2BridgeCallbacks.CameraPitch = lerp(OrbitPitchMax, OrbitPitchMin, normalizedY);
+				FN2BridgeCallbacks.CameraYaw += delta.x * OrbitSpeed;
+				FN2BridgeCallbacks.CameraPitch = Mathf.Clamp(
+					FN2BridgeCallbacks.CameraPitch - delta.y * OrbitSpeed, OrbitPitchMin, OrbitPitchMax);
 				m_Widget.UpdateOrbit();
-				evt.StopPropagation();
 			}
+
+			evt.StopPropagation();
 		}
 
 		void OnPointerUp(PointerUpEvent evt)
 		{
-			if (evt.button != 0 || !m_IsPanning)
+			if (m_DragMode == DragMode.None || evt.button != m_DragButton)
 				return;
 
-			m_IsPanning = false;
+			m_DragMode = DragMode.None;
+			m_DragButton = -1;
 			m_Widget.ReleasePointer(evt.pointerId);
 			evt.StopPropagation();
+			SaveState();
 		}
 
 		void OnWheel(WheelEvent evt)
 		{
 			float factor = evt.delta.y > 0 ? ScrollMultiplier : 1f / ScrollMultiplier;
+			float oldFreq = FN2BridgeCallbacks.PreviewFrequency;
+			float newFreq = Mathf.Clamp(oldFreq * factor, MinFrequency, MaxFrequency);
 
-			FN2BridgeCallbacks.PreviewFrequency = clamp(
-				FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
-			m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
+			// Zoom toward cursor: keep the noise-space point under the cursor fixed.
+			// Grid maps screenX directly, screenY is inverted (texture bottom = screen bottom).
+			Vector2 localPos = m_Widget.WorldToLocal(evt.mousePosition);
+			localPos.x = Mathf.Clamp(localPos.x, 0, PreviewSize);
+			localPos.y = Mathf.Clamp(localPos.y, 0, PreviewSize);
+			Vector2 cursorGrid = new Vector2(localPos.x, PreviewSize - localPos.y);
+
+			FN2BridgeCallbacks.PanOffset += cursorGrid * (oldFreq - newFreq);
+			FN2BridgeCallbacks.PreviewFrequency = newFreq;
+			m_Widget.SetEncoded(m_LastEncoded, newFreq);
 
 			FN2EditorUpdate.NotifyGraphChanged();
 			evt.StopPropagation();
+			SaveState();
+		}
+
+		Graph GetGraph()
+		{
+			var graphView = GetFirstAncestorOfType<GraphView>();
+			if (graphView == null)
+				return null;
+
+			var graphModel = graphView.GraphModel as GraphModelImp;
+			var graph = graphModel?.Graph;
+			if (graph == null || FN2BridgeCallbacks.IsFN2Graph == null
+				|| !FN2BridgeCallbacks.IsFN2Graph(graph))
+				return null;
+
+			return graph;
+		}
+
+		void SaveState()
+		{
+			if (m_LoadedGraph == null)
+				return;
+
+			FN2BridgeCallbacks.PreviewModeValue = (int)FN2PreviewWidget.Mode;
+			FN2BridgeCallbacks.SavePreviewState?.Invoke(m_LoadedGraph);
 		}
 
 		void UpdatePreview()
@@ -170,15 +231,18 @@ namespace FastNoise2.Editor.GraphEditor
 				|| FN2BridgeCallbacks.RenderPreviewWithFrequency == null)
 				return;
 
-			var graphView = GetFirstAncestorOfType<GraphView>();
-			if (graphView == null)
+			var graph = GetGraph();
+			if (graph == null)
 				return;
 
-			var graphModel = graphView.GraphModel as GraphModelImp;
-			var graph = graphModel?.Graph;
-			if (graph == null || FN2BridgeCallbacks.IsFN2Graph == null
-				|| !FN2BridgeCallbacks.IsFN2Graph(graph))
-				return;
+			// Load persisted preview state when first accessing a graph
+			if (m_LoadedGraph != graph)
+			{
+				m_LoadedGraph = graph;
+				FN2BridgeCallbacks.LoadPreviewState?.Invoke(graph);
+				FN2PreviewWidget.Mode = (FN2PreviewWidget.PreviewMode)FN2BridgeCallbacks.PreviewModeValue;
+				m_ModeToggle.text = GetModeLabel();
+			}
 
 			string encoded;
 			string title;

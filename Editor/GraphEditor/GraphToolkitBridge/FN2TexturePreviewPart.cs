@@ -21,6 +21,9 @@ namespace FastNoise2.Editor.GraphEditor
 		static int s_ScanIndex;
 		static float s_LastFrequency;
 		static float s_LastCamDist;
+		static UnityEngine.Vector2 s_LastPanOffset;
+		static float s_LastYaw;
+		static float s_LastPitch;
 		static FN2PreviewWidget.PreviewMode s_LastMode;
 
 		// --- Instance ---
@@ -100,16 +103,23 @@ namespace FastNoise2.Editor.GraphEditor
 			if (s_Parts.Count == 0 || FN2BridgeCallbacks.CompileNodeSubtree == null)
 				return;
 
-			// Phase 1: Detect global setting changes (frequency / mode / camera distance)
+			// Phase 1: Detect global setting changes (frequency / mode / camera / pan / orbit)
 			float currentFrequency = FN2BridgeCallbacks.PreviewFrequency;
 			float currentCamDist = FN2BridgeCallbacks.CameraDistance;
+			var currentPan = FN2BridgeCallbacks.PanOffset;
+			float currentYaw = FN2BridgeCallbacks.CameraYaw;
+			float currentPitch = FN2BridgeCallbacks.CameraPitch;
 			var currentMode = FN2PreviewWidget.Mode;
 
 			if (currentFrequency != s_LastFrequency || currentCamDist != s_LastCamDist
-				|| currentMode != s_LastMode)
+				|| currentPan != s_LastPanOffset || currentYaw != s_LastYaw
+				|| currentPitch != s_LastPitch || currentMode != s_LastMode)
 			{
 				s_LastFrequency = currentFrequency;
 				s_LastCamDist = currentCamDist;
+				s_LastPanOffset = currentPan;
+				s_LastYaw = currentYaw;
+				s_LastPitch = currentPitch;
 				s_LastMode = currentMode;
 				for (int i = 0; i < s_Parts.Count; i++)
 					s_Parts[i].m_Dirty = true;

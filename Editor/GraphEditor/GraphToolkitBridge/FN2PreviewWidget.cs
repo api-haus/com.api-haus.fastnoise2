@@ -1,6 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
-using static Unity.Mathematics.math;
+
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -26,6 +26,9 @@ namespace FastNoise2.Editor.GraphEditor
 		string m_LastEncoded;
 		float m_LastFrequency;
 		float m_LastCamDist;
+		Vector2 m_LastPanOffset;
+		float m_LastYaw;
+		float m_LastPitch;
 		PreviewMode m_LastMode;
 
 		Texture2D m_CachedTexture;
@@ -60,13 +63,22 @@ namespace FastNoise2.Editor.GraphEditor
 		public void SetEncoded(string encoded, float frequency)
 		{
 			float camDist = FN2BridgeCallbacks.CameraDistance;
-			if (encoded == m_LastEncoded && abs(frequency - m_LastFrequency) < 1e-6f
-				&& abs(camDist - m_LastCamDist) < 1e-6f && Mode == m_LastMode)
+			Vector2 pan = FN2BridgeCallbacks.PanOffset;
+			float yaw = FN2BridgeCallbacks.CameraYaw;
+			float pitch = FN2BridgeCallbacks.CameraPitch;
+
+			if (encoded == m_LastEncoded && Mathf.Abs(frequency - m_LastFrequency) < 1e-6f
+				&& Mathf.Abs(camDist - m_LastCamDist) < 1e-6f && pan == m_LastPanOffset
+				&& Mathf.Abs(yaw - m_LastYaw) < 1e-6f && Mathf.Abs(pitch - m_LastPitch) < 1e-6f
+				&& Mode == m_LastMode)
 				return;
 
 			m_LastEncoded = encoded;
 			m_LastFrequency = frequency;
 			m_LastCamDist = camDist;
+			m_LastPanOffset = pan;
+			m_LastYaw = yaw;
+			m_LastPitch = pitch;
 			m_LastMode = Mode;
 
 			Render(encoded, frequency);

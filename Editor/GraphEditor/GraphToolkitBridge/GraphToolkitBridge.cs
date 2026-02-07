@@ -113,6 +113,16 @@ namespace FastNoise2.Editor.GraphEditor
 					|| !FN2BridgeCallbacks.IsFN2Graph(graphModel.Graph))
 					continue;
 
+				// Always hide unwanted overlays and toolbar toggles (cheap,
+				// idempotent — runs outside the sentinel guard to survive
+				// overlay-state restoration after domain reloads)
+				foreach (string overlayId in k_OverlaysToHide)
+					HideOverlay(window, overlayId);
+
+				var bbToggle = window.rootVisualElement.Q(name: "Blackboard");
+				if (bbToggle != null)
+					bbToggle.style.display = DisplayStyle.None;
+
 				var graphView = window.rootVisualElement.Q<GraphView>();
 				if (graphView == null)
 					continue;
@@ -123,10 +133,6 @@ namespace FastNoise2.Editor.GraphEditor
 
 				// Replace the item library helper so the add-node menu uses FN2 categories
 				s_ItemLibraryHelperField?.SetValue(graphView, new FN2LibraryHelper(graphModel));
-
-				// Hide overlays
-				foreach (string overlayId in k_OverlaysToHide)
-					HideOverlay(window, overlayId);
 
 				// Inject window-level USS
 				if (s_WindowStyleSheet == null)

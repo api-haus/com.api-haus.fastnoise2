@@ -38,6 +38,17 @@ namespace FastNoise2.Editor.GraphEditor
 			FN2BridgeCallbacks.GenerateTerrainHeightmap = FastNoiseTerrainPreview.GenerateHeightmap;
 			FN2BridgeCallbacks.BlitTerrain = FastNoiseTerrainPreview.BlitTerrain;
 
+			FN2BridgeCallbacks.LoadPreviewState = graph =>
+			{
+				if (graph is FastNoiseEditorGraph fn2Graph)
+					fn2Graph.LoadPreviewState();
+			};
+			FN2BridgeCallbacks.SavePreviewState = graph =>
+			{
+				if (graph is FastNoiseEditorGraph fn2Graph)
+					fn2Graph.SavePreviewState();
+			};
+
 			FN2BridgeCallbacks.WindowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(
 				"Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph_Grey.png");
 

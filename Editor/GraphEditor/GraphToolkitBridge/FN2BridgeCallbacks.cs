@@ -135,6 +135,24 @@ namespace FastNoise2.Editor.GraphEditor
 		public static float CameraPitch = 0.7f;
 
 		/// <summary>
+		/// Preview mode as int for cross-assembly access (0 = Texture, 1 = Heightfield).
+		/// Bridge code syncs this with FN2PreviewWidget.Mode.
+		/// </summary>
+		public static int PreviewModeValue;
+
+		/// <summary>
+		/// Loads persisted preview state from the given graph into the static fields.
+		/// Called when a graph is first opened in the preview.
+		/// </summary>
+		public static Action<Unity.GraphToolkit.Editor.Graph> LoadPreviewState;
+
+		/// <summary>
+		/// Saves current preview state from the static fields into the given graph.
+		/// Called when preview settings change or the editor closes.
+		/// </summary>
+		public static Action<Unity.GraphToolkit.Editor.Graph> SavePreviewState;
+
+		/// <summary>
 		/// Optional icon to display in the graph editor window title bar.
 		/// Set by the FN2 editor assembly at startup.
 		/// </summary>
