@@ -182,13 +182,13 @@ MonoBehaviour:
       type: {class: FastNoiseEditorGraph, ns: FastNoise2.Editor.GraphEditor, asm: FastNoise2.GraphEditor}
       data:
         m_PreviewFrequency: 0.001
-        m_PanOffsetX: -36.16436
-        m_PanOffsetY: 20.669907
-        m_CameraYaw: 11.105
-        m_CameraPitch: 0.695
+        m_PanOffsetX: -39.94445
+        m_PanOffsetY: 13.518295
+        m_CameraYaw: 13.630009
+        m_CameraPitch: 0.77999973
         m_PreviewMode: 1
-        m_PreviewSize: 350
-        m_HeightScale: 0.04549999
+        m_PreviewSize: 194
+        m_HeightScale: 0.043999992
     - rid: 4858403388348694653
       type: {class: UserNodeModelImp, ns: Unity.GraphToolkit.Editor.Implementation, asm: Unity.GraphToolkit.Editor}
       data:
