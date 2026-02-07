@@ -60,6 +60,7 @@ namespace FastNoise2.Editor.GraphEditor
 
 		void OnAttach(AttachToPanelEvent evt)
 		{
+			m_LastEncoded = null;
 			FN2EditorUpdate.Register(m_Debounce);
 			FN2EditorUpdate.GraphChanged += OnGraphChanged;
 			m_Debounce.Signal();
