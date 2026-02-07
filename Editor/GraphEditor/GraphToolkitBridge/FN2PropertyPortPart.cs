@@ -139,72 +139,22 @@ namespace FastNoise2.Editor.GraphEditor
 					case FN2BridgeMemberType.NodeLookup:
 					{
 						// Port connector only — the Port view has its own label
-						if (member.PortId != null &&
-							nodeModel.InputsById.TryGetValue(member.PortId, out var portModel))
-						{
-							state.PortModel = portModel;
-							var portView = ModelViewFactory.CreateUI<Port>(
-								ownerView.RootView, portModel);
-							state.PortView = portView;
-							if (portView != null)
-							{
-								var portSlot = new VisualElement();
-								portSlot.AddToClassList(portSlotUssClassName);
-								portSlot.Add(portView);
-								row.Add(portSlot);
-							}
-						}
+						CreatePortSlot(member, nodeModel, ownerView, row, ref state);
 						break;
 					}
 
 					case FN2BridgeMemberType.Hybrid:
 					{
 						// Port connector (label hidden — the value editor provides it for drag support)
-						if (member.PortId != null &&
-							nodeModel.InputsById.TryGetValue(member.PortId, out var portModel))
+						CreatePortSlot(member, nodeModel, ownerView, row, ref state);
+						if (state.PortView != null)
 						{
-							state.PortModel = portModel;
-							var portView = ModelViewFactory.CreateUI<Port>(
-								ownerView.RootView, portModel);
-							state.PortView = portView;
-							if (portView != null)
-							{
-								portView.AddToClassList("fn2-hybrid-port");
-								// Hide the Port's own label — the value editor label
-								// provides drag-to-adjust instead
-								if (portView.Label != null)
-									portView.Label.style.display = DisplayStyle.None;
-								var portSlot = new VisualElement();
-								portSlot.AddToClassList(portSlotUssClassName);
-								portSlot.Add(portView);
-								row.Add(portSlot);
-							}
+							state.PortView.AddToClassList("fn2-hybrid-port");
+							if (state.PortView.Label != null)
+								state.PortView.Label.style.display = DisplayStyle.None;
 						}
 
-						// Value editor with label (supports drag-to-adjust on the label)
-						var editorSlot = new VisualElement();
-						editorSlot.AddToClassList(editorSlotUssClassName);
-						if (member.OptionId != null)
-						{
-							var option = userNodeModel.GetNodeOptionByName(member.OptionId)
-								as NodeOption;
-							if (option?.PortModel?.EmbeddedValue != null)
-							{
-								var constants = new List<Constant> { option.PortModel.EmbeddedValue };
-								var ownerModels = new List<GraphElementModel> { option.PortModel };
-								var editor = InlineValueEditor.CreateEditorForConstants(
-									ownerView.RootView, ownerModels, constants, member.Name);
-								if (editor != null)
-								{
-									editorSlot.Add(editor);
-									editor.UpdateDisplayedValue();
-									state.Editor = editor;
-								}
-							}
-						}
-
-						state.EditorSlot = editorSlot;
-						row.Add(editorSlot);
+						CreateEditorSlot(member, userNodeModel, ownerView, row, ref state);
 						break;
 					}
 
@@ -212,30 +162,7 @@ namespace FastNoise2.Editor.GraphEditor
 					case FN2BridgeMemberType.Int:
 					case FN2BridgeMemberType.Enum:
 					{
-						// Value editor only (label embedded in the editor)
-						var editorSlot = new VisualElement();
-						editorSlot.AddToClassList(editorSlotUssClassName);
-						if (member.OptionId != null)
-						{
-							var option = userNodeModel.GetNodeOptionByName(member.OptionId)
-								as NodeOption;
-							if (option?.PortModel?.EmbeddedValue != null)
-							{
-								var constants = new List<Constant> { option.PortModel.EmbeddedValue };
-								var ownerModels = new List<GraphElementModel> { option.PortModel };
-								var editor = InlineValueEditor.CreateEditorForConstants(
-									ownerView.RootView, ownerModels, constants, member.Name);
-								if (editor != null)
-								{
-									editorSlot.Add(editor);
-									editor.UpdateDisplayedValue();
-									state.Editor = editor;
-								}
-							}
-						}
-
-						state.EditorSlot = editorSlot;
-						row.Add(editorSlot);
+						CreateEditorSlot(member, userNodeModel, ownerView, row, ref state);
 						break;
 					}
 				}
@@ -266,6 +193,53 @@ namespace FastNoise2.Editor.GraphEditor
 				firstRow.Add(spacer);
 				firstRow.Add(outputPortSlot);
 			}
+		}
+
+		void CreatePortSlot(FN2BridgeMemberInfo member, InputOutputPortsNodeModel nodeModel,
+			ModelView ownerView, VisualElement row, ref MemberRowState state)
+		{
+			if (member.PortId == null ||
+				!nodeModel.InputsById.TryGetValue(member.PortId, out var portModel))
+				return;
+
+			state.PortModel = portModel;
+			var portView = ModelViewFactory.CreateUI<Port>(ownerView.RootView, portModel);
+			state.PortView = portView;
+			if (portView != null)
+			{
+				var portSlot = new VisualElement();
+				portSlot.AddToClassList(portSlotUssClassName);
+				portSlot.Add(portView);
+				row.Add(portSlot);
+			}
+		}
+
+		void CreateEditorSlot(FN2BridgeMemberInfo member, IUserNodeModelImp userNodeModel,
+			ModelView ownerView, VisualElement row, ref MemberRowState state)
+		{
+			var editorSlot = new VisualElement();
+			editorSlot.AddToClassList(editorSlotUssClassName);
+			if (member.OptionId != null)
+			{
+				var option = userNodeModel.GetNodeOptionByName(member.OptionId)
+					as NodeOption;
+				if (option?.PortModel?.EmbeddedValue != null)
+				{
+					var constants = new List<Constant> { option.PortModel.EmbeddedValue };
+					var ownerModels = new List<GraphElementModel> { option.PortModel };
+					var editor = InlineValueEditor.CreateEditorForConstants(
+						ownerView.RootView, ownerModels, constants, member.Name);
+					if (editor != null)
+					{
+						editorSlot.Add(editor);
+						editor.UpdateDisplayedValue();
+						state.Editor = editor;
+					}
+				}
+			}
+
+			state.EditorSlot = editorSlot;
+			row.Add(editorSlot);
 		}
 
 		public override void UpdateUIFromModel(UpdateFromModelVisitor visitor)

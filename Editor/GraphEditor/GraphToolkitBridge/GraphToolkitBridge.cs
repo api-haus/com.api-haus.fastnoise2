@@ -135,18 +135,14 @@ namespace FastNoise2.Editor.GraphEditor
 				s_ItemLibraryHelperField?.SetValue(graphView, new FN2LibraryHelper(graphModel));
 
 				// Inject window-level USS
-				if (s_WindowStyleSheet == null)
-					s_WindowStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss");
-				if (s_WindowStyleSheet != null)
-					window.rootVisualElement.styleSheets.Add(s_WindowStyleSheet);
+				LoadAndApplyStyleSheet(ref s_WindowStyleSheet,
+					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss",
+					window.rootVisualElement);
 
 				// Inject Terrain Background USS
-				if (s_TerrainBackgroundStyleSheet == null)
-					s_TerrainBackgroundStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2TerrainBackground.uss");
-				if (s_TerrainBackgroundStyleSheet != null)
-					window.rootVisualElement.styleSheets.Add(s_TerrainBackgroundStyleSheet);
+				LoadAndApplyStyleSheet(ref s_TerrainBackgroundStyleSheet,
+					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2TerrainBackground.uss",
+					window.rootVisualElement);
 
 				// Add Terrain Background on the visual hierarchy (not contentContainer)
 				// so it renders behind m_GraphViewContainer (GridBackground + nodes).
@@ -154,18 +150,14 @@ namespace FastNoise2.Editor.GraphEditor
 				graphView.hierarchy.Insert(0, terrainBackground);
 
 				// Inject Main Preview USS
-				if (s_MainPreviewStyleSheet == null)
-					s_MainPreviewStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2MainPreview.uss");
-				if (s_MainPreviewStyleSheet != null)
-					window.rootVisualElement.styleSheets.Add(s_MainPreviewStyleSheet);
+				LoadAndApplyStyleSheet(ref s_MainPreviewStyleSheet,
+					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2MainPreview.uss",
+					window.rootVisualElement);
 
 				// Inject Preview Widget USS
-				if (s_PreviewWidgetStyleSheet == null)
-					s_PreviewWidgetStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
-						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2PreviewWidget.uss");
-				if (s_PreviewWidgetStyleSheet != null)
-					window.rootVisualElement.styleSheets.Add(s_PreviewWidgetStyleSheet);
+				LoadAndApplyStyleSheet(ref s_PreviewWidgetStyleSheet,
+					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2PreviewWidget.uss",
+					window.rootVisualElement);
 
 				// Add Main Preview
 				var mainPreview = new FN2MainPreview();
@@ -211,6 +203,14 @@ namespace FastNoise2.Editor.GraphEditor
 			FN2EditorUpdate.NotifyGraphChanged();
 
 			evt.StopPropagation();
+		}
+
+		static void LoadAndApplyStyleSheet(ref StyleSheet cached, string path, VisualElement target)
+		{
+			if (cached == null)
+				cached = AssetDatabase.LoadAssetAtPath<StyleSheet>(path);
+			if (cached != null)
+				target.styleSheets.Add(cached);
 		}
 
 		static void HideOverlay(EditorWindow window, string overlayId)

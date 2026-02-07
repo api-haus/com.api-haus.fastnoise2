@@ -30,6 +30,8 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 		}
 
+		static string NormalizeLookupKey(string key) => key.Replace(" ", "").ToLower();
+
 		struct CreatedNode
 		{
 			public FN2EditorNode EditorNode;
@@ -122,7 +124,7 @@ namespace FastNoise2.Editor.GraphEditor
 		{
 			foreach (var kv in descriptor.Variables)
 			{
-				string lookupKey = kv.Key.Replace(" ", "").ToLower();
+				string lookupKey = NormalizeLookupKey(kv.Key);
 				string optionId = FN2EditorNode.VarPrefix + lookupKey;
 				node.variableValues.SetInt(optionId, kv.Value);
 			}
@@ -135,7 +137,7 @@ namespace FastNoise2.Editor.GraphEditor
 				if (kv.Value.IsNode)
 					continue;
 
-				string lookupKey = kv.Key.Replace(" ", "").ToLower();
+				string lookupKey = NormalizeLookupKey(kv.Key);
 				string optionId = FN2EditorNode.HybridValuePrefix + lookupKey;
 				node.hybridDefaults.SetFloat(optionId, kv.Value.FloatValue);
 			}
@@ -149,7 +151,7 @@ namespace FastNoise2.Editor.GraphEditor
 				if (!nodeMap.TryGetValue(kv.Value, out var childCreated))
 					continue;
 
-				string lookupKey = kv.Key.Replace(" ", "").ToLower();
+				string lookupKey = NormalizeLookupKey(kv.Key);
 				string portId = FN2EditorNode.NodeLookupPrefix + lookupKey;
 				var toPort = parentNode.GetInputPortByName(portId);
 				var fromPort = childCreated.EditorNode.GetOutputPortByName(
@@ -167,7 +169,7 @@ namespace FastNoise2.Editor.GraphEditor
 				if (!nodeMap.TryGetValue(kv.Value.NodeValue, out var childCreated))
 					continue;
 
-				string lookupKey = kv.Key.Replace(" ", "").ToLower();
+				string lookupKey = NormalizeLookupKey(kv.Key);
 				string portId = FN2EditorNode.HybridPortPrefix + lookupKey;
 				var toPort = parentNode.GetInputPortByName(portId);
 				var fromPort = childCreated.EditorNode.GetOutputPortByName(

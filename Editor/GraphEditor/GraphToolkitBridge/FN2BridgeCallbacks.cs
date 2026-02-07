@@ -36,11 +36,63 @@ namespace FastNoise2.Editor.GraphEditor
 	/// </summary>
 	public static class FN2BridgeCallbacks
 	{
+		#region Preview State
+
 		/// <summary>
 		/// Currently previewed node (null = use output node).
 		/// Set by the preview button or P hotkey on a node view.
 		/// </summary>
 		public static Unity.GraphToolkit.Editor.Node PreviewOverrideNode;
+
+		/// <summary>
+		/// Shared preview frequency/scale used by both the main preview and node previews.
+		/// Adjusted by scroll-wheel on the main preview element.
+		/// </summary>
+		public static float PreviewFrequency = 0.02f;
+
+		/// <summary>
+		/// Camera distance multiplier for the 3D heightfield preview.
+		/// Adjusted by scroll-wheel when in heightfield mode.
+		/// </summary>
+		public static float CameraDistance = 1.0f;
+
+		/// <summary>
+		/// Height scale for the 3D heightfield preview shader.
+		/// Adjusted by the vertical slider in the main preview.
+		/// </summary>
+		public static float HeightScale = 0.15f;
+
+		/// <summary>
+		/// Pan offset in noise space, applied as xOffset/yOffset when generating noise.
+		/// Adjusted by left-mouse-button drag on the preview.
+		/// </summary>
+		public static Vector2 PanOffset = Vector2.zero;
+
+		/// <summary>
+		/// Camera yaw angle (radians) for 3D heightfield orbit.
+		/// Controlled by horizontal hover position on the preview.
+		/// </summary>
+		public static float CameraYaw = 0f;
+
+		/// <summary>
+		/// Camera pitch angle (radians) for 3D heightfield orbit.
+		/// Controlled by vertical hover position on the preview.
+		/// </summary>
+		public static float CameraPitch = 0.7f;
+
+		/// <summary>
+		/// Preview mode as int for cross-assembly access (0 = Texture, 1 = Heightfield).
+		/// Bridge code syncs this with FN2PreviewWidget.Mode.
+		/// </summary>
+		public static int PreviewModeValue;
+
+		/// <summary>
+		/// Preview size in pixels for cross-assembly access.
+		/// Synced by FN2MainPreview on resize and graph load/save.
+		/// </summary>
+		public static int PreviewSizeValue = 128;
+
+		#endregion
 
 		/// <summary>
 		/// Compiles the subtree rooted at the given node to an encoded string.
@@ -103,54 +155,6 @@ namespace FastNoise2.Editor.GraphEditor
 		/// Parameters: heightmap, target RenderTexture.
 		/// </summary>
 		public static Action<Texture2D, RenderTexture> BlitTerrain;
-
-		/// <summary>
-		/// Shared preview frequency/scale used by both the main preview and node previews.
-		/// Adjusted by scroll-wheel on the main preview element.
-		/// </summary>
-		public static float PreviewFrequency = 0.02f;
-
-		/// <summary>
-		/// Camera distance multiplier for the 3D heightfield preview.
-		/// Adjusted by scroll-wheel when in heightfield mode.
-		/// </summary>
-		public static float CameraDistance = 1.0f;
-
-		/// <summary>
-		/// Height scale for the 3D heightfield preview shader.
-		/// Adjusted by the vertical slider in the main preview.
-		/// </summary>
-		public static float HeightScale = 0.15f;
-
-		/// <summary>
-		/// Pan offset in noise space, applied as xOffset/yOffset when generating noise.
-		/// Adjusted by left-mouse-button drag on the preview.
-		/// </summary>
-		public static Vector2 PanOffset = Vector2.zero;
-
-		/// <summary>
-		/// Camera yaw angle (radians) for 3D heightfield orbit.
-		/// Controlled by horizontal hover position on the preview.
-		/// </summary>
-		public static float CameraYaw = 0f;
-
-		/// <summary>
-		/// Camera pitch angle (radians) for 3D heightfield orbit.
-		/// Controlled by vertical hover position on the preview.
-		/// </summary>
-		public static float CameraPitch = 0.7f;
-
-		/// <summary>
-		/// Preview mode as int for cross-assembly access (0 = Texture, 1 = Heightfield).
-		/// Bridge code syncs this with FN2PreviewWidget.Mode.
-		/// </summary>
-		public static int PreviewModeValue;
-
-		/// <summary>
-		/// Preview size in pixels for cross-assembly access.
-		/// Synced by FN2MainPreview on resize and graph load/save.
-		/// </summary>
-		public static int PreviewSizeValue = 128;
 
 		/// <summary>
 		/// Loads persisted preview state from the given graph into the static fields.

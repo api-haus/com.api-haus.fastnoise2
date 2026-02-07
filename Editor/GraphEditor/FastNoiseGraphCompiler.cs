@@ -49,7 +49,7 @@ namespace FastNoise2.Editor.GraphEditor
 			return NodeEncoder.Encode(descriptor);
 		}
 
-		static NodeDescriptor CompileFromPort(IPort outputPort,
+		internal static NodeDescriptor CompileFromPort(IPort outputPort,
 			Dictionary<FN2EditorNode, NodeDescriptor> visited)
 		{
 			var ownerNode = GraphToolkitBridge.GetNodeFromPort(outputPort) as FN2EditorNode;
@@ -62,7 +62,7 @@ namespace FastNoise2.Editor.GraphEditor
 			return CompileEditorNode(ownerNode, visited);
 		}
 
-		static NodeDescriptor CompileEditorNode(FN2EditorNode node,
+		internal static NodeDescriptor CompileEditorNode(FN2EditorNode node,
 			Dictionary<FN2EditorNode, NodeDescriptor> visited)
 		{
 			FN2NodeDef def;
