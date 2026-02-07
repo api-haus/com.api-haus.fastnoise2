@@ -56,6 +56,11 @@ namespace FastNoise2.Editor.GraphEditor
 			m_LastEncoded = null;
 		}
 
+		public void Invalidate()
+		{
+			m_LastEncoded = null;
+		}
+
 		/// <summary>
 		/// Feed the widget an encoded noise tree. It renders based on the current mode.
 		/// </summary>

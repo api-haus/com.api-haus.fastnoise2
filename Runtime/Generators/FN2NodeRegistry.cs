@@ -27,6 +27,13 @@ namespace FastNoise2.Generators
 				string rawName = Marshal.PtrToStringAnsi(FastNoise.fnGetMetadataName(id));
 				string nodeName = rawName.Replace(" ", "");
 
+				// Node-level rich metadata
+				string nodeDesc = Marshal.PtrToStringAnsi(FastNoise.fnGetMetadataDescription(id));
+				int groupCount = FastNoise.fnGetMetadataGroupCount(id);
+				var groups = new string[groupCount];
+				for (int gi = 0; gi < groupCount; gi++)
+					groups[gi] = Marshal.PtrToStringAnsi(FastNoise.fnGetMetadataGroupName(id, gi));
+
 				int variableCount = FastNoise.fnGetMetadataVariableCount(id);
 				int nodeLookupCount = FastNoise.fnGetMetadataNodeLookupCount(id);
 				int hybridCount = FastNoise.fnGetMetadataHybridCount(id);
@@ -60,7 +67,15 @@ namespace FastNoise2.Generators
 						}
 					}
 
-					members.Add(new FN2MemberDef(memberName, type, vi, enumValues));
+					string varDesc = Marshal.PtrToStringAnsi(
+						FastNoise.fnGetMetadataVariableDescription(id, vi));
+					float defFloat = FastNoise.fnGetMetadataVariableDefaultFloat(id, vi);
+					int defInt = FastNoise.fnGetMetadataVariableDefaultInt(id, vi);
+					float minFloat = FastNoise.fnGetMetadataVariableMinFloat(id, vi);
+					float maxFloat = FastNoise.fnGetMetadataVariableMaxFloat(id, vi);
+
+					members.Add(new FN2MemberDef(memberName, type, vi, enumValues,
+						varDesc, defFloat, defInt, minFloat, maxFloat));
 				}
 
 				// Node lookups
@@ -74,7 +89,11 @@ namespace FastNoise2.Generators
 					if (dimIdx >= 0)
 						memberName += "XYZW"[dimIdx];
 
-					members.Add(new FN2MemberDef(memberName, FN2MemberType.NodeLookup, ni));
+					string nlDesc = Marshal.PtrToStringAnsi(
+						FastNoise.fnGetMetadataNodeLookupDescription(id, ni));
+
+					members.Add(new FN2MemberDef(memberName, FN2MemberType.NodeLookup, ni,
+						description: nlDesc));
 				}
 
 				// Hybrids
@@ -88,10 +107,16 @@ namespace FastNoise2.Generators
 					if (dimIdx >= 0)
 						memberName += "XYZW"[dimIdx];
 
-					members.Add(new FN2MemberDef(memberName, FN2MemberType.Hybrid, hi));
+					string hybDesc = Marshal.PtrToStringAnsi(
+						FastNoise.fnGetMetadataHybridDescription(id, hi));
+					float hybDefault = FastNoise.fnGetMetadataHybridDefault(id, hi);
+
+					members.Add(new FN2MemberDef(memberName, FN2MemberType.Hybrid, hi,
+						description: hybDesc, defaultFloat: hybDefault));
 				}
 
-				defs.Add(new FN2NodeDef(id, nodeName, members.ToArray()));
+				defs.Add(new FN2NodeDef(id, nodeName, members.ToArray(),
+					nodeDesc, groups));
 			}
 #else
 			var defs = new List<FN2NodeDef>(0);

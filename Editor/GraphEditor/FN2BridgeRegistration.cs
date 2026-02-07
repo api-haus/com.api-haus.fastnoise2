@@ -53,6 +53,42 @@ namespace FastNoise2.Editor.GraphEditor
 			FN2BridgeCallbacks.WindowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(
 				"Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph_Grey.png");
 
+			FN2BridgeCallbacks.GetAllNodeNames = () => FN2NodeRegistry.AllNodeNames;
+
+			FN2BridgeCallbacks.CreateFN2NodeInstance = nodeTypeName =>
+			{
+				var node = new FN2GenericNode();
+				node.SetNodeTypeName(nodeTypeName);
+				return node;
+			};
+
+			FN2BridgeCallbacks.GetFN2EditorNodeType = () => typeof(FN2EditorNode);
+
+			FN2BridgeCallbacks.GetNodeCategoryPath = nodeTypeName =>
+			{
+				try
+				{
+					var def = FN2NodeRegistry.GetNodeDef(nodeTypeName);
+					return def.Groups.Length > 0 ? def.Groups[0] : null;
+				}
+				catch { return null; }
+			};
+
+			FN2BridgeCallbacks.GetNodeCategoryColor = nodeTypeName =>
+			{
+				try
+				{
+					var def = FN2NodeRegistry.GetNodeDef(nodeTypeName);
+					if (def.Groups.Length > 0)
+					{
+						string group = def.Groups[0];
+						return FN2NodeCategory.GetGroupColor(group);
+					}
+				}
+				catch { }
+				return default;
+			};
+
 			EditorApplication.update += GraphToolkitBridge.ApplyWindowIcons;
 			EditorApplication.update += GraphToolkitBridge.ApplyWindowCustomizations;
 		}

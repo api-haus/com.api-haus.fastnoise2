@@ -63,12 +63,14 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Dirty = true;
 			s_ChangeGeneration++;
 			EnsureTickLoop();
+			FN2EditorUpdate.PreviewsInvalidated += OnPreviewsInvalidated;
 			FN2EditorUpdate.NotifyGraphChanged();
 		}
 
 		void OnDetach(DetachFromPanelEvent _)
 		{
 			s_Parts.Remove(this);
+			FN2EditorUpdate.PreviewsInvalidated -= OnPreviewsInvalidated;
 			FN2EditorUpdate.NotifyGraphChanged();
 			if (s_Parts.Count == 0 && s_RoundRobinThrottle != null)
 			{
@@ -157,6 +159,14 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 
 			// Phase 4: Idle — nothing to do
+		}
+
+		void OnPreviewsInvalidated()
+		{
+			m_Dirty = true;
+			s_ChangeGeneration++;
+			m_Widget?.Invalidate();
+			EnsureTickLoop();
 		}
 
 		void RenderPreview()

@@ -10,7 +10,7 @@ namespace FastNoise2.Editor.GraphEditor
 	/// Floating Main Preview element positioned at the bottom-right of the GraphView.
 	/// Compiles the full graph (or a preview override node's subtree) and renders
 	/// via <see cref="FN2PreviewWidget"/> in either flat texture or heightfield mode.
-	/// Supports scroll-wheel zoom, middle/right-button pan, and left-button orbit (3D).
+	/// Supports scroll-wheel zoom, left/middle-button pan, and right-button orbit (3D).
 	/// </summary>
 	class FN2MainPreview : VisualElement
 	{
@@ -92,7 +92,7 @@ namespace FastNoise2.Editor.GraphEditor
 			// Scroll-wheel zoom on the entire element
 			RegisterCallback<WheelEvent>(OnWheel);
 
-			// Pan (middle/right drag) and orbit (left drag, 3D only) on the widget
+			// Pan (left/middle drag) and orbit (right drag, 3D only) on the widget
 			m_Widget.RegisterCallback<PointerDownEvent>(OnPointerDown);
 			m_Widget.RegisterCallback<PointerMoveEvent>(OnPointerMove);
 			m_Widget.RegisterCallback<PointerUpEvent>(OnPointerUp);
@@ -111,6 +111,7 @@ namespace FastNoise2.Editor.GraphEditor
 			m_LoadedGraph = null;
 			FN2EditorUpdate.Register(m_Debounce);
 			FN2EditorUpdate.GraphChanged += OnGraphChanged;
+			FN2EditorUpdate.PreviewsInvalidated += OnPreviewsInvalidated;
 			m_Debounce.Signal();
 		}
 
@@ -118,12 +119,20 @@ namespace FastNoise2.Editor.GraphEditor
 		{
 			SaveState();
 			FN2EditorUpdate.GraphChanged -= OnGraphChanged;
+			FN2EditorUpdate.PreviewsInvalidated -= OnPreviewsInvalidated;
 			FN2EditorUpdate.Unregister(m_Debounce);
 			m_LoadedGraph = null;
 		}
 
 		void OnGraphChanged()
 		{
+			m_Debounce.Signal();
+		}
+
+		void OnPreviewsInvalidated()
+		{
+			m_LastEncoded = null;
+			m_Widget?.Invalidate();
 			m_Debounce.Signal();
 		}
 
@@ -194,7 +203,7 @@ namespace FastNoise2.Editor.GraphEditor
 			if (m_DragMode != DragMode.None)
 				return;
 
-			if (evt.button == 0 && FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+			if (evt.button == 1 && FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
 				m_DragMode = DragMode.Orbit;
 			else if (evt.button == 0 || evt.button == 1 || evt.button == 2)
 				m_DragMode = DragMode.Pan;

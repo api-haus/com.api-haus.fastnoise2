@@ -860,6 +860,19 @@ namespace FastNoise2.Bindings
             int nodeLookupIndex,
             float value
         );
+
+        // Rich metadata queries
+        [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataDescription(int id);
+        [DllImport(NATIVE_LIB)] internal static extern int    fnGetMetadataGroupCount(int id);
+        [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataGroupName(int id, int groupIndex);
+        [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataVariableDescription(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableDefaultFloat(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern int    fnGetMetadataVariableDefaultInt(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableMinFloat(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableMaxFloat(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataNodeLookupDescription(int id, int nodeLookupIndex);
+        [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataHybridDescription(int id, int hybridIndex);
+        [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataHybridDefault(int id, int hybridIndex);
 #endif // FN2_USER_SIGNED
 
         private bool m_IsDisposed;

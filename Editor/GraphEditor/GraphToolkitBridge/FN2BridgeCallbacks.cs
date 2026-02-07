@@ -179,5 +179,34 @@ namespace FastNoise2.Editor.GraphEditor
 		/// Set by the FN2 editor assembly at startup.
 		/// </summary>
 		public static Texture2D WindowIcon;
+
+		/// <summary>
+		/// Returns all registered FN2 node type names from the native metadata registry.
+		/// </summary>
+		public static Func<string[]> GetAllNodeNames;
+
+		/// <summary>
+		/// Creates an FN2 Node instance for the given node type name.
+		/// The returned Node will be passed to UserNodeModelImp.InitCustomNode.
+		/// </summary>
+		public static Func<string, Unity.GraphToolkit.Editor.Node> CreateFN2NodeInstance;
+
+		/// <summary>
+		/// Returns the Type object for FN2EditorNode (or its subclass used for generic nodes).
+		/// Used by the library helper to check SupportedNodes filtering.
+		/// </summary>
+		public static Func<Type> GetFN2EditorNodeType;
+
+		/// <summary>
+		/// Tries to get the category path (group name) for a node type.
+		/// Parameters: nodeTypeName. Returns category path or null.
+		/// </summary>
+		public static Func<string, string> GetNodeCategoryPath;
+
+		/// <summary>
+		/// Tries to get the category color for a node type.
+		/// Parameters: nodeTypeName. Returns Color with alpha > 0 on success, default on failure.
+		/// </summary>
+		public static Func<string, Color> GetNodeCategoryColor;
 	}
 }

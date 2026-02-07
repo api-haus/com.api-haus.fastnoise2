@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -65,12 +66,22 @@ namespace FastNoise2.Editor.GraphEditor
 		public static event Action GraphChanged;
 		public static void NotifyGraphChanged() => GraphChanged?.Invoke();
 
+		public static event Action PreviewsInvalidated;
+		public static void InvalidatePreviews() => PreviewsInvalidated?.Invoke();
+
 		static readonly List<Throttle> s_Throttles = new();
 		static readonly List<Debounce> s_Debounces = new();
 
 		static FN2EditorUpdate()
 		{
 			EditorApplication.update += Tick;
+			EditorSceneManager.sceneOpened += OnSceneOpened;
+		}
+
+		static void OnSceneOpened(UnityEngine.SceneManagement.Scene scene, OpenSceneMode mode)
+		{
+			InvalidatePreviews();
+			NotifyGraphChanged();
 		}
 
 		public static void Register(Throttle t) { if (!s_Throttles.Contains(t)) s_Throttles.Add(t); }

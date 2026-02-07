@@ -19,15 +19,27 @@ namespace FastNoise2.Generators
 		public readonly FN2MemberType Type;
 		public readonly int Index;
 		public readonly string[] EnumValues;
+		public readonly string Description;
+		public readonly float DefaultFloat;
+		public readonly int DefaultInt;
+		public readonly float MinFloat;
+		public readonly float MaxFloat;
 
 		public FN2MemberDef(string name, FN2MemberType type, int index,
-			string[] enumValues = null)
+			string[] enumValues = null, string description = null,
+			float defaultFloat = 0f, int defaultInt = 0,
+			float minFloat = 0f, float maxFloat = 0f)
 		{
 			Name = name;
 			LookupKey = name.Replace(" ", "").ToLower();
 			Type = type;
 			Index = index;
 			EnumValues = enumValues;
+			Description = description;
+			DefaultFloat = defaultFloat;
+			DefaultInt = defaultInt;
+			MinFloat = minFloat;
+			MaxFloat = maxFloat;
 		}
 
 		public bool TryGetEnumIndex(string enumValue, out int index)
@@ -53,14 +65,19 @@ namespace FastNoise2.Generators
 		public readonly int Id;
 		public readonly string NodeName;
 		public readonly FN2MemberDef[] Members;
+		public readonly string Description;
+		public readonly string[] Groups;
 
 		readonly Dictionary<string, FN2MemberDef> m_ByLookupKey;
 
-		public FN2NodeDef(int id, string nodeName, FN2MemberDef[] members)
+		public FN2NodeDef(int id, string nodeName, FN2MemberDef[] members,
+			string description = null, string[] groups = null)
 		{
 			Id = id;
 			NodeName = nodeName;
 			Members = members;
+			Description = description;
+			Groups = groups ?? Array.Empty<string>();
 			m_ByLookupKey = new Dictionary<string, FN2MemberDef>(
 				members.Length, StringComparer.OrdinalIgnoreCase);
 			foreach (var m in members)

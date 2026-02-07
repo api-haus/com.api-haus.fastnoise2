@@ -36,8 +36,18 @@ namespace FastNoise2.Editor.GraphEditor
 		public static INode CreateNode(Graph graph, Node node, Vector2 position)
 		{
 			GraphModelImp impl = graph.m_Implementation;
-			var nodeModel = impl.CreateNodeModel(node, position);
-			return (INode)nodeModel;
+
+			// Use FN2UserNodeModelImp for FN2 nodes so Title returns the node type name
+			if (FN2BridgeCallbacks.IsFN2Node?.Invoke(node) == true)
+			{
+				var nodeModel = impl.CreateNode<FN2UserNodeModelImp>(
+					position: position,
+					initializationCallback: n => n.InitCustomNode(node));
+				return (INode)nodeModel;
+			}
+
+			var model = impl.CreateNodeModel(node, position);
+			return (INode)model;
 		}
 
 		public static void CreateWire(Graph graph, IPort toPort, IPort fromPort)

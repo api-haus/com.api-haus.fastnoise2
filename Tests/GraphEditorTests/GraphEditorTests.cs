@@ -1,7 +1,6 @@
 using System.IO;
 using FastNoise2.Bindings;
 using FastNoise2.Editor.GraphEditor;
-using FastNoise2.Editor.GraphEditor.Nodes;
 using FastNoise2.Generators;
 using NUnit.Framework;
 using Unity.GraphToolkit.Editor;
@@ -19,6 +18,13 @@ namespace FastNoise2.Tests
 	{
 		const string TestAssetDir = "Assets/FastNoise2TestTemp";
 		string m_TestGraphPath;
+
+		static FN2GenericNode MakeNode(string nodeTypeName)
+		{
+			var node = new FN2GenericNode();
+			node.SetNodeTypeName(nodeTypeName);
+			return node;
+		}
 
 		[SetUp]
 		public void SetUp()
@@ -70,7 +76,7 @@ namespace FastNoise2.Tests
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 			int initialCount = graph.nodeCount;
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, Vector2.zero);
 
 			Assert.That(graph.nodeCount, Is.EqualTo(initialCount + 1));
@@ -81,7 +87,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -97,7 +103,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -122,7 +128,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			var simplexINode = GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 			Assert.That(simplexINode, Is.Not.Null, "Bridge returned null INode for Simplex");
 
@@ -187,7 +193,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -222,7 +228,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -257,11 +263,11 @@ namespace FastNoise2.Tests
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
 			// Simplex source node
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			// FractalFBm node — has a NodeLookup "source" input
-			var fbmNode = new FractalFBm();
+			var fbmNode = MakeNode("FractalFBm");
 			GraphToolkitBridge.CreateNode(graph, fbmNode, new Vector2(300, 0));
 
 			// Output node
@@ -304,14 +310,14 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
-			var perlinNode = new Perlin();
+			var perlinNode = MakeNode("Perlin");
 			GraphToolkitBridge.CreateNode(graph, perlinNode, new Vector2(0, 200));
 
 			// Add node has NodeLookup "lhs" and Hybrid "rhs"
-			var addNode = new Add();
+			var addNode = MakeNode("Add");
 			GraphToolkitBridge.CreateNode(graph, addNode, new Vector2(300, 100));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -353,7 +359,7 @@ namespace FastNoise2.Tests
 		{
 			var graph = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();
@@ -414,7 +420,7 @@ namespace FastNoise2.Tests
 			// Step 1: Build a graph manually
 			var graph1 = GraphDatabase.CreateGraph<FastNoiseEditorGraph>(m_TestGraphPath);
 
-			var simplexNode = new Simplex();
+			var simplexNode = MakeNode("Simplex");
 			GraphToolkitBridge.CreateNode(graph1, simplexNode, new Vector2(0, 0));
 
 			var outputNode = new FastNoiseOutputNode();

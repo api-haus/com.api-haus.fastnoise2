@@ -1,0 +1,3 @@
+[submodule "/mnt/archive4/UNITY/Projects/style/Packages/com.auburn.fastnoise2/Native/fastnoise2"]
+	path = /mnt/archive4/UNITY/Projects/style/Packages/com.auburn.fastnoise2/Native/fastnoise2
+	url = git@github.com:api-haus/fastnoise2.git

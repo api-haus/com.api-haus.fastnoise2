@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using FastNoise2.Generators;
 using Unity.GraphToolkit.Editor;
@@ -14,21 +13,6 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		const float NodeSpacingX = 300f;
 		const float NodeSpacingY = 180f;
-
-		static readonly Dictionary<string, Type> s_NodeTypesByName;
-
-		static FastNoiseGraphDecompiler()
-		{
-			s_NodeTypesByName = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
-			var baseType = typeof(FN2EditorNode);
-			foreach (var type in baseType.Assembly.GetTypes())
-			{
-				if (type.IsAbstract || !baseType.IsAssignableFrom(type))
-					continue;
-				// Class name == node type name by convention
-				s_NodeTypesByName[type.Name] = type;
-			}
-		}
 
 		static string NormalizeLookupKey(string key) => key.Replace(" ", "").ToLower();
 
@@ -73,11 +57,9 @@ namespace FastNoise2.Editor.GraphEditor
 
 		static FN2EditorNode CreateNodeByTypeName(string nodeTypeName)
 		{
-			if (s_NodeTypesByName.TryGetValue(nodeTypeName, out var type))
-				return (FN2EditorNode)Activator.CreateInstance(type);
-
-			Debug.LogWarning($"Unknown FN2 node type for decompiler: {nodeTypeName}");
-			return null;
+			var node = new FN2GenericNode();
+			node.SetNodeTypeName(nodeTypeName);
+			return node;
 		}
 
 		static void CreateNodesRecursive(NodeDescriptor descriptor, FastNoiseEditorGraph graph,
