@@ -167,6 +167,9 @@ namespace FastNoise2.Editor.GraphEditor
 					}
 				}
 
+				if (!string.IsNullOrEmpty(member.Tooltip))
+					row.tooltip = member.Tooltip;
+
 				m_Root.Add(row);
 				m_Rows.Add(state);
 
@@ -249,9 +252,6 @@ namespace FastNoise2.Editor.GraphEditor
 					}
 				}
 			}
-
-			if (!string.IsNullOrEmpty(member.Tooltip))
-				editorSlot.tooltip = member.Tooltip;
 
 			state.EditorSlot = editorSlot;
 			row.Add(editorSlot);

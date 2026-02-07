@@ -76,29 +76,87 @@ namespace FastNoise2.Editor.GraphEditor
 			{ "RemoveDimension", "Removes specified dimension from input coordinates" },
 		};
 
+		/// <summary>
+		/// Member descriptions keyed by "NodeType.lookupkey".
+		/// Falls back to <see cref="SharedMembers"/> when no node-specific entry exists.
+		/// </summary>
 		static readonly Dictionary<string, string> Members = new()
 		{
 			// Cellular - Distance Function
-			{ "CellularDistance.distancefunction", "How distance between points is measured" },
-			{ "CellularValue.distancefunction", "How distance between points is measured" },
-			{ "CellularLookup.distancefunction", "How distance between points is measured" },
+			{ "CellularDistance.distancefunction", "How distance between cell points is measured" },
+			{ "CellularValue.distancefunction", "How distance between cell points is measured" },
+			{ "CellularLookup.distancefunction", "How distance between cell points is measured" },
 			{ "DistanceToPoint.distancefunction", "How distance to the target point is measured" },
 
 			// Cellular - Return Type
 			{ "CellularDistance.returntype", "How Index0 and Index1 distances are combined" },
+			{ "CellularDistance.distanceindex0", "Rank of the first distance value (0 = closest)" },
+			{ "CellularDistance.distanceindex1", "Rank of the second distance value (1 = second closest)" },
+			{ "CellularValue.valueindex", "Rank of the cell point whose value is returned (0 = closest)" },
 
-			// Fade - Interpolation
+			// Fade
 			{ "Fade.interpolation", "Smoothing curve applied to the fade factor" },
+			{ "Fade.fade", "Blend factor between A and B" },
+			{ "Fade.fademin", "Fade value that maps to 100% A" },
+			{ "Fade.fademax", "Fade value that maps to 100% B" },
 
-			// RemoveDimension
-			{ "RemoveDimension.removedimension", "Which axis to remove from the input" },
+			// Remap
+			{ "Remap.frommin", "Lower bound of the input range" },
+			{ "Remap.frommax", "Upper bound of the input range" },
+			{ "Remap.tomin", "Lower bound of the output range" },
+			{ "Remap.tomax", "Upper bound of the output range" },
+
+			// ConvertRGBA8
+			{ "ConvertRGBA8.min", "Input value that maps to black (0)" },
+			{ "ConvertRGBA8.max", "Input value that maps to white (255)" },
+
+			// Terrace
+			{ "Terrace.stepcount", "Number of discrete terrace levels" },
+			{ "Terrace.smoothness", "How rounded the terrace edges are (0 = sharp steps)" },
+
+			// DomainRotate
+			{ "DomainRotate.yaw", "Rotation around the vertical axis (degrees)" },
+			{ "DomainRotate.pitch", "Rotation around the lateral axis (degrees)" },
+			{ "DomainRotate.roll", "Rotation around the forward axis (degrees)" },
 
 			// DomainRotatePlane
 			{ "DomainRotatePlane.rotationtype", "Which plane pair to rotate for artifact reduction" },
 
-			// Domain Warp - Vectorization
+			// RemoveDimension
+			{ "RemoveDimension.removedimension", "Which axis to remove from the input" },
+
+			// AddDimension
+			{ "AddDimension.newdimensionposition", "Coordinate value for the new dimension" },
+
+			// Domain Warp
 			{ "DomainWarpSimplex.vectorizationscheme", "Method used to compute warp vectors" },
 			{ "DomainWarpSuperSimplex.vectorizationscheme", "Method used to compute warp vectors" },
+
+			// PowInt
+			{ "PowInt.pow", "Integer exponent (faster than float power)" },
+
+			// PingPong
+			{ "PingPong.pingpongstrength", "Amplitude of the ping-pong bounce effect" },
+		};
+
+		/// <summary>
+		/// Shared member descriptions keyed by lookupkey alone.
+		/// Used as fallback when no node-specific entry exists in <see cref="Members"/>.
+		/// </summary>
+		static readonly Dictionary<string, string> SharedMembers = new()
+		{
+			{ "featurescale", "Size of one noise period in world units" },
+			{ "seedoffset", "Offsets the random seed for variation" },
+			{ "octaves", "Number of noise layers to combine" },
+			{ "lacunarity", "Frequency multiplier between successive octaves" },
+			{ "gain", "Amplitude multiplier between successive octaves" },
+			{ "weightedstrength", "How much each octave's amplitude depends on the previous octave's output" },
+			{ "warpamplitude", "Strength of coordinate distortion" },
+			{ "scaling", "Uniform scale factor applied to all axes" },
+			{ "gridjitter", "How far cell points wander from grid centers (0\u20131)" },
+			{ "sizejitter", "Random variation in cell size (0\u20131)" },
+			{ "minkowskip", "Minkowski distance exponent (1 = Manhattan, 2 = Euclidean)" },
+			{ "smoothness", "Blending radius for smooth min/max" },
 		};
 
 		public static string GetNodeDescription(string nodeTypeName)
@@ -108,8 +166,11 @@ namespace FastNoise2.Editor.GraphEditor
 
 		public static string GetMemberDescription(string nodeTypeName, string lookupKey)
 		{
-			var key = nodeTypeName + "." + lookupKey;
-			return Members.TryGetValue(key, out var desc) ? desc : null;
+			if (Members.TryGetValue(nodeTypeName + "." + lookupKey, out var desc))
+				return desc;
+			if (SharedMembers.TryGetValue(lookupKey, out desc))
+				return desc;
+			return null;
 		}
 	}
 }
