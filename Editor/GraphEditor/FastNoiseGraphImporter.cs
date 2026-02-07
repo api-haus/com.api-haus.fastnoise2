@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace FastNoise2.Editor.GraphEditor
 {
-	[ScriptedImporter(2, "fn2graph")]
+	[ScriptedImporter(3, "fn2graph")]
 	public class FastNoiseGraphImporter : ScriptedImporter
 	{
 		public override void OnImportAsset(AssetImportContext ctx)
@@ -25,13 +25,6 @@ namespace FastNoise2.Editor.GraphEditor
 			if (!string.IsNullOrEmpty(encoded))
 			{
 				asset.SetEncodedGraph(encoded);
-
-				var preview = FastNoisePreview.RenderPreview(encoded, 128, 128);
-				if (preview != null)
-				{
-					preview.name = "NoisePreview";
-					ctx.AddObjectToAsset("preview", preview);
-				}
 			}
 			else if (error != null)
 			{
