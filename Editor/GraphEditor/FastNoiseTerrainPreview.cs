@@ -6,13 +6,18 @@ namespace FastNoise2.Editor.GraphEditor
 {
 	static class FastNoiseTerrainPreview
 	{
-		const int HeightmapSize = 512;
-		const float Frequency = 0.01f;
+		const int DefaultHeightmapSize = 512;
+		const float DefaultFrequency = 0.01f;
 		const string ShaderPath = "Packages/com.auburn.fastnoise2/Editor/GraphEditor/Shaders/FN2TerrainRaymarch.shader";
 
 		static Material s_Material;
 
 		public static Texture2D GenerateHeightmap(string encoded)
+		{
+			return GenerateHeightmap(encoded, DefaultHeightmapSize, DefaultHeightmapSize, DefaultFrequency);
+		}
+
+		public static Texture2D GenerateHeightmap(string encoded, int width, int height, float frequency)
 		{
 #if FN2_USER_SIGNED
 			if (string.IsNullOrEmpty(encoded))
@@ -24,10 +29,10 @@ namespace FastNoise2.Editor.GraphEditor
 
 			try
 			{
-				float[] data = new float[HeightmapSize * HeightmapSize];
-				noise.GenUniformGrid2D(data, 0f, 0f, HeightmapSize, HeightmapSize, Frequency, Frequency, 1337);
+				float[] data = new float[width * height];
+				noise.GenUniformGrid2D(data, 0f, 0f, width, height, frequency, frequency, 1337);
 
-				var texture = new Texture2D(HeightmapSize, HeightmapSize, TextureFormat.RFloat, false)
+				var texture = new Texture2D(width, height, TextureFormat.RFloat, false)
 				{
 					filterMode = FilterMode.Bilinear,
 					wrapMode = TextureWrapMode.Clamp

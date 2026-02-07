@@ -7,20 +7,23 @@ namespace FastNoise2.Editor.GraphEditor
 {
 	/// <summary>
 	/// Floating Main Preview element positioned at the bottom-right of the GraphView.
-	/// Compiles the full graph from the output node and renders a noise preview texture.
+	/// Compiles the full graph (or a preview override node's subtree) and renders
+	/// via <see cref="FN2PreviewWidget"/> in either flat texture or heightfield mode.
 	/// Supports scroll-wheel zoom to adjust noise frequency.
 	/// </summary>
 	class FN2MainPreview : VisualElement
 	{
 		const int PreviewSize = 128;
-		const long UpdateIntervalMs = 500;
+		const double DebounceDelaySec = 0.2;
 		const float MinFrequency = 0.001f;
 		const float MaxFrequency = 0.2f;
 		const float ScrollMultiplier = 1.1f;
 
-		readonly Image m_Image;
+		readonly Label m_Title;
+		readonly Button m_ModeToggle;
+		readonly FN2PreviewWidget m_Widget;
+		readonly Debounce m_Debounce;
 		string m_LastEncoded;
-		Texture2D m_CachedTexture;
 
 		public FN2MainPreview()
 		{
@@ -30,22 +33,63 @@ namespace FastNoise2.Editor.GraphEditor
 			var header = new VisualElement();
 			header.AddToClassList("fn2-main-preview__header");
 
-			var title = new Label("Main Preview");
-			title.AddToClassList("fn2-main-preview__title");
-			header.Add(title);
+			m_Title = new Label("Main Preview");
+			m_Title.AddToClassList("fn2-main-preview__title");
+			header.Add(m_Title);
+
+			m_ModeToggle = new Button(OnModeToggle);
+			m_ModeToggle.AddToClassList("fn2-main-preview__mode-toggle");
+			m_ModeToggle.text = GetModeLabel();
+			m_ModeToggle.tooltip = "Toggle flat texture / heightfield preview";
+			header.Add(m_ModeToggle);
 
 			Add(header);
 
-			// Preview image
-			m_Image = new Image();
-			m_Image.AddToClassList("fn2-main-preview__image");
-			Add(m_Image);
+			// Preview widget
+			m_Widget = new FN2PreviewWidget(PreviewSize);
+			Add(m_Widget);
 
 			// Scroll-wheel zoom on the entire element
 			RegisterCallback<WheelEvent>(OnWheel);
 
-			// Schedule periodic updates
-			schedule.Execute(UpdatePreview).Every(UpdateIntervalMs);
+			m_Debounce = new Debounce(UpdatePreview, DebounceDelaySec);
+
+			RegisterCallback<AttachToPanelEvent>(OnAttach);
+			RegisterCallback<DetachFromPanelEvent>(OnDetach);
+		}
+
+		void OnAttach(AttachToPanelEvent evt)
+		{
+			FN2EditorUpdate.Register(m_Debounce);
+			FN2EditorUpdate.GraphChanged += OnGraphChanged;
+			m_Debounce.Signal();
+		}
+
+		void OnDetach(DetachFromPanelEvent evt)
+		{
+			FN2EditorUpdate.GraphChanged -= OnGraphChanged;
+			FN2EditorUpdate.Unregister(m_Debounce);
+		}
+
+		void OnGraphChanged()
+		{
+			m_Debounce.Signal();
+		}
+
+		void OnModeToggle()
+		{
+			FN2PreviewWidget.Mode = FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Texture
+				? FN2PreviewWidget.PreviewMode.Heightfield
+				: FN2PreviewWidget.PreviewMode.Texture;
+
+			m_ModeToggle.text = GetModeLabel();
+			m_Widget.Refresh();
+			FN2EditorUpdate.NotifyGraphChanged();
+		}
+
+		static string GetModeLabel()
+		{
+			return FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Texture ? "2D" : "3D";
 		}
 
 		void OnWheel(WheelEvent evt)
@@ -55,7 +99,8 @@ namespace FastNoise2.Editor.GraphEditor
 				FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
 
 			// Force re-render at new frequency
-			RenderFromEncoded(m_LastEncoded);
+			m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
+			FN2EditorUpdate.NotifyGraphChanged();
 
 			evt.StopPropagation();
 		}
@@ -76,39 +121,29 @@ namespace FastNoise2.Editor.GraphEditor
 				|| !FN2BridgeCallbacks.IsFN2Graph(graph))
 				return;
 
-			string encoded = FN2BridgeCallbacks.CompileFullGraph(graph);
+			string encoded;
+			string title;
+
+			if (FN2BridgeCallbacks.PreviewOverrideNode != null
+				&& FN2BridgeCallbacks.CompileNodeSubtree != null)
+			{
+				encoded = FN2BridgeCallbacks.CompileNodeSubtree(FN2BridgeCallbacks.PreviewOverrideNode);
+				string nodeName = FN2BridgeCallbacks.GetNodeTypeName?.Invoke(FN2BridgeCallbacks.PreviewOverrideNode);
+				title = "Preview: " + (nodeName ?? "Node");
+			}
+			else
+			{
+				encoded = FN2BridgeCallbacks.CompileFullGraph(graph);
+				title = "Main Preview";
+			}
+
+			m_Title.text = title;
 
 			if (encoded == m_LastEncoded)
 				return;
 
 			m_LastEncoded = encoded;
-			RenderFromEncoded(encoded);
-		}
-
-		void RenderFromEncoded(string encoded)
-		{
-			if (string.IsNullOrEmpty(encoded))
-			{
-				if (m_CachedTexture != null)
-				{
-					Object.DestroyImmediate(m_CachedTexture);
-					m_CachedTexture = null;
-					m_Image.image = null;
-				}
-				return;
-			}
-
-			if (FN2BridgeCallbacks.RenderPreviewWithFrequency == null)
-				return;
-
-			var newTexture = FN2BridgeCallbacks.RenderPreviewWithFrequency(
-				encoded, PreviewSize, PreviewSize, FN2BridgeCallbacks.PreviewFrequency);
-
-			if (m_CachedTexture != null && m_CachedTexture != newTexture)
-				Object.DestroyImmediate(m_CachedTexture);
-
-			m_CachedTexture = newTexture;
-			m_Image.image = m_CachedTexture;
+			m_Widget.SetEncoded(encoded, FN2BridgeCallbacks.PreviewFrequency);
 		}
 	}
 }

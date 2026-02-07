@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace FastNoise2.Editor.GraphEditor
@@ -10,18 +9,23 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		public static readonly string ussClassName = "fn2-texture-preview-part";
 		const int PreviewSize = 128;
-		const long TickIntervalMs = 16; // ~60 Hz
+		const double TickIntervalSec = 0.016; // ~60 Hz
 
 		// --- Shared round-robin state ---
 		static readonly List<FN2TexturePreviewPart> s_Parts = new();
-		static int s_NextIndex;
-		static VisualElement s_TickHost;
-		static IVisualElementScheduledItem s_TickLoop;
+		static Throttle s_RoundRobinThrottle;
+
+		// --- Dirty-driven rendering state ---
+		static int s_ChangeGeneration;
+		static int s_ScanGeneration;
+		static int s_ScanIndex;
+		static float s_LastFrequency;
+		static FN2PreviewWidget.PreviewMode s_LastMode;
 
 		// --- Instance ---
 		VisualElement m_Root;
-		Image m_Image;
-		Texture2D m_CachedTexture;
+		FN2PreviewWidget m_Widget;
+		bool m_Dirty = true;
 
 		public static FN2TexturePreviewPart Create(string name, Model model,
 			ChildView ownerElement, string parentClassName)
@@ -40,9 +44,8 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Root = new VisualElement();
 			m_Root.AddToClassList(ussClassName);
 
-			m_Image = new Image();
-			m_Image.AddToClassList("fn2-preview-image");
-			m_Root.Add(m_Image);
+			m_Widget = new FN2PreviewWidget(PreviewSize);
+			m_Root.Add(m_Widget);
 
 			m_Root.RegisterCallback<AttachToPanelEvent>(OnAttach);
 			m_Root.RegisterCallback<DetachFromPanelEvent>(OnDetach);
@@ -54,62 +57,108 @@ namespace FastNoise2.Editor.GraphEditor
 		{
 			if (!s_Parts.Contains(this))
 				s_Parts.Add(this);
+			m_Dirty = true;
+			s_ChangeGeneration++;
 			EnsureTickLoop();
+			FN2EditorUpdate.NotifyGraphChanged();
 		}
 
 		void OnDetach(DetachFromPanelEvent _)
 		{
 			s_Parts.Remove(this);
+			FN2EditorUpdate.NotifyGraphChanged();
+			if (s_Parts.Count == 0 && s_RoundRobinThrottle != null)
+			{
+				FN2EditorUpdate.Unregister(s_RoundRobinThrottle);
+				s_RoundRobinThrottle = null;
+			}
 		}
 
 		public override void UpdateUIFromModel(UpdateFromModelVisitor visitor)
 		{
-			if (FN2BridgeCallbacks.RenderNodePreview == null)
+			if (FN2BridgeCallbacks.CompileNodeSubtree == null)
 				return;
 
+			m_Dirty = true;
+			s_ChangeGeneration++;
 			EnsureTickLoop();
+			FN2EditorUpdate.NotifyGraphChanged();
 		}
 
-		// --- Tick loop: render one node per tick, round-robin ---
-		void EnsureTickLoop()
+		static void EnsureTickLoop()
 		{
-			if (s_TickHost?.panel != null)
+			if (s_RoundRobinThrottle != null)
 				return;
 
-			s_TickHost = m_Root;
-			s_TickLoop = m_Root.schedule.Execute(ProcessNextNode).Every(TickIntervalMs);
+			s_RoundRobinThrottle = new Throttle(ProcessNextNode, TickIntervalSec);
+			FN2EditorUpdate.Register(s_RoundRobinThrottle);
 		}
 
 		static void ProcessNextNode()
 		{
-			if (s_Parts.Count == 0 || FN2BridgeCallbacks.RenderNodePreview == null)
+			if (s_Parts.Count == 0 || FN2BridgeCallbacks.CompileNodeSubtree == null)
 				return;
 
-			var index = s_NextIndex % s_Parts.Count;
-			s_NextIndex = index + 1;
+			// Phase 1: Detect global setting changes (frequency / mode)
+			float currentFrequency = FN2BridgeCallbacks.PreviewFrequency;
+			var currentMode = FN2PreviewWidget.Mode;
 
-			var part = s_Parts[index];
-			if (part.m_Root?.panel != null)
-				part.RenderPreview();
+			if (currentFrequency != s_LastFrequency || currentMode != s_LastMode)
+			{
+				s_LastFrequency = currentFrequency;
+				s_LastMode = currentMode;
+				for (int i = 0; i < s_Parts.Count; i++)
+					s_Parts[i].m_Dirty = true;
+				s_ChangeGeneration++;
+				return; // let dirty rendering pick them up starting next tick
+			}
+
+			// Phase 2: Priority — render first dirty node
+			for (int i = 0; i < s_Parts.Count; i++)
+			{
+				var part = s_Parts[i];
+				if (part.m_Dirty && part.m_Root?.panel != null)
+				{
+					part.m_Dirty = false;
+					part.RenderPreview();
+					return;
+				}
+			}
+
+			// Phase 3: Background scan — one node per tick
+			if (s_ScanGeneration < s_ChangeGeneration)
+			{
+				if (s_ScanIndex >= s_Parts.Count)
+				{
+					// Scan complete for this generation
+					s_ScanGeneration = s_ChangeGeneration;
+					s_ScanIndex = 0;
+					return;
+				}
+
+				var part = s_Parts[s_ScanIndex];
+				s_ScanIndex++;
+
+				if (part.m_Root?.panel != null)
+					part.RenderPreview();
+
+				return;
+			}
+
+			// Phase 4: Idle — nothing to do
 		}
 
 		void RenderPreview()
 		{
-			if (FN2BridgeCallbacks.RenderNodePreview == null)
-				return;
-
 			var nodeModel = m_Model as IUserNodeModelImp;
 			if (nodeModel == null)
 				return;
 
-			var newTexture = FN2BridgeCallbacks.RenderNodePreview(
-				nodeModel.Node, PreviewSize, PreviewSize);
+			string encoded = FN2BridgeCallbacks.CompileNodeSubtree(nodeModel.Node);
+			if (string.IsNullOrEmpty(encoded))
+				return;
 
-			if (m_CachedTexture != null && m_CachedTexture != newTexture)
-				Object.DestroyImmediate(m_CachedTexture);
-
-			m_CachedTexture = newTexture;
-			m_Image.image = m_CachedTexture;
+			m_Widget.SetEncoded(encoded, FN2BridgeCallbacks.PreviewFrequency);
 		}
 	}
 }

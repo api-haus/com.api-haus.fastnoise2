@@ -23,6 +23,11 @@ namespace FastNoise2.Editor.GraphEditor
 
 			FN2BridgeCallbacks.RenderNodePreview = RenderNodePreview;
 
+			FN2BridgeCallbacks.CompileNodeSubtree = node =>
+				node is FN2EditorNode fn2Node ? FastNoiseSubtreeCompiler.CompileSubtree(fn2Node) : null;
+
+			FN2BridgeCallbacks.GenerateHeightmapWithFrequency = FastNoiseTerrainPreview.GenerateHeightmap;
+
 			FN2BridgeCallbacks.IsFN2Graph = graph => graph is FastNoiseEditorGraph;
 
 			FN2BridgeCallbacks.CompileFullGraph = graph =>

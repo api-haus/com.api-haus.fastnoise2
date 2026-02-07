@@ -8,9 +8,10 @@ namespace FastNoise2.Editor.GraphEditor
 	class FN2TerrainBackground : VisualElement
 	{
 		const int TextureSize = 512;
-		const long UpdateIntervalMs = 500;
+		const double DebounceDelaySec = 0.5;
 
 		readonly Image m_Image;
+		readonly Debounce m_Debounce;
 		RenderTexture m_RenderTexture;
 		Texture2D m_Heightmap;
 		string m_LastEncoded;
@@ -25,20 +26,36 @@ namespace FastNoise2.Editor.GraphEditor
 			m_Image.pickingMode = PickingMode.Ignore;
 			Add(m_Image);
 
-			m_RenderTexture = new RenderTexture(TextureSize, TextureSize, 0, RenderTextureFormat.ARGB32)
-			{
-				filterMode = FilterMode.Bilinear,
-				wrapMode = TextureWrapMode.Clamp
-			};
-			m_RenderTexture.Create();
-			m_Image.image = m_RenderTexture;
+			m_Debounce = new Debounce(UpdateTerrain, DebounceDelaySec);
 
+			RegisterCallback<AttachToPanelEvent>(OnAttach);
 			RegisterCallback<DetachFromPanelEvent>(OnDetach);
-			schedule.Execute(UpdateTerrain).Every(UpdateIntervalMs);
+		}
+
+		void OnAttach(AttachToPanelEvent evt)
+		{
+			if (m_RenderTexture == null)
+			{
+				m_RenderTexture = new RenderTexture(TextureSize, TextureSize, 0, RenderTextureFormat.ARGB32)
+				{
+					filterMode = FilterMode.Bilinear,
+					wrapMode = TextureWrapMode.Clamp
+				};
+				m_RenderTexture.Create();
+			}
+
+			m_Image.image = m_RenderTexture;
+			m_LastEncoded = null;
+			FN2EditorUpdate.Register(m_Debounce);
+			FN2EditorUpdate.GraphChanged += OnGraphChanged;
+			m_Debounce.Signal();
 		}
 
 		void OnDetach(DetachFromPanelEvent evt)
 		{
+			FN2EditorUpdate.GraphChanged -= OnGraphChanged;
+			FN2EditorUpdate.Unregister(m_Debounce);
+
 			if (m_RenderTexture != null)
 			{
 				m_RenderTexture.Release();
@@ -53,6 +70,11 @@ namespace FastNoise2.Editor.GraphEditor
 			}
 
 			m_Image.image = null;
+		}
+
+		void OnGraphChanged()
+		{
+			m_Debounce.Signal();
 		}
 
 		void UpdateTerrain()

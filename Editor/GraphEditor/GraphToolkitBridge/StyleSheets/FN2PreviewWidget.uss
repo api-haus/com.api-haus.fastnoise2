@@ -1,0 +1,9 @@
+.fn2-preview-widget {
+    align-items: center;
+}
+
+.fn2-preview-widget__image {
+    border-width: 1px;
+    border-color: #121212;
+    border-radius: 2px;
+}

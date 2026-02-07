@@ -75,3 +75,31 @@
     bottom: 0;
     pointer-events: none;
 }
+
+/* ─── Preview button in title ─── */
+.fn2-preview-button {
+    font-size: 9px;
+    -unity-font-style: bold;
+    color: #666666;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-width: 0;
+    border-radius: 3px;
+    padding: 1px 4px;
+    min-width: 16px;
+    height: 14px;
+    -unity-text-align: middle-center;
+    margin-left: auto;
+    margin-right: 4px;
+    align-self: center;
+}
+
+.fn2-preview-button:hover {
+    color: #B0B0B0;
+    background-color: rgba(48, 134, 179, 0.4);
+}
+
+/* ─── Active preview indicator ─── */
+.fn2-node--previewing {
+    border-left-width: 3px;
+    border-left-color: #3086B3;
+}

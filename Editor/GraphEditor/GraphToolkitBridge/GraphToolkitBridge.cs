@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.Overlays;
@@ -30,6 +31,7 @@ namespace FastNoise2.Editor.GraphEditor
 		static StyleSheet s_WindowStyleSheet;
 		static StyleSheet s_MainPreviewStyleSheet;
 		static StyleSheet s_TerrainBackgroundStyleSheet;
+		static StyleSheet s_PreviewWidgetStyleSheet;
 
 		public static INode CreateNode(Graph graph, Node node, Vector2 position)
 		{
@@ -152,15 +154,57 @@ namespace FastNoise2.Editor.GraphEditor
 				if (s_MainPreviewStyleSheet != null)
 					window.rootVisualElement.styleSheets.Add(s_MainPreviewStyleSheet);
 
+				// Inject Preview Widget USS
+				if (s_PreviewWidgetStyleSheet == null)
+					s_PreviewWidgetStyleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+						"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2PreviewWidget.uss");
+				if (s_PreviewWidgetStyleSheet != null)
+					window.rootVisualElement.styleSheets.Add(s_PreviewWidgetStyleSheet);
+
 				// Add Main Preview
 				var mainPreview = new FN2MainPreview();
 				graphView.Add(mainPreview);
+
+				// Register P hotkey for preview override
+				graphView.RegisterCallback<KeyDownEvent>(OnPreviewKeyDown, TrickleDown.TrickleDown);
 
 				// Add invisible sentinel
 				var sentinel = new VisualElement { name = SentinelName };
 				sentinel.style.display = DisplayStyle.None;
 				graphView.Add(sentinel);
 			}
+		}
+
+		static void OnPreviewKeyDown(KeyDownEvent evt)
+		{
+			if (evt.keyCode != KeyCode.P)
+				return;
+
+			var graphView = evt.currentTarget as GraphView;
+			if (graphView == null)
+				return;
+
+			// Find first selected FN2 node
+			var selected = graphView.GetSelection()
+				.OfType<ModelView>()
+				.Select(v => (v as NodeView)?.NodeModel)
+				.OfType<IUserNodeModelImp>()
+				.Where(n => FN2BridgeCallbacks.IsFN2Node?.Invoke(n.Node) == true)
+				.FirstOrDefault();
+
+			if (selected == null)
+				return;
+
+			// Toggle preview
+			if (FN2BridgeCallbacks.PreviewOverrideNode == selected.Node)
+				FN2BridgeCallbacks.PreviewOverrideNode = null;
+			else
+				FN2BridgeCallbacks.PreviewOverrideNode = selected.Node;
+
+			FN2NodeView.UpdatePreviewHighlights(graphView);
+			FN2EditorUpdate.NotifyGraphChanged();
+
+			evt.StopPropagation();
 		}
 
 		static void HideOverlay(EditorWindow window, string overlayId)

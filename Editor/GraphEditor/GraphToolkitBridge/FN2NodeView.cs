@@ -1,3 +1,4 @@
+using System.Linq;
 using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine;
@@ -39,6 +40,7 @@ namespace FastNoise2.Editor.GraphEditor
 				"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
 
 			ApplyCategoryColoring();
+			AddPreviewButton();
 		}
 
 		void ApplyCategoryColoring()
@@ -61,6 +63,54 @@ namespace FastNoise2.Editor.GraphEditor
 			sheen.AddToClassList("fn2-node-sheen");
 			sheen.style.backgroundImage = FN2NodeCategory.SheenTexture;
 			titleContainer.Insert(0, sheen);
+		}
+
+		void AddPreviewButton()
+		{
+			var titleContainer = this.Q(className: "ge-node__title-icon-container");
+			if (titleContainer == null)
+				return;
+
+			var previewBtn = new Button(OnPreviewClicked);
+			previewBtn.AddToClassList("fn2-preview-button");
+			previewBtn.text = "P";
+			previewBtn.tooltip = "Preview this node (P)";
+			titleContainer.Add(previewBtn);
+		}
+
+		void OnPreviewClicked()
+		{
+			var userNodeModel = Model as IUserNodeModelImp;
+			if (userNodeModel == null)
+				return;
+
+			var node = userNodeModel.Node;
+			if (FN2BridgeCallbacks.PreviewOverrideNode == node)
+				FN2BridgeCallbacks.PreviewOverrideNode = null;
+			else
+				FN2BridgeCallbacks.PreviewOverrideNode = node;
+
+			FN2EditorUpdate.NotifyGraphChanged();
+
+			var graphView = GetFirstAncestorOfType<GraphView>();
+			if (graphView != null)
+				UpdatePreviewHighlights(graphView);
+		}
+
+		/// <summary>
+		/// Updates the <c>fn2-node--previewing</c> class on all FN2 node views
+		/// in the given graph view to reflect the current preview override.
+		/// </summary>
+		public static void UpdatePreviewHighlights(GraphView graphView)
+		{
+			foreach (var nodeView in graphView.Query<FN2NodeView>().ToList())
+			{
+				var userModel = nodeView.Model as IUserNodeModelImp;
+				if (userModel != null && userModel.Node == FN2BridgeCallbacks.PreviewOverrideNode)
+					nodeView.AddToClassList("fn2-node--previewing");
+				else
+					nodeView.RemoveFromClassList("fn2-node--previewing");
+			}
 		}
 	}
 }

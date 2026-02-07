@@ -76,19 +76,20 @@ namespace FastNoise2.Editor.GraphEditor
 			// Defer to avoid interfering with the ongoing PartialUpdate cycle
 			rootView.schedule.Execute(() =>
 			{
-				var toNodeModel = wireModel.ToPort?.NodeModel;
-				if (toNodeModel == null)
-					return;
-
-				// Update the directly affected node (hybrid toggle + dirty marking)
-				if (toNodeModel is IUserNodeModelImp userNode
-					&& FN2BridgeCallbacks.IsFN2Node != null
-					&& FN2BridgeCallbacks.IsFN2Node(userNode.Node))
-				{
-					var nodeView = toNodeModel.GetView<ModelView>(rootView);
-					nodeView?.UpdateView(UpdateFromModelVisitor.genericUpdateFromModelVisitor);
-				}
+				UpdateEndpoint(rootView, wireModel.ToPort?.NodeModel);
+				UpdateEndpoint(rootView, wireModel.FromPort?.NodeModel);
 			}).ExecuteLater(0);
+		}
+
+		static void UpdateEndpoint(RootView rootView, Model nodeModel)
+		{
+			if (nodeModel is IUserNodeModelImp userNode
+				&& FN2BridgeCallbacks.IsFN2Node != null
+				&& FN2BridgeCallbacks.IsFN2Node(userNode.Node))
+			{
+				var nodeView = nodeModel.GetView<ModelView>(rootView);
+				nodeView?.UpdateView(UpdateFromModelVisitor.genericUpdateFromModelVisitor);
+			}
 		}
 	}
 }

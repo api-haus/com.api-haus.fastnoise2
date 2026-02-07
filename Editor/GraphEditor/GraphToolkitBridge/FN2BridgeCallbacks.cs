@@ -37,6 +37,24 @@ namespace FastNoise2.Editor.GraphEditor
 	public static class FN2BridgeCallbacks
 	{
 		/// <summary>
+		/// Currently previewed node (null = use output node).
+		/// Set by the preview button or P hotkey on a node view.
+		/// </summary>
+		public static Unity.GraphToolkit.Editor.Node PreviewOverrideNode;
+
+		/// <summary>
+		/// Compiles the subtree rooted at the given node to an encoded string.
+		/// Returns null on failure.
+		/// </summary>
+		public static Func<Unity.GraphToolkit.Editor.Node, string> CompileNodeSubtree;
+
+		/// <summary>
+		/// Generates an RFloat heightmap at the specified size and frequency from an encoded tree.
+		/// Parameters: encoded, width, height, frequency. Returns null on failure.
+		/// </summary>
+		public static Func<string, int, int, float, Texture2D> GenerateHeightmapWithFrequency;
+
+		/// <summary>
 		/// Returns true if the given Node is an FN2 editor node.
 		/// </summary>
 		public static Func<Unity.GraphToolkit.Editor.Node, bool> IsFN2Node;
