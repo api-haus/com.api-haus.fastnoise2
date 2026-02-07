@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using NUnit.Framework;
 using Unity.Mathematics;
+using static Unity.Mathematics.math;
 using UnityEngine;
 
 namespace FastNoise2.Tests
@@ -201,9 +202,9 @@ namespace FastNoise2.Tests
 				foreach (float noise in noiseData)
 				{
 					//Scale noise to 0 - 255
-					int noiseI = (int)math.round((noise - minMax.min) * scale);
+					int noiseI = (int)round((noise - minMax.min) * scale);
 
-					writer.Write((byte)math.clamp(noiseI, 0, 255));
+					writer.Write((byte)clamp(noiseI, 0, 255));
 				}
 			}
 		}

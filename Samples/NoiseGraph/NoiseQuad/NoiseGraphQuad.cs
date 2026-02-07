@@ -1,6 +1,7 @@
 using FastNoise2.Authoring.NoiseGraph;
 using FastNoise2.Bindings;
 using UnityEngine;
+using static Unity.Mathematics.math;
 
 namespace FastNoise2.Samples
 {
@@ -75,7 +76,7 @@ namespace FastNoise2.Samples
 
 			for (int i = 0; i < m_Buffer.Length; i++)
 			{
-				byte v = (byte)(Mathf.Clamp01(m_Buffer[i] * 0.5f + 0.5f) * 255f);
+				byte v = (byte)(saturate(m_Buffer[i] * 0.5f + 0.5f) * 255f);
 				m_Pixels[i] = new Color32(v, v, v, 255);
 			}
 

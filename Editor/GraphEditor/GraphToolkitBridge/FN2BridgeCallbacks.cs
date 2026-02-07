@@ -117,6 +117,24 @@ namespace FastNoise2.Editor.GraphEditor
 		public static float CameraDistance = 1.0f;
 
 		/// <summary>
+		/// Pan offset in noise space, applied as xOffset/yOffset when generating noise.
+		/// Adjusted by left-mouse-button drag on the preview.
+		/// </summary>
+		public static Vector2 PanOffset = Vector2.zero;
+
+		/// <summary>
+		/// Camera yaw angle (radians) for 3D heightfield orbit.
+		/// Controlled by horizontal hover position on the preview.
+		/// </summary>
+		public static float CameraYaw = 0f;
+
+		/// <summary>
+		/// Camera pitch angle (radians) for 3D heightfield orbit.
+		/// Controlled by vertical hover position on the preview.
+		/// </summary>
+		public static float CameraPitch = 0.7f;
+
+		/// <summary>
 		/// Optional icon to display in the graph editor window title bar.
 		/// Set by the FN2 editor assembly at startup.
 		/// </summary>

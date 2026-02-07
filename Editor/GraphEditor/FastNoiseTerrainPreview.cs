@@ -30,7 +30,8 @@ namespace FastNoise2.Editor.GraphEditor
 			try
 			{
 				float[] data = new float[width * height];
-				noise.GenUniformGrid2D(data, 0f, 0f, width, height, frequency, frequency, 1337);
+				var pan = FN2BridgeCallbacks.PanOffset;
+				noise.GenUniformGrid2D(data, pan.x, pan.y, width, height, frequency, frequency, 1337);
 
 				var texture = new Texture2D(width, height, TextureFormat.RFloat, false)
 				{
@@ -70,6 +71,8 @@ namespace FastNoise2.Editor.GraphEditor
 
 			s_Material.SetTexture("_HeightMap", heightmap);
 			s_Material.SetFloat("_CamDist", FN2BridgeCallbacks.CameraDistance);
+			s_Material.SetFloat("_CamYaw", FN2BridgeCallbacks.CameraYaw);
+			s_Material.SetFloat("_CamPitch", FN2BridgeCallbacks.CameraPitch);
 			Graphics.Blit(null, target, s_Material);
 		}
 	}

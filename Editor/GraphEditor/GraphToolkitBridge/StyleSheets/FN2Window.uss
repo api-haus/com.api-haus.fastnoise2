@@ -76,3 +76,8 @@
 .ge-view Label {
     color: #878787;
 }
+
+/* ─── Hide built-in GTK Blackboard overlay ─── */
+#gtf-blackboard {
+    display: none;
+}

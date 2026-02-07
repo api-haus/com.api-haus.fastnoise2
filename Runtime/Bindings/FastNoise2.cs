@@ -10,6 +10,7 @@ namespace FastNoise2.Bindings
     using Unity.Collections.LowLevel.Unsafe;
     using Unity.Jobs;
     using Unity.Mathematics;
+    using static Unity.Mathematics.math;
 
     public struct FastNoise : INativeDisposable, IEquatable<FastNoise>
     {
@@ -52,8 +53,8 @@ namespace FastNoise2.Bindings
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public void Merge(OutputMinMax other)
             {
-                min = math.min(min, other.min);
-                max = math.max(max, other.max);
+                min = min(min, other.min);
+                max = max(max, other.max);
             }
 
             public float min;

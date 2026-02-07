@@ -1,5 +1,6 @@
 using FastNoise2.Bindings;
 using UnityEngine;
+using static Unity.Mathematics.math;
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -26,7 +27,8 @@ namespace FastNoise2.Editor.GraphEditor
 			try
 			{
 				float[] noiseData = new float[width * height];
-				noise.GenUniformGrid2D(noiseData, 0f, 0f, width, height, frequency, frequency, 1337);
+				var pan = FN2BridgeCallbacks.PanOffset;
+				noise.GenUniformGrid2D(noiseData, pan.x, pan.y, width, height, frequency, frequency, 1337);
 
 				var texture = new Texture2D(width, height, TextureFormat.R8, false)
 				{
@@ -37,7 +39,7 @@ namespace FastNoise2.Editor.GraphEditor
 				var pixels = new Color32[width * height];
 				for (int i = 0; i < noiseData.Length; i++)
 				{
-					byte v = (byte)(Mathf.Clamp01(noiseData[i] * 0.5f + 0.5f) * 255f);
+					byte v = (byte)(saturate(noiseData[i] * 0.5f + 0.5f) * 255f);
 					pixels[i] = new Color32(v, v, v, 255);
 				}
 

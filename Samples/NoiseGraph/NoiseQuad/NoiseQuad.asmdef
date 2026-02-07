@@ -3,7 +3,8 @@
 	"rootNamespace": "FastNoise2.Samples",
 	"references": [
 		"FastNoise2.Runtime",
-		"FastNoise2.Authoring"
+		"FastNoise2.Authoring",
+		"Unity.Mathematics"
 	],
 	"includePlatforms": [],
 	"excludePlatforms": [],

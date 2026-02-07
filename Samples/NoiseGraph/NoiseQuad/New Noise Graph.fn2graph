@@ -55,10 +55,10 @@ MonoBehaviour:
         m_LocalSubgraphs: []
         m_LastKnownBounds:
           serializedVersion: 2
-          x: -380
-          y: -246
-          width: 1929
-          height: 1023.5
+          x: -380.5
+          y: -251.5
+          width: 1929.5
+          height: 1024
         m_GraphElementMetaData:
         - m_Guid:
             m_Value0: 1599275097827902374
@@ -209,7 +209,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: a60329683ac431167ed8272045eba404
         m_Version: 2
-        m_Position: {x: -380.2404, y: -246.07373}
+        m_Position: {x: -380.5, y: -251.5}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -322,7 +322,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 634b8f153a43d409b1fc8d928f629392
         m_Version: 2
-        m_Position: {x: 72.75073, y: 53.29901}
+        m_Position: {x: 72.5, y: 48}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -418,7 +418,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 5c9627770de40222faa59c323fc245f8
         m_Version: 2
-        m_Position: {x: 459.08185, y: -37.409264}
+        m_Position: {x: 467.5, y: -61}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -536,7 +536,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: a43c4c0da107eb258e3f84ecf644110f
         m_Version: 2
-        m_Position: {x: -365.3618, y: 77.66587}
+        m_Position: {x: -365.5, y: 72.5}
         m_Title: Perlin
         m_Tooltip: 
         m_NodePreviewModel:
@@ -639,7 +639,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: c71bb7ab63ac9a7ccf6755ffcc1cc64b
         m_Version: 2
-        m_Position: {x: -346.75793, y: 378.30518}
+        m_Position: {x: -347, y: 373}
         m_Title: Perlin
         m_Tooltip: 
         m_NodePreviewModel:
@@ -774,7 +774,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: 95da73bc5469c60ad35ada296bdcfa03
         m_Version: 2
-        m_Position: {x: 836.7351, y: -42.968796}
+        m_Position: {x: 851.8603, y: 59.41017}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:
@@ -857,7 +857,7 @@ MonoBehaviour:
     - rid: 4858403389312860340
       type: {class: 'Constant`1[[System.Int32, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
-        m_Value: 36
+        m_Value: 474
     - rid: 4858403389312860341
       type: {class: 'Constant`1[[System.Single, mscorlib]]', ns: Unity.GraphToolkit.Editor, asm: Unity.GraphToolkit.Internal.Editor}
       data:
@@ -900,7 +900,7 @@ MonoBehaviour:
           - var_amplitudescalingz
           - var_amplitudescalingw
           - var_vectorizationscheme
-          values: 0000803f240000000000803f0000803f0000803f0000803f00000000
+          values: 0000803fda0100000000803f0000803f0000803f0000803f00000000
         hybridDefaults:
           keys:
           - hyb_val_warpamplitude
@@ -947,7 +947,7 @@ MonoBehaviour:
           serializedVersion: 2
           Hash: b9f54fd660ec56bf69b475852a658f37
         m_Version: 2
-        m_Position: {x: 402.64185, y: 318.519}
+        m_Position: {x: 402.5, y: 313.5}
         m_Title: 
         m_Tooltip: 
         m_NodePreviewModel:

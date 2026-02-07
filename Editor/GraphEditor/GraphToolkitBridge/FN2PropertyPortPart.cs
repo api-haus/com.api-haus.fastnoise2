@@ -3,6 +3,7 @@ using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Unity.Mathematics.math;
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -97,7 +98,7 @@ namespace FastNoise2.Editor.GraphEditor
 				if (member.Name.Length > maxNameLen)
 					maxNameLen = member.Name.Length;
 			}
-			float estimatedMinWidth = Mathf.Max(200f, maxNameLen * CharWidth + BaseOverhead);
+			float estimatedMinWidth = max(200f, maxNameLen * CharWidth + BaseOverhead);
 			// Apply on the node view itself so it actually constrains the node width
 			((VisualElement)m_OwnerElement).style.minWidth = estimatedMinWidth;
 

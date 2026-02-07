@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Unity.Mathematics.math;
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -59,8 +60,8 @@ namespace FastNoise2.Editor.GraphEditor
 		public void SetEncoded(string encoded, float frequency)
 		{
 			float camDist = FN2BridgeCallbacks.CameraDistance;
-			if (encoded == m_LastEncoded && Mathf.Approximately(frequency, m_LastFrequency)
-				&& Mathf.Approximately(camDist, m_LastCamDist) && Mode == m_LastMode)
+			if (encoded == m_LastEncoded && abs(frequency - m_LastFrequency) < 1e-6f
+				&& abs(camDist - m_LastCamDist) < 1e-6f && Mode == m_LastMode)
 				return;
 
 			m_LastEncoded = encoded;
@@ -72,13 +73,30 @@ namespace FastNoise2.Editor.GraphEditor
 		}
 
 		/// <summary>
-		/// Update camera distance and re-render in heightfield mode.
+		/// Update camera distance and re-blit in heightfield mode (no heightmap regen).
 		/// </summary>
 		public void SetCameraDistance(float dist)
 		{
 			m_LastCamDist = dist;
 			if (Mode == PreviewMode.Heightfield)
-				Render(m_LastEncoded, m_LastFrequency);
+				BlitAndReadback();
+		}
+
+		/// <summary>
+		/// Re-render with updated pan offset (regenerates noise data).
+		/// </summary>
+		public void SetPanOffset()
+		{
+			Render(m_LastEncoded, m_LastFrequency);
+		}
+
+		/// <summary>
+		/// Re-blit the cached heightmap with updated orbit angles (no heightmap regen).
+		/// </summary>
+		public void UpdateOrbit()
+		{
+			if (Mode == PreviewMode.Heightfield)
+				BlitAndReadback();
 		}
 
 		/// <summary>
@@ -135,6 +153,14 @@ namespace FastNoise2.Editor.GraphEditor
 			if (m_CachedHeightmap != null && m_CachedHeightmap != newHeightmap)
 				Object.DestroyImmediate(m_CachedHeightmap);
 			m_CachedHeightmap = newHeightmap;
+
+			BlitAndReadback();
+		}
+
+		void BlitAndReadback()
+		{
+			if (m_CachedHeightmap == null || FN2BridgeCallbacks.BlitTerrain == null)
+				return;
 
 			EnsureSharedRT(m_PreviewSize);
 			FN2BridgeCallbacks.BlitTerrain(m_CachedHeightmap, s_SharedRT);

@@ -5,6 +5,8 @@ Shader "Hidden/FN2/TerrainRaymarch"
         _HeightMap ("Heightmap", 2D) = "black" {}
         _HeightScale ("Height Scale", Float) = 0.15
         _CamDist ("Camera Distance", Float) = 1.0
+        _CamYaw ("Camera Yaw", Float) = 0.0
+        _CamPitch ("Camera Pitch", Float) = 0.7
     }
 
     SubShader
@@ -22,13 +24,14 @@ Shader "Hidden/FN2/TerrainRaymarch"
             sampler2D _HeightMap;
             float _HeightScale;
             float _CamDist;
+            float _CamYaw;
+            float _CamPitch;
 
             static const float3 BG_COLOR = float3(0.0863, 0.0863, 0.0863); // #161616
             static const float3 COLOR_LOW = float3(0.1098, 0.1098, 0.1098); // #1C1C1C
             static const float3 COLOR_HIGH = float3(0.1804, 0.1804, 0.1804); // #2E2E2E
 
             static const float3 CAM_TARGET = float3(0.5, 0.0, 0.5);
-            static const float3 CAM_DIR = normalize(float3(0.5, 0.6, -0.2) - float3(0.5, 0.0, 0.5));
             static const float3 LIGHT_DIR = normalize(float3(0.4, 0.8, -0.3));
 
             static const int MAX_STEPS = 128;
@@ -69,9 +72,9 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 return normalize(float3(hL - hR, 2.0 * EPS, hD - hU));
             }
 
-            float3 getCameraRay(float2 uv)
+            float3 getCameraRay(float2 uv, float3 camDir)
             {
-                float3 forward = -CAM_DIR;
+                float3 forward = -camDir;
                 float3 right = normalize(cross(float3(0, 1, 0), forward));
                 float3 up = cross(forward, right);
                 return normalize(forward + (uv.x - 0.5) * right * 1.2 + (uv.y - 0.5) * up * 1.2);
@@ -79,8 +82,11 @@ Shader "Hidden/FN2/TerrainRaymarch"
 
             fixed4 frag(v2f i) : SV_Target
             {
-                float3 ro = CAM_TARGET + CAM_DIR * _CamDist;
-                float3 rd = getCameraRay(i.uv);
+                float cp = cos(_CamPitch);
+                float3 camDir = float3(cp * sin(_CamYaw), sin(_CamPitch), -cp * cos(_CamYaw));
+
+                float3 ro = CAM_TARGET + camDir * _CamDist;
+                float3 rd = getCameraRay(i.uv, camDir);
 
                 // Ray-AABB intersection to find valid march range
                 float3 bmin = float3(-0.1, -0.05, -0.1);

@@ -2,6 +2,7 @@ using Unity.GraphToolkit.Editor;
 using Unity.GraphToolkit.Editor.Implementation;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static Unity.Mathematics.math;
 
 namespace FastNoise2.Editor.GraphEditor
 {
@@ -9,7 +10,7 @@ namespace FastNoise2.Editor.GraphEditor
 	/// Floating Main Preview element positioned at the bottom-right of the GraphView.
 	/// Compiles the full graph (or a preview override node's subtree) and renders
 	/// via <see cref="FN2PreviewWidget"/> in either flat texture or heightfield mode.
-	/// Supports scroll-wheel zoom to adjust noise frequency.
+	/// Supports scroll-wheel zoom, left-button pan, and hover orbit (3D).
 	/// </summary>
 	class FN2MainPreview : VisualElement
 	{
@@ -20,12 +21,18 @@ namespace FastNoise2.Editor.GraphEditor
 		const float ScrollMultiplier = 1.1f;
 		const float MinCamDist = 0.3f;
 		const float MaxCamDist = 3.0f;
+		const float OrbitYawRange = 0.8f;
+		const float OrbitPitchMin = 0.3f;
+		const float OrbitPitchMax = 1.1f;
 
 		readonly Label m_Title;
 		readonly Button m_ModeToggle;
 		readonly FN2PreviewWidget m_Widget;
 		readonly Debounce m_Debounce;
 		string m_LastEncoded;
+
+		bool m_IsPanning;
+		Vector2 m_LastPointerPos;
 
 		public FN2MainPreview()
 		{
@@ -53,6 +60,11 @@ namespace FastNoise2.Editor.GraphEditor
 
 			// Scroll-wheel zoom on the entire element
 			RegisterCallback<WheelEvent>(OnWheel);
+
+			// Pan (left-button drag) and orbit (hover, 3D only) on the widget
+			m_Widget.RegisterCallback<PointerDownEvent>(OnPointerDown);
+			m_Widget.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+			m_Widget.RegisterCallback<PointerUpEvent>(OnPointerUp);
 
 			m_Debounce = new Debounce(UpdatePreview, DebounceDelaySec);
 
@@ -95,22 +107,58 @@ namespace FastNoise2.Editor.GraphEditor
 			return FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Texture ? "2D" : "3D";
 		}
 
+		void OnPointerDown(PointerDownEvent evt)
+		{
+			if (evt.button != 0)
+				return;
+
+			m_IsPanning = true;
+			m_LastPointerPos = evt.position;
+			m_Widget.CapturePointer(evt.pointerId);
+			evt.StopPropagation();
+		}
+
+		void OnPointerMove(PointerMoveEvent evt)
+		{
+			if (m_IsPanning)
+			{
+				Vector2 delta = (Vector2)evt.position - m_LastPointerPos;
+				m_LastPointerPos = evt.position;
+
+				FN2BridgeCallbacks.PanOffset -= new Vector2(delta.x, -delta.y) * FN2BridgeCallbacks.PreviewFrequency;
+				m_Widget.SetPanOffset();
+				evt.StopPropagation();
+			}
+			else if (FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
+			{
+				Vector2 localPos = m_Widget.WorldToLocal(evt.position);
+				float normalizedX = saturate(localPos.x / PreviewSize);
+				float normalizedY = saturate(localPos.y / PreviewSize);
+
+				FN2BridgeCallbacks.CameraYaw = (normalizedX - 0.5f) * 2f * OrbitYawRange;
+				FN2BridgeCallbacks.CameraPitch = lerp(OrbitPitchMax, OrbitPitchMin, normalizedY);
+				m_Widget.UpdateOrbit();
+				evt.StopPropagation();
+			}
+		}
+
+		void OnPointerUp(PointerUpEvent evt)
+		{
+			if (evt.button != 0 || !m_IsPanning)
+				return;
+
+			m_IsPanning = false;
+			m_Widget.ReleasePointer(evt.pointerId);
+			evt.StopPropagation();
+		}
+
 		void OnWheel(WheelEvent evt)
 		{
 			float factor = evt.delta.y > 0 ? ScrollMultiplier : 1f / ScrollMultiplier;
 
-			if (FN2PreviewWidget.Mode == FN2PreviewWidget.PreviewMode.Heightfield)
-			{
-				FN2BridgeCallbacks.CameraDistance = Mathf.Clamp(
-					FN2BridgeCallbacks.CameraDistance * factor, MinCamDist, MaxCamDist);
-				m_Widget.SetCameraDistance(FN2BridgeCallbacks.CameraDistance);
-			}
-			else
-			{
-				FN2BridgeCallbacks.PreviewFrequency = Mathf.Clamp(
-					FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
-				m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
-			}
+			FN2BridgeCallbacks.PreviewFrequency = clamp(
+				FN2BridgeCallbacks.PreviewFrequency * factor, MinFrequency, MaxFrequency);
+			m_Widget.SetEncoded(m_LastEncoded, FN2BridgeCallbacks.PreviewFrequency);
 
 			FN2EditorUpdate.NotifyGraphChanged();
 			evt.StopPropagation();

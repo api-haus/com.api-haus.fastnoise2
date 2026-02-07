@@ -2,6 +2,7 @@ using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
+using static Unity.Mathematics.math;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -87,7 +88,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			{
 				NativeArray<float> buffer = texture.GetPixelData<float>(0);
 				minMax = new NativeReference<float2>(
-					new float2(float.PositiveInfinity, float.NegativeInfinity),
+					float2(float.PositiveInfinity, float.NegativeInfinity),
 					Allocator.Temp
 				);
 				return buffer;
@@ -111,7 +112,7 @@ namespace FastNoise2.Editor.NoiseAssets
 			{
 				NativeArray<float> buffer = texture.GetRawTextureData<float>();
 				minMax = new NativeReference<float2>(
-					new float2(float.PositiveInfinity, float.NegativeInfinity),
+					float2(float.PositiveInfinity, float.NegativeInfinity),
 					Allocator.Temp
 				);
 				return buffer;

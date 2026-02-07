@@ -5,7 +5,8 @@
 		"FastNoise2.Runtime",
 		"FastNoise2.Authoring",
 		"Unity.GraphToolkit.Editor",
-		"Unity.GraphToolkit.Common.Editor"
+		"Unity.GraphToolkit.Common.Editor",
+		"Unity.Mathematics"
 	],
 	"includePlatforms": [
 		"Editor"
