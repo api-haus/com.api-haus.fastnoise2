@@ -82,7 +82,21 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 float3 ro = CAM_TARGET + CAM_DIR * _CamDist;
                 float3 rd = getCameraRay(i.uv);
 
-                float t = 0.0;
+                // Ray-AABB intersection to find valid march range
+                float3 bmin = float3(-0.1, -0.05, -0.1);
+                float3 bmax = float3(1.1, _HeightScale + 0.1, 1.1);
+                float3 invRd = 1.0 / rd;
+                float3 tA = (bmin - ro) * invRd;
+                float3 tB = (bmax - ro) * invRd;
+                float3 tNear = min(tA, tB);
+                float3 tFar = max(tA, tB);
+                float tEnter = max(max(tNear.x, tNear.y), max(tNear.z, 0.0));
+                float tExit = min(min(tFar.x, tFar.y), tFar.z);
+
+                if (tEnter >= tExit)
+                    return fixed4(BG_COLOR, 1);
+
+                float t = tEnter;
                 bool hit = false;
 
                 // Raymarch
@@ -90,8 +104,7 @@ Shader "Hidden/FN2/TerrainRaymarch"
                 {
                     float3 p = ro + rd * t;
 
-                    // Out of bounds check
-                    if (p.x < -0.1 || p.x > 1.1 || p.z < -0.1 || p.z > 1.1 || t > 3.0 * _CamDist)
+                    if (t > tExit)
                         break;
 
                     float2 xz = saturate(p.xz);
