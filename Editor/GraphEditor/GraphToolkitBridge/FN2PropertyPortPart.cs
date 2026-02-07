@@ -168,7 +168,7 @@ namespace FastNoise2.Editor.GraphEditor
 				}
 
 				if (!string.IsNullOrEmpty(member.Tooltip))
-					row.tooltip = member.Tooltip;
+					ApplyTooltip(member.Tooltip, state);
 
 				m_Root.Add(row);
 				m_Rows.Add(state);
@@ -195,6 +195,31 @@ namespace FastNoise2.Editor.GraphEditor
 				spacer.AddToClassList("fn2-member-spacer");
 				firstRow.Add(spacer);
 				firstRow.Add(outputPortSlot);
+			}
+		}
+
+		/// <summary>
+		/// Overrides the tooltip on the row, its port view, and its editor field so that
+		/// our description takes priority over the default GTK tooltips set on inner elements.
+		/// </summary>
+		static void ApplyTooltip(string tooltip, in MemberRowState state)
+		{
+			state.Row.tooltip = tooltip;
+
+			if (state.PortView != null)
+			{
+				((VisualElement)state.PortView).tooltip = tooltip;
+				if (state.PortView.Label != null)
+					state.PortView.Label.tooltip = tooltip;
+			}
+
+			if (state.Editor != null)
+			{
+				state.Editor.tooltip = tooltip;
+				if (state.Editor.LabelElement != null)
+					state.Editor.LabelElement.tooltip = tooltip;
+				if (state.Editor.Field != null)
+					state.Editor.Field.tooltip = tooltip;
 			}
 		}
 
