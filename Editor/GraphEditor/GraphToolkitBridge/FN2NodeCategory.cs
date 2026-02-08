@@ -20,11 +20,6 @@ namespace FastNoise2.Editor.GraphEditor
 
 		static Texture2D s_SheenTexture;
 
-		public static string[] GetSynonyms(string nodeTypeName)
-		{
-			return null;
-		}
-
 		public static bool TryGetCategoryPath(string nodeTypeName, out string categoryPath)
 		{
 			categoryPath = FN2BridgeCallbacks.GetNodeCategoryPath?.Invoke(nodeTypeName);

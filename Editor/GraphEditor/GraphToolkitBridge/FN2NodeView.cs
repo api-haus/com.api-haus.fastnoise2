@@ -42,28 +42,6 @@ namespace FastNoise2.Editor.GraphEditor
 			ApplyCategoryColoring();
 			ApplyNodeTooltip();
 			AddPreviewButton();
-			ApplyNodeTitle();
-		}
-
-		public override void UpdateUIFromModel(UpdateFromModelVisitor visitor)
-		{
-			base.UpdateUIFromModel(visitor);
-			ApplyNodeTitle();
-		}
-
-		void ApplyNodeTitle()
-		{
-			var userNodeModel = Model as IUserNodeModelImp;
-			if (userNodeModel == null)
-				return;
-
-			string nodeTypeName = FN2BridgeCallbacks.GetNodeTypeName?.Invoke(userNodeModel.Node);
-			if (string.IsNullOrEmpty(nodeTypeName))
-				return;
-
-			var titleLabel = this.Q<Label>("title");
-			if (titleLabel != null)
-				titleLabel.text = nodeTypeName;
 		}
 
 		void ApplyCategoryColoring()

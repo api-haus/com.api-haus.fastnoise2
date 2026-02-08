@@ -66,8 +66,7 @@ namespace FastNoise2.Editor.GraphEditor
 							n => ((FN2UserNodeModelImp)n).InitCustomNode(customNode));
 					})
 				{
-					CategoryPath = categoryPath,
-					Synonyms = FN2NodeCategory.GetSynonyms(captured)
+					CategoryPath = categoryPath
 				};
 
 				db.Items.Add(nodeDef);

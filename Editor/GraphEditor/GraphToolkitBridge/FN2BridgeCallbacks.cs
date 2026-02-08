@@ -52,12 +52,6 @@ namespace FastNoise2.Editor.GraphEditor
 		public static float PreviewFrequency = 0.02f;
 
 		/// <summary>
-		/// Camera distance multiplier for the 3D heightfield preview.
-		/// Adjusted by scroll-wheel when in heightfield mode.
-		/// </summary>
-		public static float CameraDistance = 1.0f;
-
-		/// <summary>
 		/// Height scale for the 3D heightfield preview shader.
 		/// Adjusted by the vertical slider in the main preview.
 		/// </summary>
