@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       upstream_ref:
-        description: 'FastNoise2 upstream tag/branch/SHA'
+        description: 'FastNoise2 fork tag/branch/SHA'
         required: true
-        default: 'v1.0.1'
+        default: 'feat/extended-metadata-api'
   push:
     branches: [main]
     paths:
@@ -58,11 +58,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Checkout upstream FastNoise2
+      - name: Checkout FastNoise2 fork
         uses: actions/checkout@v4
         with:
-          repository: Auburn/FastNoise2
-          ref: ${{ inputs.upstream_ref || 'v1.0.1' }}
+          repository: api-haus/fastnoise2
+          ref: ${{ inputs.upstream_ref || 'feat/extended-metadata-api' }}
           submodules: recursive
 
       - name: Install tool dependencies (Linux)
