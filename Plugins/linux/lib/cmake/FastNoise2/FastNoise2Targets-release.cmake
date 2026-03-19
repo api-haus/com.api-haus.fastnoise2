@@ -15,6 +15,16 @@ set_target_properties(FastNoise2::FastNoise PROPERTIES
 list(APPEND _cmake_import_check_targets FastNoise2::FastNoise )
 list(APPEND _cmake_import_check_files_for_FastNoise2::FastNoise "${_IMPORT_PREFIX}/lib/libFastNoise.so" )
 
+# Import target "FastNoise2::NodeEditorIpc" for configuration "Release"
+set_property(TARGET FastNoise2::NodeEditorIpc APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(FastNoise2::NodeEditorIpc PROPERTIES
+  IMPORTED_LOCATION_RELEASE "${_IMPORT_PREFIX}/lib/libNodeEditorIpc.so"
+  IMPORTED_SONAME_RELEASE "libNodeEditorIpc.so"
+  )
+
+list(APPEND _cmake_import_check_targets FastNoise2::NodeEditorIpc )
+list(APPEND _cmake_import_check_files_for_FastNoise2::NodeEditorIpc "${_IMPORT_PREFIX}/lib/libNodeEditorIpc.so" )
+
 # Import target "FastNoise2::NodeEditor" for configuration "Release"
 set_property(TARGET FastNoise2::NodeEditor APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_target_properties(FastNoise2::NodeEditor PROPERTIES

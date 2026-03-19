@@ -70,7 +70,7 @@ namespace FastNoise2.Generators
 					string varDesc = Marshal.PtrToStringAnsi(
 						FastNoise.fnGetMetadataVariableDescription(id, vi));
 					float defFloat = FastNoise.fnGetMetadataVariableDefaultFloat(id, vi);
-					int defInt = FastNoise.fnGetMetadataVariableDefaultInt(id, vi);
+					int defInt = FastNoise.fnGetMetadataVariableDefaultIntEnum(id, vi);
 					float minFloat = FastNoise.fnGetMetadataVariableMinFloat(id, vi);
 					float maxFloat = FastNoise.fnGetMetadataVariableMaxFloat(id, vi);
 

@@ -46,7 +46,7 @@ namespace FastNoise2.Generators
 
 				FastNoise child = Build(kv.Value);
 				IntPtr childHandle = child.mNodeHandle;
-				FastNoise.fnSetNodeLookup(fn.mNodeHandle, member.Index, ref childHandle);
+				FastNoise.fnSetNodeLookup(fn.mNodeHandle, member.Index, childHandle);
 			}
 
 			foreach (var kv in descriptor.Hybrids)
@@ -59,7 +59,7 @@ namespace FastNoise2.Generators
 				{
 					FastNoise child = Build(kv.Value.NodeValue);
 					IntPtr childHandle = child.mNodeHandle;
-					FastNoise.fnSetHybridNodeLookup(fn.mNodeHandle, member.Index, ref childHandle);
+					FastNoise.fnSetHybridNodeLookup(fn.mNodeHandle, member.Index, childHandle);
 				}
 				else
 				{

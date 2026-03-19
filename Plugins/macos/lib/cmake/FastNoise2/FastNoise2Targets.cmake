@@ -19,7 +19,7 @@ set(CMAKE_IMPORT_FILE_VERSION 1)
 set(_cmake_targets_defined "")
 set(_cmake_targets_not_defined "")
 set(_cmake_expected_targets "")
-foreach(_cmake_expected_target IN ITEMS FastNoise2::FastNoise FastNoise2::FastSIMD FastNoise2::FastSIMD_FastNoise FastNoise2::NodeEditor)
+foreach(_cmake_expected_target IN ITEMS FastNoise2::FastNoise FastNoise2::FastSIMD FastNoise2::FastSIMD_FastNoise FastNoise2::NodeEditorIpc FastNoise2::NodeEditor)
   list(APPEND _cmake_expected_targets "${_cmake_expected_target}")
   if(TARGET "${_cmake_expected_target}")
     list(APPEND _cmake_targets_defined "${_cmake_expected_target}")
@@ -59,7 +59,7 @@ endif()
 add_library(FastNoise2::FastNoise SHARED IMPORTED)
 
 set_target_properties(FastNoise2::FastNoise PROPERTIES
-  INTERFACE_COMPILE_DEFINITIONS "FASTNOISE2_VERSION=\"1.0.1\""
+  INTERFACE_COMPILE_DEFINITIONS "FASTNOISE2_VERSION=\"1.1.1\""
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "FastNoise2::FastSIMD;FastNoise2::FastSIMD_FastNoise"
 )
@@ -78,6 +78,13 @@ set_target_properties(FastNoise2::FastSIMD_FastNoise PROPERTIES
   INTERFACE_COMPILE_DEFINITIONS "FASTSIMD_IS_RELAXED=1"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:FastNoise2::FastSIMD>"
+)
+
+# Create imported target FastNoise2::NodeEditorIpc
+add_library(FastNoise2::NodeEditorIpc SHARED IMPORTED)
+
+set_target_properties(FastNoise2::NodeEditorIpc PROPERTIES
+  INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include;${_IMPORT_PREFIX}/include"
 )
 
 # Create imported target FastNoise2::NodeEditor

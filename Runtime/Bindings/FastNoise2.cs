@@ -138,7 +138,7 @@ namespace FastNoise2.Bindings
         public readonly uint GetSIMDLevel()
         {
 #if FN2_USER_SIGNED
-            return fnGetSIMDLevel(mNodeHandle);
+            return fnGetActiveFeatureSet(mNodeHandle);
 #else
             throw new InvalidOperationException("FastNoise2 native libraries are not signed. Use Window > FastNoise2 to sign them.");
 #endif
@@ -220,7 +220,7 @@ namespace FastNoise2.Bindings
                 case FN2MemberType.NodeLookup:
                 {
                     IntPtr lookupHandle = nodeLookup.mNodeHandle;
-                    if (!fnSetNodeLookup(mNodeHandle, member.Index, ref lookupHandle))
+                    if (!fnSetNodeLookup(mNodeHandle, member.Index, lookupHandle))
                         throw new ExternalException("Failed to set node lookup");
                     break;
                 }
@@ -228,7 +228,7 @@ namespace FastNoise2.Bindings
                 case FN2MemberType.Hybrid:
                 {
                     IntPtr lookupHandle = nodeLookup.mNodeHandle;
-                    if (!fnSetHybridNodeLookup(mNodeHandle, member.Index, ref lookupHandle))
+                    if (!fnSetHybridNodeLookup(mNodeHandle, member.Index, lookupHandle))
                         throw new ExternalException("Failed to set node lookup");
                     break;
                 }
@@ -530,7 +530,7 @@ namespace FastNoise2.Bindings
         internal static extern void fnDeleteNodeRef(IntPtr nodeHandle);
 
         [DllImport(NATIVE_LIB)]
-        internal static extern uint fnGetSIMDLevel(IntPtr nodeHandle);
+        internal static extern uint fnGetActiveFeatureSet(IntPtr nodeHandle);
 
         [DllImport(NATIVE_LIB)]
         internal static extern int fnGetMetadataID(IntPtr nodeHandle);
@@ -834,7 +834,7 @@ namespace FastNoise2.Bindings
         internal static extern bool fnSetNodeLookup(
             IntPtr nodeHandle,
             int nodeLookupIndex,
-            ref IntPtr nodeLookupHandle
+            IntPtr nodeLookupHandle
         );
 
         // Hybrid
@@ -851,7 +851,7 @@ namespace FastNoise2.Bindings
         internal static extern bool fnSetHybridNodeLookup(
             IntPtr nodeHandle,
             int nodeLookupIndex,
-            ref IntPtr nodeLookupHandle
+            IntPtr nodeLookupHandle
         );
 
         [DllImport(NATIVE_LIB)]
@@ -867,7 +867,7 @@ namespace FastNoise2.Bindings
         [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataGroupName(int id, int groupIndex);
         [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataVariableDescription(int id, int variableIndex);
         [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableDefaultFloat(int id, int variableIndex);
-        [DllImport(NATIVE_LIB)] internal static extern int    fnGetMetadataVariableDefaultInt(int id, int variableIndex);
+        [DllImport(NATIVE_LIB)] internal static extern int    fnGetMetadataVariableDefaultIntEnum(int id, int variableIndex);
         [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableMinFloat(int id, int variableIndex);
         [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataVariableMaxFloat(int id, int variableIndex);
         [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataNodeLookupDescription(int id, int nodeLookupIndex);
