@@ -1,3 +1,4 @@
+#if !FN2_USER_SIGNED
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -14,12 +15,16 @@ namespace FastNoise2.Editor.Signing
 			window.minSize = new Vector2(400, 260);
 		}
 
+		[MenuItem("Window/FastNoise2", true)]
+		static bool ShowWindowValidate() => Application.platform == RuntimePlatform.OSXEditor;
+
 		[InitializeOnLoadMethod]
 		static void AutoPopup()
 		{
-#if !FN2_USER_SIGNED
-			EditorApplication.delayCall += () => ShowWindow();
-#endif
+			if (Application.platform == RuntimePlatform.OSXEditor)
+				EditorApplication.delayCall += () => ShowWindow();
+			else
+				EditorApplication.delayCall += () => LibrarySigner.AddSigningDefine();
 		}
 
 		public void CreateGUI()
@@ -57,41 +62,25 @@ namespace FastNoise2.Editor.Signing
 			disclaimerBox.style.paddingRight = 10;
 			disclaimerBox.style.marginBottom = 12;
 
-			var disclaimer = new Label(
-				"FastNoise2 ships pre-built native libraries that are unsigned. " +
-				"On macOS, unsigned libraries trigger OS-level security dialogs that prevent Unity from loading them. " +
-				"On Linux, libraries need execute permissions.\n\n" +
-				"Clicking 'Sign Libraries' will run platform-specific commands to clear quarantine " +
-				"attributes (macOS) or set execute permissions (Linux), then enable a scripting define " +
-				"(FN2_USER_SIGNED) so that native interop code compiles.");
+			var paths = LibrarySigner.GetLibraryPaths();
+			var sb = new System.Text.StringBuilder();
+			sb.AppendLine("FastNoise2 ships unsigned native libraries. macOS Gatekeeper blocks them until quarantine attributes are cleared.");
+			sb.AppendLine();
+			sb.AppendLine("Clicking 'Sign Libraries' will run:");
+			sb.AppendLine();
+			foreach (string path in paths)
+			{
+				string fullPath = LibrarySigner.GetFullLibraryPath(path);
+				sb.AppendLine($"  chmod +x '{fullPath}'");
+				sb.AppendLine($"  xattr -dr com.apple.quarantine '{fullPath}'");
+			}
+			sb.AppendLine();
+			sb.AppendLine("On Linux and Windows, this is handled automatically.");
+
+			var disclaimer = new Label(sb.ToString());
 			disclaimer.style.whiteSpace = WhiteSpace.Normal;
 			disclaimerBox.Add(disclaimer);
 			root.Add(disclaimerBox);
-
-			var platformInfo = new Label(GetPlatformInfoText());
-			platformInfo.style.whiteSpace = WhiteSpace.Normal;
-			platformInfo.style.marginBottom = 12;
-			platformInfo.style.unityFontStyleAndWeight = FontStyle.Italic;
-			root.Add(platformInfo);
-
-#if FN2_USER_SIGNED
-			var status = new Label("Libraries are signed. Native code is enabled.");
-			status.style.color = new Color(0.3f, 0.8f, 0.3f);
-			status.style.unityFontStyleAndWeight = FontStyle.Bold;
-			status.style.marginBottom = 8;
-			root.Add(status);
-
-			var removeButton = new Button(() =>
-			{
-				LibrarySigner.RemoveSigningDefine();
-			})
-			{
-				text = "Remove Signing Define"
-			};
-			root.Add(removeButton);
-#else
-			var buttonRow = new VisualElement();
-			buttonRow.style.flexDirection = FlexDirection.Row;
 
 			var signButton = new Button(() =>
 			{
@@ -101,34 +90,8 @@ namespace FastNoise2.Editor.Signing
 			{
 				text = "Sign Libraries"
 			};
-			signButton.style.flexGrow = 1;
-			buttonRow.Add(signButton);
-
-			var dismissButton = new Button(() => Close())
-			{
-				text = "Dismiss"
-			};
-			dismissButton.style.width = 80;
-			buttonRow.Add(dismissButton);
-
-			root.Add(buttonRow);
-#endif
-		}
-
-		static string GetPlatformInfoText()
-		{
-			var paths = LibrarySigner.GetLibraryPaths();
-			if (paths.Count == 0)
-				return "Platform: " + Application.platform + " (no signing commands needed)";
-
-			string cmds = Application.platform switch
-			{
-				RuntimePlatform.OSXEditor => "chmod +x, xattr -dr com.apple.quarantine",
-				RuntimePlatform.LinuxEditor => "chmod +x",
-				_ => "none",
-			};
-
-			return $"Platform: {Application.platform}\nCommands: {cmds}\nPaths: {string.Join(", ", paths)}";
+			root.Add(signButton);
 		}
 	}
 }
+#endif

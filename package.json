@@ -1,6 +1,6 @@
 {
 	"displayName": "FastNoise2",
-	"name": "com.auburn.fastnoise2",
+	"name": "FastNoise2Unity",
 	"version": "0.2.0",
 	"description": "FastNoise2 in UPM",
 	"hideInEditor": false,

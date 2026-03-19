@@ -146,12 +146,12 @@ namespace FastNoise2.Editor.GraphEditor
 
 				// Inject window-level USS
 				LoadAndApplyStyleSheet(ref s_WindowStyleSheet,
-					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss",
+					"Packages/FastNoise2Unity/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2Window.uss",
 					window.rootVisualElement);
 
 				// Inject Terrain Background USS
 				LoadAndApplyStyleSheet(ref s_TerrainBackgroundStyleSheet,
-					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2TerrainBackground.uss",
+					"Packages/FastNoise2Unity/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2TerrainBackground.uss",
 					window.rootVisualElement);
 
 				// Add Terrain Background on the visual hierarchy (not contentContainer)
@@ -161,12 +161,12 @@ namespace FastNoise2.Editor.GraphEditor
 
 				// Inject Main Preview USS
 				LoadAndApplyStyleSheet(ref s_MainPreviewStyleSheet,
-					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2MainPreview.uss",
+					"Packages/FastNoise2Unity/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2MainPreview.uss",
 					window.rootVisualElement);
 
 				// Inject Preview Widget USS
 				LoadAndApplyStyleSheet(ref s_PreviewWidgetStyleSheet,
-					"Packages/com.auburn.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2PreviewWidget.uss",
+					"Packages/FastNoise2Unity/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/FN2PreviewWidget.uss",
 					window.rootVisualElement);
 
 				// Add Main Preview

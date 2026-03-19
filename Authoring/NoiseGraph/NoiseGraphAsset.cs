@@ -8,7 +8,7 @@ namespace FastNoise2.Authoring.NoiseGraph
 	/// Runtime-accessible ScriptableObject produced by the .fn2graph importer.
 	/// Holds the compiled noise graph and provides lazy construction of native handles.
 	/// </summary>
-	[Icon("Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph.png")]
+	[Icon("Packages/FastNoise2Unity/Editor/Resources/Icons/NoiseGraph.png")]
 	public class NoiseGraphAsset : ScriptableObject
 	{
 		[SerializeField] string encodedGraph;

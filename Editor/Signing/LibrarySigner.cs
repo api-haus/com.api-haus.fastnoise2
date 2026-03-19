@@ -42,8 +42,7 @@ namespace FastNoise2.Editor.Signing
 
 			foreach (string path in paths)
 			{
-				string fullPath = System.IO.Path.GetFullPath(
-					System.IO.Path.Combine(GetPackageRoot(), path));
+				string fullPath = GetFullLibraryPath(path);
 
 				if (!System.IO.File.Exists(fullPath) && !System.IO.Directory.Exists(fullPath))
 				{
@@ -121,8 +120,11 @@ namespace FastNoise2.Editor.Signing
 			return paths;
 		}
 
+		public static string GetFullLibraryPath(string relativePath) =>
+			System.IO.Path.GetFullPath(System.IO.Path.Combine(GetPackageRoot(), relativePath));
+
 		static string GetPackageRoot() =>
-			System.IO.Path.Join(Application.dataPath, "../Packages/com.auburn.fastnoise2/");
+			System.IO.Path.Join(Application.dataPath, "../Packages/FastNoise2Unity/");
 
 		static void RunShell(string command)
 		{

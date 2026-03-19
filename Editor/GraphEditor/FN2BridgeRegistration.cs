@@ -51,7 +51,7 @@ namespace FastNoise2.Editor.GraphEditor
 			};
 
 			FN2BridgeCallbacks.WindowIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(
-				"Packages/com.auburn.fastnoise2/Editor/Resources/Icons/NoiseGraph_Grey.png");
+				"Packages/FastNoise2Unity/Editor/Resources/Icons/NoiseGraph_Grey.png");
 
 			FN2BridgeCallbacks.GetAllNodeNames = () => FN2NodeRegistry.AllNodeNames;
 

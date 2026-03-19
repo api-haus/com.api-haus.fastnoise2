@@ -8,7 +8,7 @@ namespace FastNoise2.Editor.GraphEditor
 	{
 		const int DefaultHeightmapSize = 512;
 		const float DefaultFrequency = 0.01f;
-		const string ShaderPath = "Packages/com.auburn.fastnoise2/Editor/GraphEditor/Shaders/FN2TerrainRaymarch.shader";
+		const string ShaderPath = "Packages/FastNoise2Unity/Editor/GraphEditor/Shaders/FN2TerrainRaymarch.shader";
 
 		static Material s_Material;
 
