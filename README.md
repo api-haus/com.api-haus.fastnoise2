@@ -2,9 +2,9 @@
 
 <img src=".github/docs/grapheditor.jpg" width="100%">
 
-[FastNoise2](https://github.com/Auburn/FastNoise2) v1.0.1 packaged for Unity Package Manager (UPM). SIMD-accelerated noise generation with a visual graph editor, type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
+[FastNoise2](https://github.com/Auburn/FastNoise2) v1.1.1 packaged for Unity Package Manager (UPM). SIMD-accelerated noise generation with a visual graph editor, type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
 
-For native texture containers and sampling utilities, see the optional companion package [`NativeTexture`](https://github.com/api-haus/NativeTexture).
+For native texture containers and sampling utilities, see the optional companion package [`NativeTexture`](https://github.com/api-haus/com.api-haus.native-texture).
 
 ---
 
@@ -59,7 +59,7 @@ For native texture containers and sampling utilities, see the optional companion
 | Unity.Burst | — | Runtime ref |
 | Unity.Collections | — | Runtime ref |
 | Unity.Mathematics | — | Runtime ref |
-| [`NativeTexture`](https://github.com/api-haus/NativeTexture) | — | Optional — native texture containers + FN2 sampling bridge |
+| [`NativeTexture`](https://github.com/api-haus/com.api-haus.native-texture) | — | Optional — native texture containers + FN2 sampling bridge |
 
 ---
 
@@ -134,7 +134,7 @@ Debug.Log($"Noise bounds: Min={minMax.min}, Max={minMax.max}");
 
 ### With NativeTexture Integration
 
-When the optional [`NativeTexture`](https://github.com/api-haus/NativeTexture) package is installed, you can generate noise directly into native texture containers. See the NativeTexture package README for extension method details.
+When the optional [`NativeTexture`](https://github.com/api-haus/com.api-haus.native-texture) package is installed, you can generate noise directly into native texture containers. See the NativeTexture package README for extension method details.
 
 ```csharp
 using FastNoise2.Bindings;
@@ -176,13 +176,12 @@ All assemblies have `autoReferenced: false` — consumers must add explicit asse
 
 ---
 
-## Roadmap / TODO
+## Version Mapping
 
-- [x] ~~Update to NewFastSIMD branch~~ — v1.0.1
-- [x] ~~Complete Noise Editor integration (serialization to/from Noise Tool)~~ — Encode/Decode implemented
-- [x] ~~Support for all texture dimensions (4D) and job types~~ — via [`NativeTexture`](https://github.com/api-haus/NativeTexture)
-- [ ] Comprehensive documentation and additional examples
-- [ ] OpenUPM release
+| UPM Package | FastNoise2 (C++) |
+|---|---|
+| v1.1.0 | [v1.1.1](https://github.com/Auburn/FastNoise2/releases/tag/v1.1.1) |
+| v1.0.0 | [v1.0.1](https://github.com/Auburn/FastNoise2/releases/tag/v1.0.1) |
 
 ---
 
