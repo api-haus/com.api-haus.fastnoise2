@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.0.0...v1.1.0) (2026-03-19)
+
+
+### Features
+
+* update native libs to FastNoise2 v1.1.1 ([0dee725](https://github.com/api-haus/com.api-haus.fastnoise2/commit/0dee725f5a53ce80f2601c260fef20d5d8909fc3))
+
 # 1.0.0 (2026-03-19)
 
 
