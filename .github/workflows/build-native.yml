@@ -6,7 +6,7 @@ on:
       upstream_ref:
         description: 'FastNoise2 fork tag/branch/SHA'
         required: true
-        default: 'feat/extended-metadata-api'
+        default: 'v1.1.1'
   push:
     branches: [main]
     paths:
@@ -61,8 +61,8 @@ jobs:
       - name: Checkout FastNoise2 fork
         uses: actions/checkout@v4
         with:
-          repository: api-haus/fastnoise2
-          ref: ${{ inputs.upstream_ref || 'feat/extended-metadata-api' }}
+          repository: Auburn/FastNoise2
+          ref: ${{ inputs.upstream_ref || 'v1.1.1' }}
           submodules: recursive
 
       - name: Install tool dependencies (Linux)
