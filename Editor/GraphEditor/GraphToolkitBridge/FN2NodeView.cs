@@ -37,7 +37,7 @@ namespace FastNoise2.Editor.GraphEditor
 			base.PostBuildUI();
 			AddToClassList(fn2UssClassName);
 			GraphElementHelper.AddStylesheet(this, "FN2NodeView.uss",
-				"Packages/FastNoise2Unity/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
+				"Packages/com.api-haus.fastnoise2/Editor/GraphEditor/GraphToolkitBridge/StyleSheets/");
 
 			ApplyCategoryColoring();
 			ApplyNodeTooltip();

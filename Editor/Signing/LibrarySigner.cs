@@ -124,7 +124,7 @@ namespace FastNoise2.Editor.Signing
 			System.IO.Path.GetFullPath(System.IO.Path.Combine(GetPackageRoot(), relativePath));
 
 		static string GetPackageRoot() =>
-			System.IO.Path.Join(Application.dataPath, "../Packages/FastNoise2Unity/");
+			UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(LibrarySigner).Assembly).resolvedPath;
 
 		static void RunShell(string command)
 		{

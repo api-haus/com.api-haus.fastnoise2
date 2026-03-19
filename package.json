@@ -1,8 +1,12 @@
 {
 	"displayName": "FastNoise2",
-	"name": "FastNoise2Unity",
+	"name": "com.api-haus.fastnoise2",
 	"version": "0.2.0",
 	"description": "FastNoise2 in UPM",
 	"hideInEditor": false,
-	"dependencies": {}
+	"dependencies": {},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/api-haus/FastNoise2Unity.git"
+	}
 }
