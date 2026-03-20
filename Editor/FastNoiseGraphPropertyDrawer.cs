@@ -95,6 +95,14 @@ namespace FastNoise2.Editor
 			if (s_ActiveSerializedObject == null || string.IsNullOrEmpty(s_ActivePropertyPath))
 				return;
 
+			// targetObject may have been destroyed (deselected, deleted, domain reload)
+			if (s_ActiveSerializedObject.targetObject == null)
+			{
+				s_ActiveSerializedObject = null;
+				s_ActivePropertyPath = null;
+				return;
+			}
+
 			s_ActiveSerializedObject.Update();
 
 			var prop = s_ActiveSerializedObject.FindProperty(s_ActivePropertyPath);
@@ -106,7 +114,6 @@ namespace FastNoise2.Editor
 			encodedProp.stringValue = encodedGraph;
 			s_ActiveSerializedObject.ApplyModifiedProperties();
 
-			// Force Inspector repaint so the field updates visually in real-time
 			EditorUtility.SetDirty(s_ActiveSerializedObject.targetObject);
 			UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
 		}

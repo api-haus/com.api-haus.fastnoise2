@@ -15,6 +15,7 @@ namespace FastNoise2.Editor.Ipc
 		public static event Action<string> OnGraphChanged;
 
 		const int POLL_BUFFER_SIZE = 65536;
+		const string SESSION_KEY_PID = "FN2_NodeEditor_PID";
 
 		static IntPtr s_Ctx;
 		static bool s_Polling;
@@ -23,13 +24,37 @@ namespace FastNoise2.Editor.Ipc
 
 		static NodeEditorSession()
 		{
-			EditorApplication.quitting += Release;
-			AssemblyReloadEvents.beforeAssemblyReload += Release;
+			EditorApplication.quitting += OnQuitting;
+			AssemblyReloadEvents.beforeAssemblyReload += OnBeforeReload;
+
+			// After domain reload: reconnect to surviving NodeEditor process
+			TryReconnect();
+		}
+
+		static void TryReconnect()
+		{
+			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
+			if (pid <= 0)
+				return;
+
+			if (!IsProcessAlive(pid))
+			{
+				SessionState.EraseInt(SESSION_KEY_PID);
+				return;
+			}
+
+			// NodeEditor is still running — re-open the shared memory and resume polling
+			if (!Setup())
+				return;
+
+			StartPolling();
+			Debug.Log($"[FN2 IPC] Reconnected to NodeEditor (PID {pid}) after domain reload");
 		}
 
 		static string ResolveNodeEditorPath()
 		{
-			if (s_NodeEditorPath != null) return s_NodeEditorPath;
+			if (s_NodeEditorPath != null)
+				return s_NodeEditorPath;
 
 			var pkgInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(
 				typeof(NodeEditorSession).Assembly
@@ -68,17 +93,25 @@ namespace FastNoise2.Editor.Ipc
 				UseShellExecute = false,
 				CreateNoWindow = true,
 			};
-			try { Process.Start(psi)?.WaitForExit(2000); }
-			catch (Exception e) { Debug.LogWarning($"[FN2 IPC] chmod failed: {e.Message}"); }
+			try
+			{
+				Process.Start(psi)?.WaitForExit(2000);
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning($"[FN2 IPC] chmod failed: {e.Message}");
+			}
 #endif
 		}
 
 		static bool Setup()
 		{
-			if (s_Ctx != IntPtr.Zero) return true;
+			if (s_Ctx != IntPtr.Zero)
+				return true;
 
 			string editorPath = ResolveNodeEditorPath();
-			if (editorPath == null) return false;
+			if (editorPath == null)
+				return false;
 
 			EnsureExecutable(editorPath);
 
@@ -95,30 +128,24 @@ namespace FastNoise2.Editor.Ipc
 
 		public static void EditGraph(string encodedGraph)
 		{
-			if (!IsNodeEditorRunning())
-			{
-				// Release stale context so shared memory is fresh
-				Release();
+			// Always kill + relaunch — the IPC has no "clear canvas" command,
+			// and SendImportRequest appends rather than replaces.
+			// --import-ent on launch starts with a clean slate.
+			KillNodeEditor();
+			ReleaseContext();
 
-				if (!Setup()) return;
+			if (!Setup())
+				return;
 
-				StartNodeEditor(encodedGraph);
-			}
-			else
-			{
-				if (!Setup()) return;
-
-				if (!string.IsNullOrEmpty(encodedGraph))
-					NodeEditorIpc.fnEditorIpcSendImportRequest(s_Ctx, encodedGraph);
-			}
-
+			StartNodeEditor(encodedGraph);
 			StartPolling();
 		}
 
 		static void StartNodeEditor(string encodedGraph)
 		{
 			string path = ResolveNodeEditorPath();
-			if (path == null) return;
+			if (path == null)
+				return;
 
 			string binDir = Path.GetDirectoryName(path)!;
 			string libDir = Path.GetFullPath(Path.Combine(binDir, "..", "lib"));
@@ -140,14 +167,18 @@ namespace FastNoise2.Editor.Ipc
 
 #if UNITY_EDITOR_LINUX
 			string existing = psi.Environment.ContainsKey("LD_LIBRARY_PATH")
-				? psi.Environment["LD_LIBRARY_PATH"] : "";
+				? psi.Environment["LD_LIBRARY_PATH"]
+				: "";
 			psi.Environment["LD_LIBRARY_PATH"] = string.IsNullOrEmpty(existing)
-				? libDir : $"{libDir}:{existing}";
+				? libDir
+				: $"{libDir}:{existing}";
 #elif UNITY_EDITOR_OSX
 			string existing = psi.Environment.ContainsKey("DYLD_LIBRARY_PATH")
-				? psi.Environment["DYLD_LIBRARY_PATH"] : "";
+				? psi.Environment["DYLD_LIBRARY_PATH"]
+				: "";
 			psi.Environment["DYLD_LIBRARY_PATH"] = string.IsNullOrEmpty(existing)
-				? libDir : $"{libDir}:{existing}";
+				? libDir
+				: $"{libDir}:{existing}";
 #endif
 
 			try
@@ -159,21 +190,28 @@ namespace FastNoise2.Editor.Ipc
 					return;
 				}
 
-				Debug.Log($"[FN2 IPC] NodeEditor started (PID {proc.Id})");
+				// Persist PID so we can reconnect after domain reload
+				SessionState.SetInt(SESSION_KEY_PID, proc.Id);
 
-				// Watch for early exit — if it dies within 1s, log stderr
 				proc.EnableRaisingEvents = true;
 				proc.Exited += (_, _) =>
 				{
-					string stderr = "";
-					try { stderr = proc.StandardError.ReadToEnd(); }
-					catch { /* stream already closed */ }
+					int code = proc.ExitCode;
 
-					if (!string.IsNullOrEmpty(stderr))
-						Debug.LogError($"[FN2 IPC] NodeEditor exited (code {proc.ExitCode}): {stderr}");
-					else
-						Debug.LogWarning($"[FN2 IPC] NodeEditor exited (code {proc.ExitCode})");
+					if (code != 0)
+					{
+						string stderr = "";
+						try
+						{
+							stderr = proc.StandardError.ReadToEnd();
+						}
+						catch
+						{ /* stream already closed */
+						}
+						Debug.LogError($"[FN2 IPC] NodeEditor crashed (code {code}): {stderr}");
+					}
 
+					SessionState.EraseInt(SESSION_KEY_PID);
 					proc.Dispose();
 				};
 			}
@@ -183,13 +221,54 @@ namespace FastNoise2.Editor.Ipc
 			}
 		}
 
+		static void KillNodeEditor()
+		{
+			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
+			if (pid <= 0)
+				return;
+
+			try
+			{
+				var p = Process.GetProcessById(pid);
+				if (!p.HasExited)
+					p.Kill();
+				p.Dispose();
+			}
+			catch
+			{ /* already dead */
+			}
+
+			SessionState.EraseInt(SESSION_KEY_PID);
+		}
+
 		static bool IsNodeEditorRunning()
 		{
+			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
+			if (pid > 0 && IsProcessAlive(pid))
+				return true;
+
+			// Fallback: scan by name in case PID was lost
 			try
 			{
 				var procs = Process.GetProcessesByName("NodeEditor");
 				bool alive = procs.Length > 0;
-				foreach (var p in procs) p.Dispose();
+				foreach (var p in procs)
+					p.Dispose();
+				return alive;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		static bool IsProcessAlive(int pid)
+		{
+			try
+			{
+				var p = Process.GetProcessById(pid);
+				bool alive = !p.HasExited;
+				p.Dispose();
 				return alive;
 			}
 			catch
@@ -200,32 +279,33 @@ namespace FastNoise2.Editor.Ipc
 
 		static void StartPolling()
 		{
-			if (s_Polling) return;
+			if (s_Polling)
+				return;
 			s_Polling = true;
 			EditorApplication.update += PollUpdate;
 		}
 
 		static void StopPolling()
 		{
-			if (!s_Polling) return;
+			if (!s_Polling)
+				return;
 			s_Polling = false;
 			EditorApplication.update -= PollUpdate;
 		}
 
 		static void PollUpdate()
 		{
-			if (s_Ctx == IntPtr.Zero) return;
+			if (s_Ctx == IntPtr.Zero)
+				return;
 
-			int msgType = NodeEditorIpc.fnEditorIpcPollMessage(
-				s_Ctx, s_PollBuffer, s_PollBuffer.Length
-			);
+			int msgType = NodeEditorIpc.fnEditorIpcPollMessage(s_Ctx, s_PollBuffer, s_PollBuffer.Length);
 
-			// 0 = no message, negative = error, 1-2 = valid message type
-			if (msgType <= 0) return;
+			if (msgType <= 0)
+				return;
 
-			// Find null terminator in buffer
 			int len = Array.IndexOf(s_PollBuffer, (byte)0);
-			if (len < 0) len = s_PollBuffer.Length;
+			if (len < 0)
+				len = s_PollBuffer.Length;
 
 			if (len > 0)
 			{
@@ -234,16 +314,62 @@ namespace FastNoise2.Editor.Ipc
 			}
 		}
 
-		static void Release()
+		/// <summary>
+		/// Release IPC context only (shared memory). Does NOT kill the NodeEditor process.
+		/// </summary>
+		static void ReleaseContext()
 		{
 			StopPolling();
 
-			if (s_Ctx == IntPtr.Zero) return;
+			if (s_Ctx == IntPtr.Zero)
+				return;
 			IntPtr ctx = s_Ctx;
 			s_Ctx = IntPtr.Zero;
 
-			try { NodeEditorIpc.fnEditorIpcRelease(ctx); }
-			catch (Exception e) { Debug.LogWarning($"[FN2 IPC] Release failed: {e.Message}"); }
+			try
+			{
+				NodeEditorIpc.fnEditorIpcRelease(ctx);
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning($"[FN2 IPC] Release failed: {e.Message}");
+			}
+		}
+
+		/// <summary>
+		/// Domain reload: drop our C# handle but leave the shared memory and NodeEditor alive.
+		/// fnEditorIpcSetup will re-open the same /dev/shm/FastNoise2NodeEditor segment after reload.
+		/// </summary>
+		static void OnBeforeReload()
+		{
+			StopPolling();
+			// Intentionally do NOT call fnEditorIpcRelease — the shm segment must survive
+			// for the NodeEditor process. The 16-byte native context struct leaks; acceptable.
+			s_Ctx = IntPtr.Zero;
+		}
+
+		/// <summary>
+		/// Editor quitting: full cleanup — release IPC and kill NodeEditor.
+		/// </summary>
+		static void OnQuitting()
+		{
+			ReleaseContext();
+
+			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
+			if (pid > 0)
+			{
+				try
+				{
+					var p = Process.GetProcessById(pid);
+					if (!p.HasExited)
+						p.Kill();
+					p.Dispose();
+				}
+				catch
+				{ /* already dead */
+				}
+				SessionState.EraseInt(SESSION_KEY_PID);
+			}
 		}
 	}
 #endif
