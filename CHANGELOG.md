@@ -1,3 +1,16 @@
+# [1.3.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.2.0...v1.3.0) (2026-03-20)
+
+
+### Bug Fixes
+
+* detect dead NodeEditor in poll loop to clear stale session immediately ([b0b3c29](https://github.com/api-haus/com.api-haus.fastnoise2/commit/b0b3c29120f37f7907e5947f251632b17a5bc525))
+* suppress SIGKILL (137) exit log when we intentionally kill NodeEditor ([5d9f76e](https://github.com/api-haus/com.api-haus.fastnoise2/commit/5d9f76eb17688719a36ac65e0392b43e2200105b))
+
+
+### Features
+
+* persistent session ↔ asset association via GlobalObjectId ([d2d21ef](https://github.com/api-haus/com.api-haus.fastnoise2/commit/d2d21eff2f5aa18aaf555e54cac3e6fb0af16050))
+
 # [1.2.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.1.0...v1.2.0) (2026-03-20)
 
 
