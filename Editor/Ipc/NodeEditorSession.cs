@@ -317,6 +317,16 @@ namespace FastNoise2.Editor.Ipc
 			if (s_Ctx == IntPtr.Zero)
 				return;
 
+			// Detect dead NodeEditor and clean up on the main thread
+			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
+			if (pid > 0 && !IsProcessAlive(pid))
+			{
+				ClearSessionState();
+				ReleaseContext();
+				UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+				return;
+			}
+
 			int msgType = NodeEditorIpc.fnEditorIpcPollMessage(s_Ctx, s_PollBuffer, s_PollBuffer.Length);
 
 			if (msgType <= 0)
