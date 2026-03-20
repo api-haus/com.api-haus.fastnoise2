@@ -1,3 +1,15 @@
+# [1.2.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.1.0...v1.2.0) (2026-03-20)
+
+
+### Bug Fixes
+
+* IPC session resilience — survive domain reloads, clean canvas, null-safe polling ([8fa031b](https://github.com/api-haus/com.api-haus.fastnoise2/commit/8fa031bdf114a4451b3eb297da3eb04b4545532f))
+
+
+### Features
+
+* NodeEditor IPC integration — P/Invoke bindings, session manager, live property updates ([2147b17](https://github.com/api-haus/com.api-haus.fastnoise2/commit/2147b179d035af4141579069712ff60ca9a146f9))
+
 # [1.1.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.0.0...v1.1.0) (2026-03-19)
 
 
