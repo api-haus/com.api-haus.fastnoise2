@@ -198,7 +198,8 @@ namespace FastNoise2.Editor.Ipc
 				{
 					int code = proc.ExitCode;
 
-					if (code != 0)
+					// 137 = SIGKILL (we killed it), 0 = clean exit — both expected
+					if (code != 0 && code != 137)
 					{
 						string stderr = "";
 						try
