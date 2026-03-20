@@ -12,22 +12,30 @@ namespace FastNoise2.Editor.Ipc
 	[InitializeOnLoad]
 	internal static class NodeEditorSession
 	{
-		public static event Action<string> OnGraphChanged;
-
 		const int POLL_BUFFER_SIZE = 65536;
 		const string SESSION_KEY_PID = "FN2_NodeEditor_PID";
+		const string SESSION_KEY_GLOBAL_ID = "FN2_EditingGlobalObjectId";
+		const string SESSION_KEY_PROPERTY_PATH = "FN2_EditingPropertyPath";
+		const string ENCODED_GRAPH_PROPERTY_PATH = "encodedGraph";
 
 		static IntPtr s_Ctx;
 		static bool s_Polling;
 		static byte[] s_PollBuffer;
 		static string s_NodeEditorPath;
 
+		// Editing target — recoverable from SessionState after domain reload
+		static string s_ActiveGlobalId;
+		static string s_ActivePropertyPath;
+		static SerializedObject s_ActiveSerializedObject;
+
+		public static string ActiveGlobalId => s_ActiveGlobalId;
+		public static string ActivePropertyPath => s_ActivePropertyPath;
+
 		static NodeEditorSession()
 		{
 			EditorApplication.quitting += OnQuitting;
 			AssemblyReloadEvents.beforeAssemblyReload += OnBeforeReload;
 
-			// After domain reload: reconnect to surviving NodeEditor process
 			TryReconnect();
 		}
 
@@ -39,16 +47,43 @@ namespace FastNoise2.Editor.Ipc
 
 			if (!IsProcessAlive(pid))
 			{
-				SessionState.EraseInt(SESSION_KEY_PID);
+				ClearSessionState();
 				return;
 			}
 
-			// NodeEditor is still running — re-open the shared memory and resume polling
+			// Recover editing target
+			s_ActiveGlobalId = SessionState.GetString(SESSION_KEY_GLOBAL_ID, "");
+			s_ActivePropertyPath = SessionState.GetString(SESSION_KEY_PROPERTY_PATH, "");
+
+			if (!string.IsNullOrEmpty(s_ActiveGlobalId))
+				RecoverSerializedObject();
+
 			if (!Setup())
 				return;
 
 			StartPolling();
 			Debug.Log($"[FN2 IPC] Reconnected to NodeEditor (PID {pid}) after domain reload");
+		}
+
+		static void RecoverSerializedObject()
+		{
+			if (string.IsNullOrEmpty(s_ActiveGlobalId))
+				return;
+
+			if (!GlobalObjectId.TryParse(s_ActiveGlobalId, out var globalId))
+			{
+				Debug.LogWarning($"[FN2 IPC] Failed to parse GlobalObjectId: {s_ActiveGlobalId}");
+				return;
+			}
+
+			var obj = GlobalObjectId.GlobalObjectIdentifierToObjectSlow(globalId);
+			if (obj == null)
+			{
+				Debug.LogWarning("[FN2 IPC] Could not recover target object from GlobalObjectId");
+				return;
+			}
+
+			s_ActiveSerializedObject = new SerializedObject(obj);
 		}
 
 		static string ResolveNodeEditorPath()
@@ -126,13 +161,18 @@ namespace FastNoise2.Editor.Ipc
 			return true;
 		}
 
-		public static void EditGraph(string encodedGraph)
+		public static void EditGraph(string encodedGraph, UnityEngine.Object targetObject, string propertyPath)
 		{
-			// Always kill + relaunch — the IPC has no "clear canvas" command,
-			// and SendImportRequest appends rather than replaces.
-			// --import-ent on launch starts with a clean slate.
 			KillNodeEditor();
 			ReleaseContext();
+
+			// Store editing target
+			s_ActiveGlobalId = GlobalObjectId.GetGlobalObjectIdSlow(targetObject).ToString();
+			s_ActivePropertyPath = propertyPath;
+			s_ActiveSerializedObject = new SerializedObject(targetObject);
+
+			SessionState.SetString(SESSION_KEY_GLOBAL_ID, s_ActiveGlobalId);
+			SessionState.SetString(SESSION_KEY_PROPERTY_PATH, s_ActivePropertyPath);
 
 			if (!Setup())
 				return;
@@ -167,18 +207,14 @@ namespace FastNoise2.Editor.Ipc
 
 #if UNITY_EDITOR_LINUX
 			string existing = psi.Environment.ContainsKey("LD_LIBRARY_PATH")
-				? psi.Environment["LD_LIBRARY_PATH"]
-				: "";
+				? psi.Environment["LD_LIBRARY_PATH"] : "";
 			psi.Environment["LD_LIBRARY_PATH"] = string.IsNullOrEmpty(existing)
-				? libDir
-				: $"{libDir}:{existing}";
+				? libDir : $"{libDir}:{existing}";
 #elif UNITY_EDITOR_OSX
 			string existing = psi.Environment.ContainsKey("DYLD_LIBRARY_PATH")
-				? psi.Environment["DYLD_LIBRARY_PATH"]
-				: "";
+				? psi.Environment["DYLD_LIBRARY_PATH"] : "";
 			psi.Environment["DYLD_LIBRARY_PATH"] = string.IsNullOrEmpty(existing)
-				? libDir
-				: $"{libDir}:{existing}";
+				? libDir : $"{libDir}:{existing}";
 #endif
 
 			try
@@ -190,29 +226,34 @@ namespace FastNoise2.Editor.Ipc
 					return;
 				}
 
-				// Persist PID so we can reconnect after domain reload
-				SessionState.SetInt(SESSION_KEY_PID, proc.Id);
+				int launchedPid = proc.Id;
+				SessionState.SetInt(SESSION_KEY_PID, launchedPid);
 
 				proc.EnableRaisingEvents = true;
 				proc.Exited += (_, _) =>
 				{
 					int code = proc.ExitCode;
 
-					// 137 = SIGKILL (we killed it), 0 = clean exit — both expected
 					if (code != 0 && code != 137)
 					{
 						string stderr = "";
-						try
-						{
-							stderr = proc.StandardError.ReadToEnd();
-						}
-						catch
-						{ /* stream already closed */
-						}
+						try { stderr = proc.StandardError.ReadToEnd(); }
+						catch { /* stream already closed */ }
 						Debug.LogError($"[FN2 IPC] NodeEditor crashed (code {code}): {stderr}");
 					}
 
-					SessionState.EraseInt(SESSION_KEY_PID);
+					// Defer to main thread — SessionState and Unity API can't be called from thread pool
+					EditorApplication.delayCall += () =>
+					{
+						// Only clear state if we're still the current session —
+						// a new EditGraph() call may have already replaced us.
+						if (SessionState.GetInt(SESSION_KEY_PID, -1) == launchedPid)
+						{
+							ClearSessionState();
+							UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+						}
+					};
+
 					proc.Dispose();
 				};
 			}
@@ -235,32 +276,9 @@ namespace FastNoise2.Editor.Ipc
 					p.Kill();
 				p.Dispose();
 			}
-			catch
-			{ /* already dead */
-			}
+			catch { /* already dead */ }
 
 			SessionState.EraseInt(SESSION_KEY_PID);
-		}
-
-		static bool IsNodeEditorRunning()
-		{
-			int pid = SessionState.GetInt(SESSION_KEY_PID, -1);
-			if (pid > 0 && IsProcessAlive(pid))
-				return true;
-
-			// Fallback: scan by name in case PID was lost
-			try
-			{
-				var procs = Process.GetProcessesByName("NodeEditor");
-				bool alive = procs.Length > 0;
-				foreach (var p in procs)
-					p.Dispose();
-				return alive;
-			}
-			catch
-			{
-				return false;
-			}
 		}
 
 		static bool IsProcessAlive(int pid)
@@ -311,13 +329,35 @@ namespace FastNoise2.Editor.Ipc
 			if (len > 0)
 			{
 				string message = Encoding.UTF8.GetString(s_PollBuffer, 0, len);
-				OnGraphChanged?.Invoke(message);
+				ApplyGraphChange(message);
 			}
 		}
 
-		/// <summary>
-		/// Release IPC context only (shared memory). Does NOT kill the NodeEditor process.
-		/// </summary>
+		static void ApplyGraphChange(string encodedGraph)
+		{
+			// Try to recover stale SerializedObject
+			if (s_ActiveSerializedObject == null || s_ActiveSerializedObject.targetObject == null)
+			{
+				RecoverSerializedObject();
+				if (s_ActiveSerializedObject == null)
+					return;
+			}
+
+			s_ActiveSerializedObject.Update();
+
+			var prop = s_ActiveSerializedObject.FindProperty(s_ActivePropertyPath);
+			if (prop == null) return;
+
+			var encodedProp = prop.FindPropertyRelative(ENCODED_GRAPH_PROPERTY_PATH);
+			if (encodedProp == null) return;
+
+			encodedProp.stringValue = encodedGraph;
+			s_ActiveSerializedObject.ApplyModifiedProperties();
+
+			EditorUtility.SetDirty(s_ActiveSerializedObject.targetObject);
+			UnityEditorInternal.InternalEditorUtility.RepaintAllViews();
+		}
+
 		static void ReleaseContext()
 		{
 			StopPolling();
@@ -327,31 +367,29 @@ namespace FastNoise2.Editor.Ipc
 			IntPtr ctx = s_Ctx;
 			s_Ctx = IntPtr.Zero;
 
-			try
-			{
-				NodeEditorIpc.fnEditorIpcRelease(ctx);
-			}
-			catch (Exception e)
-			{
-				Debug.LogWarning($"[FN2 IPC] Release failed: {e.Message}");
-			}
+			try { NodeEditorIpc.fnEditorIpcRelease(ctx); }
+			catch (Exception e) { Debug.LogWarning($"[FN2 IPC] Release failed: {e.Message}"); }
 		}
 
-		/// <summary>
-		/// Domain reload: drop our C# handle but leave the shared memory and NodeEditor alive.
-		/// fnEditorIpcSetup will re-open the same /dev/shm/FastNoise2NodeEditor segment after reload.
-		/// </summary>
+		static void ClearSessionState()
+		{
+			s_ActiveGlobalId = null;
+			s_ActivePropertyPath = null;
+			s_ActiveSerializedObject = null;
+
+			SessionState.EraseInt(SESSION_KEY_PID);
+			SessionState.EraseString(SESSION_KEY_GLOBAL_ID);
+			SessionState.EraseString(SESSION_KEY_PROPERTY_PATH);
+		}
+
 		static void OnBeforeReload()
 		{
 			StopPolling();
-			// Intentionally do NOT call fnEditorIpcRelease — the shm segment must survive
-			// for the NodeEditor process. The 16-byte native context struct leaks; acceptable.
 			s_Ctx = IntPtr.Zero;
+			s_ActiveSerializedObject = null;
+			// PID, GlobalId, PropertyPath stay in SessionState for TryReconnect
 		}
 
-		/// <summary>
-		/// Editor quitting: full cleanup — release IPC and kill NodeEditor.
-		/// </summary>
 		static void OnQuitting()
 		{
 			ReleaseContext();
@@ -366,11 +404,10 @@ namespace FastNoise2.Editor.Ipc
 						p.Kill();
 					p.Dispose();
 				}
-				catch
-				{ /* already dead */
-				}
-				SessionState.EraseInt(SESSION_KEY_PID);
+				catch { /* already dead */ }
 			}
+
+			ClearSessionState();
 		}
 	}
 #endif

@@ -2,10 +2,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
 
 namespace FastNoise2.Tests
 {
 #if FN2_USER_SIGNED
+	using Authoring.NoiseGraph;
 	using Editor.Ipc;
 
 	public class NodeEditorIpcTests : IpcTestBase
@@ -36,7 +39,6 @@ namespace FastNoise2.Tests
 		[Test, Order(1)]
 		public void PollMessage_OnFreshContext_ReturnsNull()
 		{
-			// Drain any stale messages left from prior runs
 			while (PollMessage() != null) { }
 
 			Assert.That(PollMessage(), Is.Null);
@@ -56,17 +58,12 @@ namespace FastNoise2.Tests
 
 		#endregion
 
-		#region Event Wiring
+		#region Session State
 
 		[Test]
-		public void OnGraphChanged_SubscribeDoesNotThrow()
+		public void ActiveGlobalId_IsNullByDefault()
 		{
-			bool fired = false;
-			void Handler(string s) => fired = true;
-
-			Assert.DoesNotThrow(() => NodeEditorSession.OnGraphChanged += Handler);
-			Assert.DoesNotThrow(() => NodeEditorSession.OnGraphChanged -= Handler);
-			Assert.That(fired, Is.False);
+			Assert.That(NodeEditorSession.ActiveGlobalId, Is.Null);
 		}
 
 		#endregion
@@ -104,27 +101,84 @@ namespace FastNoise2.Tests
 		{
 			KillNodeEditors();
 
-			// First launch
 			var proc1 = LaunchNodeEditor(DEFAULT_GRAPH);
 			Assert.That(proc1, Is.Not.Null);
 			Assert.That(WaitForNodeEditor(5000), Is.True, "First launch: process not found");
 
-			// Kill it
 			KillNodeEditors();
 			System.Threading.Thread.Sleep(500);
 
-			// Verify dead
 			var procs = Process.GetProcessesByName("NodeEditor");
 			bool stillAlive = procs.Length > 0;
 			foreach (var p in procs) p.Dispose();
 			Assert.That(stillAlive, Is.False, "NodeEditor should be dead after kill");
 
-			// Re-launch
 			var proc2 = LaunchNodeEditor(DEFAULT_GRAPH);
 			Assert.That(proc2, Is.Not.Null);
 			Assert.That(WaitForNodeEditor(5000), Is.True, "Second launch: process not found after kill+relaunch");
 
 			KillNodeEditors();
+		}
+
+		#endregion
+
+		#region E2E Session Switching
+
+		[Test]
+		public void EditGraph_SwitchBetweenObjects_SessionTracksCorrectTarget()
+		{
+			KillNodeEditors();
+
+			const string pathA = "Assets/_fn2_test_a.asset";
+			const string pathB = "Assets/_fn2_test_b.asset";
+
+			var assetA = ScriptableObject.CreateInstance<FastNoiseGraphAsset>();
+			var assetB = ScriptableObject.CreateInstance<FastNoiseGraphAsset>();
+
+			try
+			{
+				// Save as actual assets so GlobalObjectId is valid
+				AssetDatabase.CreateAsset(assetA, pathA);
+				AssetDatabase.CreateAsset(assetB, pathB);
+				AssetDatabase.SaveAssets();
+
+				string propertyPath = "savedGraph";
+
+				var globalIdA = GlobalObjectId.GetGlobalObjectIdSlow(assetA).ToString();
+				var globalIdB = GlobalObjectId.GetGlobalObjectIdSlow(assetB).ToString();
+
+				Assert.That(globalIdA, Is.Not.EqualTo(globalIdB),
+					"Two distinct assets should have different GlobalObjectIds");
+
+				// Edit object A
+				NodeEditorSession.EditGraph(DEFAULT_GRAPH, assetA, propertyPath);
+
+				Assert.That(NodeEditorSession.ActiveGlobalId, Is.EqualTo(globalIdA),
+					"Session should track object A after EditGraph(A)");
+				Assert.That(NodeEditorSession.ActivePropertyPath, Is.EqualTo(propertyPath));
+
+				Assert.That(WaitForNodeEditor(5000), Is.True,
+					"NodeEditor should be running after EditGraph(A)");
+
+				// Switch to object B
+				NodeEditorSession.EditGraph(DEFAULT_GRAPH, assetB, propertyPath);
+
+				// Give the old process time to exit and fire its Exited handler
+				System.Threading.Thread.Sleep(1000);
+
+				Assert.That(NodeEditorSession.ActiveGlobalId, Is.EqualTo(globalIdB),
+					"Session should track object B after EditGraph(B) — must NOT be cleared by old process Exited handler");
+				Assert.That(NodeEditorSession.ActivePropertyPath, Is.EqualTo(propertyPath));
+
+				Assert.That(WaitForNodeEditor(5000), Is.True,
+					"NodeEditor should be running after EditGraph(B)");
+			}
+			finally
+			{
+				KillNodeEditors();
+				AssetDatabase.DeleteAsset(pathA);
+				AssetDatabase.DeleteAsset(pathB);
+			}
 		}
 
 		#endregion
