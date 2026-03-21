@@ -11,7 +11,7 @@ namespace FastNoise2.Samples
 	public class NoiseGraphQuad : MonoBehaviour
 	{
 		[Header("Noise Source")]
-		[SerializeField] NoiseGraphAsset noiseGraph;
+		[SerializeField] FastNoiseGraph noiseGraph;
 
 		[Header("Display")]
 		[SerializeField] int resolution = 256;
@@ -29,10 +29,10 @@ namespace FastNoise2.Samples
 
 		void OnEnable()
 		{
-			if (noiseGraph == null || !noiseGraph.IsValid)
+			if (noiseGraph == null)
 				return;
 
-			m_Noise = noiseGraph.CreateNoise();
+			m_Noise = noiseGraph.Instantiate();
 			if (!m_Noise.IsCreated)
 				return;
 

@@ -17,12 +17,6 @@
 	"precompiledReferences": [],
 	"autoReferenced": false,
 	"defineConstraints": [],
-	"versionDefines": [
-		{
-			"name": "com.unity.graphtoolkit",
-			"expression": "",
-			"define": "FN2_HAS_GRAPH_TOOLKIT"
-		}
-	],
+	"versionDefines": [],
 	"noEngineReferences": false
 }

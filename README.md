@@ -1,8 +1,6 @@
 # FastNoise2 for Unity (UPM Package)
 
-<img src=".github/docs/grapheditor.jpg" width="100%">
-
-[FastNoise2](https://github.com/Auburn/FastNoise2) v1.1.1 packaged for Unity Package Manager (UPM). SIMD-accelerated noise generation with a visual graph editor, type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
+[FastNoise2](https://github.com/Auburn/FastNoise2) v1.1.1 packaged for Unity Package Manager (UPM). SIMD-accelerated noise generation with a type-safe builder API, base64 encode/decode compatible with C++ NoiseTool, and full Burst/Jobs/IL2CPP compatibility.
 
 For native texture containers and sampling utilities, see the optional companion package [`NativeTexture`](https://github.com/api-haus/com.api-haus.native-texture).
 
@@ -25,12 +23,6 @@ For native texture containers and sampling utilities, see the optional companion
 - **Job System Integration**:
   - Full Burst/Jobs/IL2CPP compatibility for noise generation
   - Native interop via `FastNoise` handle type
-
-- **Graph Editor** (Unity GraphToolkit):
-  - Visual node-based noise graph editor inside Unity
-  - Per-node noise texture previews with live updates
-  - Hybrid ports — inline value editors that toggle when a wire is connected
-  - `FastNoiseGraph` asset for storing and serializing noise graphs
 
 - **Authoring Tools**:
   - `BakedNoiseTextureAsset` for creating and configuring baked noise textures
@@ -186,7 +178,7 @@ All assemblies have `autoReferenced: false` — consumers must add explicit asse
 
 | UPM Package | FastNoise2 (C++) |
 |---|---|
-| v1.1.0 | [v1.1.1](https://github.com/Auburn/FastNoise2/releases/tag/v1.1.1) |
+| \>= v1.1.0 | [v1.1.1](https://github.com/Auburn/FastNoise2/releases/tag/v1.1.1) |
 | v1.0.0 | [v1.0.1](https://github.com/Auburn/FastNoise2/releases/tag/v1.0.1) |
 
 ---

@@ -5,8 +5,8 @@ using UnityEngine;
 namespace FastNoise2.Authoring.NoiseGraph
 {
 	/// <summary>
-	/// Runtime-accessible ScriptableObject produced by the .fn2graph importer.
-	/// Holds the compiled noise graph and provides lazy construction of native handles.
+	/// Runtime-accessible ScriptableObject that holds a compiled noise graph
+	/// and provides lazy construction of native handles.
 	/// </summary>
 	[Icon("Packages/com.api-haus.fastnoise2/Editor/Resources/Icons/NoiseGraph.png")]
 	public class NoiseGraphAsset : ScriptableObject
