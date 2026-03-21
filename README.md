@@ -65,6 +65,12 @@ For native texture containers and sampling utilities, see the optional companion
 
 ## Getting Started
 
+### Installation via OpenUPM (recommended)
+
+```bash
+openupm add com.api-haus.fastnoise2
+```
+
 ### Installation via Unity Package Manager (UPM)
 
 1. Open Unity and navigate to `Window → Package Manager`.
@@ -72,7 +78,7 @@ For native texture containers and sampling utilities, see the optional companion
 3. Paste the following URL and click `Add`:
 
 ```
-https://github.com/api-haus/FastNoise2Unity.git
+https://github.com/api-haus/com.api-haus.fastnoise2.git
 ```
 
 Unity will automatically download and install the package.
