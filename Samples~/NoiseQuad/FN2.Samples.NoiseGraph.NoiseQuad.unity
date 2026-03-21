@@ -145,7 +145,7 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 12955691}
   m_Enabled: 1
-  serializedVersion: 12
+  serializedVersion: 13
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
   m_Intensity: 1
@@ -197,7 +197,7 @@ Light:
   m_UseBoundingSphereOverride: 0
   m_UseViewFrustumForShadowCasterCull: 1
   m_ForceVisible: 0
-  m_ShadowRadius: 0
+  m_ShapeRadius: 0
   m_ShadowAngle: 0
   m_LightUnit: 1
   m_LuxAtDistance: 1
@@ -449,7 +449,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0ca981ba3dda70316bc636ab94e9ecb1, type: 2}
+  - {fileID: -876546973899608171, guid: 817ef1f31026215caa6892a9fc1b4e73, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -508,11 +508,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 537dccda4d6e3d01ab0c365414bd517e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: FN2.Samples.NoiseGraph.NoiseQuad::FastNoise2.Samples.NoiseGraphQuad
-  noiseGraph: {fileID: -6750239444755058063, guid: 3d35489dbd606dea2a053db3c00e37f4, type: 3}
+  noiseGraph:
+    encodedGraph: DQAE@BCB+FC0AJEg@AKRBCQYIDg@BQDzcxSQgQDH4XrPgsfheu+BA==
   resolution: 256
-  frequency: 0.02
+  frequency: 0.5
   seed: 1337
-  scrollSpeed: {x: 0.5, y: 0.3}
+  scrollSpeed: {x: 64, y: 64}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
