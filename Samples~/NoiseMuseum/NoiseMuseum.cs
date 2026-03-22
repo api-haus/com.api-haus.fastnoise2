@@ -24,64 +24,52 @@ namespace FastNoise2.Samples
 		{
 			return new (string, NoiseNode)[]
 			{
-				// --- 1. Basics: raw generator factory methods ---
+				// --- Row 1: Basics ---
 				("Perlin", BasicPerlin()),
 				("Simplex", BasicSimplex()),
 				("Value", BasicValue()),
-
-				// --- 2. Fractals: .Fbm() vs .Ridged() on the same source ---
-				("Perlin FBM", FractalFbm()),
-				("Perlin Ridged", FractalRidged()),
-
-				// --- 3. Operators: all five arithmetic operators ---
-				("Add (P+S)", OpAdd()),
-				("Sub (P-C)", OpSubtract()),
-				("Mul (*0.5)", OpMultiply()),
-				("Div (/2)", OpDivide()),
-				("Mod (%0.5)", OpModulo()),
-				("Negate (-P)", OpNegate()),
-
-				// --- 4. Hybrid params: constant vs noise-driven ---
-				("FBM gain=0.5", HybridConstant()),
-				("FBM gain=Simplex", HybridNoiseDriven()),
-
-				// --- 5. Blend functions ---
-				("Min(P,S)", BlendMin()),
-				("Max(P,S)", BlendMax()),
-				("MinSmooth", BlendMinSmooth()),
-				("Fade(P,S)", BlendFade()),
-
-				// --- 6. Domain warp ---
-				("DWarp Gradient", DomainWarpGradient()),
-				("DWarp Simplex", DomainWarpSimplex()),
-
-				// --- 7. Domain transforms ---
-				("DomainScale", TransformScale()),
-				("DomainAxisScale", TransformAxisScale()),
-				("DomainRotate", TransformRotate()),
-				("DomainOffset", TransformOffset()),
-
-				// --- 8. Modifiers ---
-				("Terrace", ModTerrace()),
-				("PingPong", ModPingPong()),
-				("Abs", ModAbs()),
-				("Remap", ModRemap()),
-				("PowInt(3)", ModPowInt()),
-				("PowFloat(0.5)", ModPowFloat()),
-
-				// --- 9. Cellular variants ---
-				("Cell Dist", CellDistance()),
-				("Cell Dist Manhattan", CellDistanceManhattan()),
-				("Cell Value", CellValue()),
-				("Cell Lookup", CellLookup()),
-
-				// --- 10. Specialized nodes ---
-				("Gradient", SpecialGradient()),
-				("DistToPoint", SpecialDistanceToPoint()),
+				("White", SpecialWhite()),
 				("Checkerboard", SpecialCheckerboard()),
 				("SineWave", SpecialSineWave()),
 
-				// --- 11. Composition: everything combined ---
+				// --- Row 2: Fractals & Hybrid ---
+				("Perlin FBM", FractalFbm()),
+				("Perlin Ridged", FractalRidged()),
+				("FBM gain=0.5", HybridConstant()),
+				("FBM gain=Simplex", HybridNoiseDriven()),
+				("FBM Lacunarity=3", FractalHighLacunarity()),
+				("Ridged Abs", RidgedAbs()),
+
+				// --- Row 3: Operators ---
+				("P * 0.5 + S * 0.5", OpAdd()),
+				("Perlin - Cellular", OpSubtract()),
+				("Mod %0.5", OpModulo()),
+				("Negate -P", OpNegate()),
+				("PowInt(3)", ModPowInt()),
+				("PowFloat(0.5)", ModPowFloat()),
+
+				// --- Row 4: Blends & Modifiers ---
+				("MinSmooth", BlendMinSmooth()),
+				("Fade", BlendFade()),
+				("Terrace", ModTerrace()),
+				("PingPong", ModPingPong()),
+				("Abs", ModAbs()),
+				("Gradient", SpecialGradient()),
+
+				// --- Row 5: Domain Warp & Transforms ---
+				("DWarp Gradient", DomainWarpGradient()),
+				("DWarp Simplex", DomainWarpSimplex()),
+				("DWarp Fractal", DomainWarpFractal()),
+				("DomainScale", TransformScale()),
+				("DomainAxisScale", TransformAxisScale()),
+				("DomainRotate", TransformRotate()),
+
+				// --- Row 6: Cellular & Composition ---
+				("Cell Distance", CellDistance()),
+				("Cell Manhattan", CellDistanceManhattan()),
+				("Cell Value", CellValue()),
+				("Cell Lookup", CellLookup()),
+				("DistToPoint", SpecialDistanceToPoint()),
 				("Composition", Composition()),
 			};
 		}
@@ -93,6 +81,7 @@ namespace FastNoise2.Samples
 		static NoiseNode BasicPerlin() => Perlin();
 		static NoiseNode BasicSimplex() => Simplex();
 		static NoiseNode BasicValue() => Value();
+		static NoiseNode BasicSuperSimplex() => SuperSimplex();
 
 		// =====================================================================
 		// 2. Fractals — .Fbm() and .Ridged() on the same Perlin source
@@ -140,7 +129,12 @@ namespace FastNoise2.Samples
 		static NoiseNode BlendMin() => Perlin().Min(Simplex());
 		static NoiseNode BlendMax() => Perlin().Max(Simplex());
 		static NoiseNode BlendMinSmooth() => Perlin().MinSmooth(Simplex(), smoothness: 0.2f);
+		static NoiseNode BlendMaxSmooth() => Perlin().MaxSmooth(Simplex(), smoothness: 0.2f);
 		static NoiseNode BlendFade() => Perlin().Fade(Simplex(), fade: 0.5f);
+
+		// Fade with Quintic interpolation
+		static NoiseNode BlendFadeQuintic() =>
+			Perlin().Fade(Simplex(), fade: 0.5f, interpolation: FadeInterpolation.Quintic);
 
 		// =====================================================================
 		// 6. Domain warp — distort input coordinates with gradient/simplex warp
@@ -148,6 +142,14 @@ namespace FastNoise2.Samples
 
 		static NoiseNode DomainWarpGradient() => Perlin().DomainWarpGradient(warpAmplitude: 50f);
 		static NoiseNode DomainWarpSimplex() => Perlin().DomainWarpSimplex(warpAmplitude: 50f);
+
+		// Fractal domain warp: progressive warp accumulation across octaves
+		static NoiseNode DomainWarpFractal() =>
+			Perlin().DomainWarpGradient(warpAmplitude: 30f).DomainWarpProgressive(octaves: 5);
+
+		// SuperSimplex domain warp
+		static NoiseNode DomainWarpSuperSimplex() =>
+			Perlin().DomainWarpSuperSimplex(warpAmplitude: 40f);
 
 		// =====================================================================
 		// 7. Domain transforms — scale, axis-scale, rotate, offset
@@ -164,6 +166,9 @@ namespace FastNoise2.Samples
 
 		// Offset: shift noise origin
 		static NoiseNode TransformOffset() => Perlin().DomainOffset(x: 100f, y: 100f);
+
+		// Plane rotation: improves 2D slices of 3D noise
+		static NoiseNode TransformRotatePlane() => Simplex().DomainRotatePlane();
 
 		// =====================================================================
 		// 8. Modifiers — shape the output curve
@@ -186,6 +191,28 @@ namespace FastNoise2.Samples
 
 		// PowFloat: raises to float power (sqrt = expand low values)
 		static NoiseNode ModPowFloat() => Perlin().Abs().PowFloat(0.5f);
+
+		// SignedSqrt: preserves sign while taking sqrt of magnitude
+		static NoiseNode ModSignedSqrt() => Perlin().Fbm(octaves: 5).SignedSqrt();
+
+		// Ridged + Abs: sharp ridge lines
+		static NoiseNode RidgedAbs() => Perlin().Ridged(octaves: 5).Abs();
+
+		// Cache: demonstrates .Cache() node (same visual, enables DAG reuse)
+		static NoiseNode CachedPerlin() => Perlin().Fbm(octaves: 5).Cache();
+
+		// AddDimension: project 3D noise back to 2D slice
+		static NoiseNode ExtraDimension() => Perlin().AddDimension(newDimensionPosition: 0.5f);
+
+		// High lacunarity fractal: tighter detail frequency
+		static NoiseNode FractalHighLacunarity() => Perlin().Fbm(octaves: 5, lacunarity: 3f);
+
+		// FBM with domain offset: shifted fractal pattern
+		static NoiseNode OffsetFbm() =>
+			Perlin().DomainOffset(x: 50f, y: -50f).Fbm(octaves: 5);
+
+		// SeedOffset: same noise type, different seed
+		static NoiseNode SeedOffsetDemo() => Perlin().SeedOffset(42);
 
 		// =====================================================================
 		// 9. Cellular — different return types, distance functions, lookup
@@ -212,6 +239,24 @@ namespace FastNoise2.Samples
 			CellularLookup(Simplex(20f))
 				.WithDistanceFunction(DistanceFunction.Euclidean);
 
+		// Cellular with Hybrid distance function
+		static NoiseNode CellDistanceHybrid() =>
+			CellularDistance()
+				.WithDistanceFunction(DistanceFunction.Hybrid)
+				.WithReturnType(CellularReturnType.Index0);
+
+		// Cellular with EuclideanSquared: smoother falloff
+		static NoiseNode CellDistanceEuclideanSq() =>
+			CellularDistance()
+				.WithDistanceFunction(DistanceFunction.EuclideanSquared)
+				.WithReturnType(CellularReturnType.Index0Sub1);
+
+		// Cellular with MaxAxis: blocky cells
+		static NoiseNode CellDistanceMaxAxis() =>
+			CellularDistance()
+				.WithDistanceFunction(DistanceFunction.MaxAxis)
+				.WithReturnType(CellularReturnType.Index0);
+
 		// =====================================================================
 		// 10. Specialized nodes — Gradient, DistanceToPoint, Checkerboard, SineWave
 		// =====================================================================
@@ -229,6 +274,12 @@ namespace FastNoise2.Samples
 
 		// Sine wave
 		static NoiseNode SpecialSineWave() => SineWave(20f);
+
+		// White noise: random per-pixel
+		static NoiseNode SpecialWhite() => White();
+
+		// Constant: flat value (useful as hybrid input)
+		static NoiseNode SpecialConstant() => Constant(0.7f);
 
 		// =====================================================================
 		// 11. Composition — one big expression combining multiple API features
