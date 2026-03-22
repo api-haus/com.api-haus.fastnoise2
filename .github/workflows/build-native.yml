@@ -109,18 +109,23 @@ jobs:
 
       - name: Copy binaries to Plugins
         run: |
-          for platform in windows linux macos android ios; do
-            for dir in bin lib; do
-              src="artifacts/fastnoise2-${platform}/${dir}"
-              dst="Plugins/${platform}/${dir}"
-              if [ -d "$src" ]; then
-                mkdir -p "$dst"
-                rsync -a --delete "$src/" "$dst/"
-              fi
+          copy_bins() {
+            local src="artifacts/fastnoise2-$1" dst="Plugins/$1"
+            shift
+            for f in "$@"; do
+              mkdir -p "$dst/$(dirname "$f")"
+              cp "$src/$f" "$dst/$f"
             done
-          done
+          }
+
+          copy_bins windows bin/FastNoise.dll bin/NodeEditor.exe bin/NodeEditorIpc.dll
+          copy_bins linux   bin/NodeEditor lib/libFastNoise.so lib/libNodeEditorIpc.so
+          copy_bins macos   bin/NodeEditor lib/libFastNoise.dylib lib/libNodeEditorIpc.dylib
+          copy_bins android lib/libFastNoise.so
+          copy_bins ios     lib/libFastNoise.a
+
           echo "=== Final layout ==="
-          find Plugins -type f | sort
+          find Plugins -type f ! -name '*.meta' | sort
 
       - name: Commit and push
         run: |
