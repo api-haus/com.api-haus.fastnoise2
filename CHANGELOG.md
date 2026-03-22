@@ -1,3 +1,15 @@
+# [1.4.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.3.0...v1.4.0) (2026-03-22)
+
+
+### Bug Fixes
+
+* restore CI workflows accidentally deleted in GraphToolkit removal ([b862686](https://github.com/api-haus/com.api-haus.fastnoise2/commit/b862686aaf89169e5a764eb9d3cc15f8b84eee4c))
+
+
+### Features
+
+* add NoiseMuseum sample showcasing full builder API ([dc31510](https://github.com/api-haus/com.api-haus.fastnoise2/commit/dc3151098c8b50f0423d4a98e68187e704e4e195))
+
 # [1.3.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.2.0...v1.3.0) (2026-03-20)
 
 
