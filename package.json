@@ -14,6 +14,11 @@
 			"displayName": "NoiseQuad",
 			"description": "Scrolling noise texture rendered on a quad using FastNoiseGraph.",
 			"path": "Samples~/NoiseQuad"
+		},
+		{
+			"displayName": "NoiseMuseum",
+			"description": "Grid of noise textures showcasing the full builder API: factories, operators, fractals, blends, domain warps, modifiers, cellular, and specialized nodes.",
+			"path": "Samples~/NoiseMuseum"
 		}
 	]
 }
