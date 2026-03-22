@@ -93,32 +93,40 @@ jobs:
           name: fastnoise2-${{ matrix.platform }}
           path: ${{ github.workspace }}/install/
 
-  collect:
+  commit-binaries:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
+      - uses: actions/checkout@v4
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts/
+          path: artifacts
           pattern: fastnoise2-*
 
-      - name: Assemble combined artifact
+      - name: Copy binaries to Plugins
         run: |
-          mkdir -p out/windows out/linux out/macos out/android out/ios
-          cp -r artifacts/fastnoise2-windows/bin out/windows/ || true
-          cp -r artifacts/fastnoise2-windows/lib out/windows/ || true
-          cp -r artifacts/fastnoise2-linux/bin out/linux/ || true
-          cp -r artifacts/fastnoise2-linux/lib out/linux/
-          cp -r artifacts/fastnoise2-macos/bin out/macos/ || true
-          cp -r artifacts/fastnoise2-macos/lib out/macos/
-          cp -r artifacts/fastnoise2-android/lib out/android/
-          cp -r artifacts/fastnoise2-ios/lib out/ios/
+          for platform in windows linux macos android ios; do
+            for dir in bin lib; do
+              src="artifacts/fastnoise2-${platform}/${dir}"
+              dst="Plugins/${platform}/${dir}"
+              if [ -d "$src" ]; then
+                mkdir -p "$dst"
+                rsync -a --delete "$src/" "$dst/"
+              fi
+            done
+          done
           echo "=== Final layout ==="
-          find out -type f | sort
+          find Plugins -type f | sort
 
-      - name: Upload combined artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fastnoise2-all-platforms
-          path: out/
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Plugins/
+          git diff --cached --quiet || git commit -m "build: update FastNoise2 binaries"
+          git pull --rebase
+          git push
