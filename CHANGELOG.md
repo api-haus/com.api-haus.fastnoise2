@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.4.0...v1.4.1) (2026-03-22)
+
+
+### Bug Fixes
+
+* stop CI from deleting .meta files, remove cmake/lib build artifacts ([28f9ac6](https://github.com/api-haus/com.api-haus.fastnoise2/commit/28f9ac6402aba754d746cc734763dea954c98ec2))
+
 # [1.4.0](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.3.0...v1.4.0) (2026-03-22)
 
 
