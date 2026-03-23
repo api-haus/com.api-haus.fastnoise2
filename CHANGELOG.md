@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.4.1...v1.4.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* nodeEditor rights ([7560103](https://github.com/api-haus/com.api-haus.fastnoise2/commit/756010353b88a90be6ca59d8a82315de03e0133b))
+
 ## [1.4.1](https://github.com/api-haus/com.api-haus.fastnoise2/compare/v1.4.0...v1.4.1) (2026-03-22)
 
 
