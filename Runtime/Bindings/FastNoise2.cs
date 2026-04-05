@@ -874,7 +874,7 @@ namespace FastNoise2.Bindings
         [DllImport(NATIVE_LIB)] internal static extern IntPtr fnGetMetadataHybridDescription(int id, int hybridIndex);
         [DllImport(NATIVE_LIB)] internal static extern float  fnGetMetadataHybridDefault(int id, int hybridIndex);
 #endif // FN2_USER_SIGNED
-
+        [MarshalAs(UnmanagedType.U1)]
         private bool m_IsDisposed;
         public readonly bool IsCreated => !m_IsDisposed && mNodeHandle != IntPtr.Zero;
     }
