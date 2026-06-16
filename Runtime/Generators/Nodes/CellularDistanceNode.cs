@@ -31,7 +31,7 @@ namespace FastNoise2.Generators
 			CellularReturnType returnType, int distIdx0, int distIdx1,
 			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "DistanceFunction", EnumIndex("CellularDistance",
 					"DistanceFunction", distFunc.ToMetadataString()) },
@@ -40,7 +40,7 @@ namespace FastNoise2.Generators
 				{ "DistanceIndex0", distIdx0 },
 				{ "DistanceIndex1", distIdx1 }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gridJitter.AddTo(hybrids, "GridJitter");
 			sizeJitter.AddTo(hybrids, "SizeJitter");
 			minkowskiP.AddTo(hybrids, "MinkowskiP");

@@ -3,6 +3,8 @@ using FastNoise2.Bindings;
 
 namespace FastNoise2.Generators
 {
+	using System.Collections.Generic;
+
 	/// <summary>
 	/// Builds a native <see cref="FastNoise"/> handle tree from a <see cref="NodeDescriptor"/> tree.
 	/// </summary>
@@ -14,9 +16,9 @@ namespace FastNoise2.Generators
 			FastNoise fn = new(descriptor.NodeName);
 			FN2NodeDef def = FN2NodeRegistry.GetNodeDef(descriptor.NodeName);
 
-			foreach (var kv in descriptor.Variables)
+			foreach (KeyValuePair<string, int> kv in descriptor.Variables)
 			{
-				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out FN2MemberDef member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 
@@ -38,9 +40,9 @@ namespace FastNoise2.Generators
 				}
 			}
 
-			foreach (var kv in descriptor.NodeLookups)
+			foreach (KeyValuePair<string, NodeDescriptor> kv in descriptor.NodeLookups)
 			{
-				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out FN2MemberDef member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 
@@ -49,9 +51,9 @@ namespace FastNoise2.Generators
 				FastNoise.fnSetNodeLookup(fn.mNodeHandle, member.Index, childHandle);
 			}
 
-			foreach (var kv in descriptor.Hybrids)
+			foreach (KeyValuePair<string, HybridValue> kv in descriptor.Hybrids)
 			{
-				if (!def.TryGetMember(FormatLookup(kv.Key), out var member))
+				if (!def.TryGetMember(FormatLookup(kv.Key), out FN2MemberDef member))
 					throw new ArgumentException(
 						$"Unknown member '{kv.Key}' on node '{descriptor.NodeName}'");
 

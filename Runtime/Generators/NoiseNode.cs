@@ -49,7 +49,7 @@ namespace FastNoise2.Generators
 		{
 			FN2NodeDef def = FN2NodeRegistry.GetNodeDef(nodeName);
 			string key = memberName.Replace(" ", "").ToLower();
-			if (!def.TryGetMember(key, out var member))
+			if (!def.TryGetMember(key, out FN2MemberDef member))
 				throw new ArgumentException($"Unknown member '{memberName}' on '{nodeName}'");
 			if (member.EnumValues == null)
 				throw new ArgumentException($"Member '{memberName}' on '{nodeName}' is not an enum");
@@ -68,16 +68,16 @@ namespace FastNoise2.Generators
 		public NoiseNode Fbm(Hybrid gain = default, Hybrid weightedStrength = default,
 			int octaves = 3, float lacunarity = 2f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Octaves", octaves },
 				{ "Lacunarity", Bits(lacunarity) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gain.AddTo(hybrids, "Gain");
 			weightedStrength.AddTo(hybrids, "WeightedStrength");
 			return new NoiseNode(new NodeDescriptor("FractalFBm", vars, nodes, hybrids));
@@ -86,16 +86,16 @@ namespace FastNoise2.Generators
 		public NoiseNode Ridged(Hybrid gain = default, Hybrid weightedStrength = default,
 			int octaves = 3, float lacunarity = 2f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Octaves", octaves },
 				{ "Lacunarity", Bits(lacunarity) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gain.AddTo(hybrids, "Gain");
 			weightedStrength.AddTo(hybrids, "WeightedStrength");
 			return new NoiseNode(new NodeDescriptor("FractalRidged", vars, nodes, hybrids));
@@ -107,33 +107,33 @@ namespace FastNoise2.Generators
 
 		public NoiseNode Min(Hybrid rhs)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "LHS", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			rhs.AddTo(hybrids, "RHS");
 			return new NoiseNode(new NodeDescriptor("Min", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode Max(Hybrid rhs)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "LHS", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			rhs.AddTo(hybrids, "RHS");
 			return new NoiseNode(new NodeDescriptor("Max", nodeLookups: nodes, hybrids: hybrids));
 		}
 
 		public NoiseNode MinSmooth(Hybrid rhs, Hybrid smoothness = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "LHS", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			rhs.AddTo(hybrids, "RHS");
 			smoothness.AddTo(hybrids, "Smoothness");
 			return new NoiseNode(new NodeDescriptor("MinSmooth", nodeLookups: nodes, hybrids: hybrids));
@@ -141,11 +141,11 @@ namespace FastNoise2.Generators
 
 		public NoiseNode MaxSmooth(Hybrid rhs, Hybrid smoothness = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "LHS", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			rhs.AddTo(hybrids, "RHS");
 			smoothness.AddTo(hybrids, "Smoothness");
 			return new NoiseNode(new NodeDescriptor("MaxSmooth", nodeLookups: nodes, hybrids: hybrids));
@@ -155,17 +155,17 @@ namespace FastNoise2.Generators
 			Hybrid fadeMin = default, Hybrid fadeMax = default,
 			FadeInterpolation interpolation = FadeInterpolation.Linear)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Interpolation", EnumIndex("Fade", "Interpolation",
 					interpolation.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "A", m_Descriptor },
 				{ "B", b.m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			fade.AddTo(hybrids, "Fade");
 			fadeMin.AddTo(hybrids, "FadeMin");
 			fadeMax.AddTo(hybrids, "FadeMax");
@@ -174,7 +174,7 @@ namespace FastNoise2.Generators
 
 		public NoiseNode PowFloat(Hybrid pow)
 		{
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			Hybrid sourceHybrid = this;
 			sourceHybrid.AddTo(hybrids, "Value");
 			pow.AddTo(hybrids, "Pow");
@@ -183,11 +183,11 @@ namespace FastNoise2.Generators
 
 		public NoiseNode PowInt(int pow = 2)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Pow", pow }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Value", m_Descriptor }
 			};
@@ -201,15 +201,15 @@ namespace FastNoise2.Generators
 		public DomainWarpNode DomainWarpGradient(Hybrid warpAmplitude = default,
 			float featureScale = 100f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "FeatureScale", Bits(featureScale) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
 			return new DomainWarpNode(
 				new NodeDescriptor("DomainWarpGradient", vars, nodes, hybrids));
@@ -219,17 +219,17 @@ namespace FastNoise2.Generators
 			float featureScale = 100f,
 			VectorizationScheme scheme = VectorizationScheme.OrthogonalGradientMatrix)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "FeatureScale", Bits(featureScale) },
 				{ "VectorizationScheme", EnumIndex("DomainWarpSimplex",
 					"VectorizationScheme", scheme.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
 			return new DomainWarpNode(
 				new NodeDescriptor("DomainWarpSimplex", vars, nodes, hybrids));
@@ -239,17 +239,17 @@ namespace FastNoise2.Generators
 			float featureScale = 100f,
 			VectorizationScheme scheme = VectorizationScheme.OrthogonalGradientMatrix)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "FeatureScale", Bits(featureScale) },
 				{ "VectorizationScheme", EnumIndex("DomainWarpSuperSimplex",
 					"VectorizationScheme", scheme.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			warpAmplitude.AddTo(hybrids, "WarpAmplitude");
 			return new DomainWarpNode(
 				new NodeDescriptor("DomainWarpSuperSimplex", vars, nodes, hybrids));
@@ -261,11 +261,11 @@ namespace FastNoise2.Generators
 
 		public NoiseNode DomainScale(float scaling = 1f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Scaling", Bits(scaling) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -275,11 +275,11 @@ namespace FastNoise2.Generators
 		public NoiseNode DomainOffset(Hybrid x = default, Hybrid y = default,
 			Hybrid z = default, Hybrid w = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			x.AddTo(hybrids, "OffsetX");
 			y.AddTo(hybrids, "OffsetY");
 			z.AddTo(hybrids, "OffsetZ");
@@ -290,13 +290,13 @@ namespace FastNoise2.Generators
 
 		public NoiseNode DomainRotate(float yaw = 0f, float pitch = 0f, float roll = 0f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Yaw", Bits(yaw) },
 				{ "Pitch", Bits(pitch) },
 				{ "Roll", Bits(roll) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -306,14 +306,14 @@ namespace FastNoise2.Generators
 		public NoiseNode DomainAxisScale(float x = 1f, float y = 1f,
 			float z = 1f, float w = 1f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "ScalingX", Bits(x) },
 				{ "ScalingY", Bits(y) },
 				{ "ScalingZ", Bits(z) },
 				{ "ScalingW", Bits(w) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -323,12 +323,12 @@ namespace FastNoise2.Generators
 		public NoiseNode DomainRotatePlane(
 			PlaneRotationType type = PlaneRotationType.ImproveXYPlanes)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "RotationType", EnumIndex("DomainRotatePlane", "RotationType",
 					type.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -337,11 +337,11 @@ namespace FastNoise2.Generators
 
 		public NoiseNode SeedOffset(int offset = 0)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "SeedOffset", offset }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -351,11 +351,11 @@ namespace FastNoise2.Generators
 		public NoiseNode Remap(Hybrid fromMin = default, Hybrid fromMax = default,
 			Hybrid toMin = default, Hybrid toMax = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			fromMin.AddTo(hybrids, "FromMin");
 			fromMax.AddTo(hybrids, "FromMax");
 			toMin.AddTo(hybrids, "ToMin");
@@ -365,12 +365,12 @@ namespace FastNoise2.Generators
 
 		public NoiseNode ConvertRgba8(float min = -1f, float max = 1f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Min", Bits(min) },
 				{ "Max", Bits(max) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -379,26 +379,26 @@ namespace FastNoise2.Generators
 
 		public NoiseNode Terrace(float stepCount = 4f, Hybrid smoothness = default)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "StepCount", Bits(stepCount) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			smoothness.AddTo(hybrids, "Smoothness");
 			return new NoiseNode(new NodeDescriptor("Terrace", vars, nodes, hybrids));
 		}
 
 		public NoiseNode AddDimension(Hybrid newDimensionPosition = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			newDimensionPosition.AddTo(hybrids, "NewDimensionPosition");
 			return new NoiseNode(new NodeDescriptor("AddDimension", nodeLookups: nodes,
 				hybrids: hybrids));
@@ -406,12 +406,12 @@ namespace FastNoise2.Generators
 
 		public NoiseNode RemoveDimension(Dimension dimension = Dimension.W)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "RemoveDimension", EnumIndex("RemoveDimension", "RemoveDimension",
 					dimension.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -420,7 +420,7 @@ namespace FastNoise2.Generators
 
 		public NoiseNode Cache()
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -429,11 +429,11 @@ namespace FastNoise2.Generators
 
 		public NoiseNode PingPong(Hybrid strength = default)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			strength.AddTo(hybrids, "PingPongStrength");
 			return new NoiseNode(new NodeDescriptor("PingPong", nodeLookups: nodes,
 				hybrids: hybrids));
@@ -441,7 +441,7 @@ namespace FastNoise2.Generators
 
 		public NoiseNode Abs()
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -450,7 +450,7 @@ namespace FastNoise2.Generators
 
 		public NoiseNode SignedSqrt()
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Source", m_Descriptor }
 			};
@@ -464,11 +464,11 @@ namespace FastNoise2.Generators
 		// LHS=NodeLookup, RHS=Hybrid (for Add, Multiply)
 		static NoiseNode BinaryOpNodeLhs(string nodeType, NoiseNode lhs, Hybrid rhs)
 		{
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "LHS", lhs.m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			rhs.AddTo(hybrids, "RHS");
 			return new NoiseNode(new NodeDescriptor(nodeType, nodeLookups: nodes,
 				hybrids: hybrids));
@@ -477,7 +477,7 @@ namespace FastNoise2.Generators
 		// LHS=Hybrid, RHS=Hybrid (for Subtract, Divide, Modulus)
 		static NoiseNode BinaryOpBothHybrid(string nodeType, NoiseNode lhs, Hybrid rhs)
 		{
-			var hybrids = new Dictionary<string, HybridValue>
+			Dictionary<string, HybridValue> hybrids = new()
 			{
 				{ "LHS", new HybridValue(lhs.m_Descriptor) }
 			};

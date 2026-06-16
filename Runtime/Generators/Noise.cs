@@ -18,7 +18,7 @@ namespace FastNoise2.Generators
 
 		public static NoiseNode White(int seedOffset = 0)
 		{
-			var vars = new Dictionary<string, int>();
+			Dictionary<string, int> vars = new();
 			if (seedOffset != 0)
 				vars["SeedOffset"] = seedOffset;
 			return new NoiseNode(new NodeDescriptor("White", vars));
@@ -43,7 +43,7 @@ namespace FastNoise2.Generators
 
 		static NoiseNode CoherentNoise(string name, float featureScale, int seedOffset)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "FeatureScale", Bits(featureScale) }
 			};

@@ -25,16 +25,16 @@ namespace FastNoise2.Generators
 		static NodeDescriptor MakeDescriptor(NoiseNode lookup, DistanceFunction distFunc,
 			Hybrid gridJitter, Hybrid sizeJitter, Hybrid minkowskiP)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "DistanceFunction", EnumIndex("CellularLookup",
 					"DistanceFunction", distFunc.ToMetadataString()) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "Lookup", lookup.m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gridJitter.AddTo(hybrids, "GridJitter");
 			sizeJitter.AddTo(hybrids, "SizeJitter");
 			minkowskiP.AddTo(hybrids, "MinkowskiP");

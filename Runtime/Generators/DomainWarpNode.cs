@@ -15,16 +15,16 @@ namespace FastNoise2.Generators
 		public NoiseNode DomainWarpProgressive(Hybrid gain = default,
 			Hybrid weightedStrength = default, int octaves = 3, float lacunarity = 2f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Octaves", octaves },
 				{ "Lacunarity", Bits(lacunarity) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "DomainWarpSource", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gain.AddTo(hybrids, "Gain");
 			weightedStrength.AddTo(hybrids, "WeightedStrength");
 			return new NoiseNode(new NodeDescriptor("DomainWarpFractalProgressive",
@@ -34,16 +34,16 @@ namespace FastNoise2.Generators
 		public NoiseNode DomainWarpIndependent(Hybrid gain = default,
 			Hybrid weightedStrength = default, int octaves = 3, float lacunarity = 2f)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "Octaves", octaves },
 				{ "Lacunarity", Bits(lacunarity) }
 			};
-			var nodes = new Dictionary<string, NodeDescriptor>
+			Dictionary<string, NodeDescriptor> nodes = new()
 			{
 				{ "DomainWarpSource", m_Descriptor }
 			};
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, HybridValue> hybrids = new();
 			gain.AddTo(hybrids, "Gain");
 			weightedStrength.AddTo(hybrids, "WeightedStrength");
 			return new NoiseNode(new NodeDescriptor("DomainWarpFractalIndependent",

@@ -80,7 +80,7 @@ namespace FastNoise2.Generators
 			Groups = groups ?? Array.Empty<string>();
 			m_ByLookupKey = new Dictionary<string, FN2MemberDef>(
 				members.Length, StringComparer.OrdinalIgnoreCase);
-			foreach (var m in members)
+			foreach (FN2MemberDef m in members)
 				m_ByLookupKey[m.LookupKey] = m;
 		}
 
@@ -89,7 +89,7 @@ namespace FastNoise2.Generators
 
 		public FN2MemberDef? GetMemberByTypeAndIndex(FN2MemberType type, int index)
 		{
-			foreach (var m in Members)
+			foreach (FN2MemberDef m in Members)
 			{
 				if (m.Type == type && m.Index == index)
 					return m;
@@ -108,7 +108,7 @@ namespace FastNoise2.Generators
 		public int CountMembersOfType(FN2MemberType type)
 		{
 			int count = 0;
-			foreach (var m in Members)
+			foreach (FN2MemberDef m in Members)
 				if (m.Type == type)
 					count++;
 			return count;
@@ -116,8 +116,8 @@ namespace FastNoise2.Generators
 
 		public List<FN2MemberDef> GetMembersOfType(FN2MemberType type)
 		{
-			var result = new List<FN2MemberDef>();
-			foreach (var m in Members)
+			List<FN2MemberDef> result = new();
+			foreach (FN2MemberDef m in Members)
 				if (m.Type == type)
 					result.Add(m);
 			result.Sort((a, b) => a.Index.CompareTo(b.Index));
@@ -129,7 +129,7 @@ namespace FastNoise2.Generators
 		/// </summary>
 		public FN2MemberDef? FindVariableMemberByIndex(int index)
 		{
-			foreach (var m in Members)
+			foreach (FN2MemberDef m in Members)
 			{
 				if (m.Index == index && (m.Type == FN2MemberType.Float ||
 						m.Type == FN2MemberType.Int || m.Type == FN2MemberType.Enum))
@@ -143,7 +143,7 @@ namespace FastNoise2.Generators
 		/// </summary>
 		public FN2MemberDef? FindHybridMemberByIndex(int index)
 		{
-			foreach (var m in Members)
+			foreach (FN2MemberDef m in Members)
 			{
 				if (m.Index == index && m.Type == FN2MemberType.Hybrid)
 					return m;
@@ -159,7 +159,7 @@ namespace FastNoise2.Generators
 			get
 			{
 				int count = 0;
-				foreach (var m in Members)
+				foreach (FN2MemberDef m in Members)
 					if (m.Type == FN2MemberType.NodeLookup)
 						count++;
 				return count;

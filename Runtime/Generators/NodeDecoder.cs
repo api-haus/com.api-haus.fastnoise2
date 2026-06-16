@@ -19,8 +19,8 @@ namespace FastNoise2.Generators
 			byte[] data = FnBase64.Decode(encodedNodeTree);
 			if (data.Length == 0) return null;
 
-			var stream = new DataStream(data);
-			var referenceNodes = new List<NodeDescriptor>();
+			DataStream stream = new(data);
+			List<NodeDescriptor> referenceNodes = new();
 
 			return DeserialiseNodeDataInternal(stream, referenceNodes);
 		}
@@ -46,9 +46,9 @@ namespace FastNoise2.Generators
 
 			string nodeName = def.NodeName;
 
-			var variables = new Dictionary<string, int>();
-			var nodeLookups = new Dictionary<string, NodeDescriptor>();
-			var hybrids = new Dictionary<string, HybridValue>();
+			Dictionary<string, int> variables = new();
+			Dictionary<string, NodeDescriptor> nodeLookups = new();
+			Dictionary<string, HybridValue> hybrids = new();
 
 			// Read first member lookup
 			if (!stream.TryReadMemberLookup(out byte memberType, out byte memberIndex))
@@ -60,7 +60,7 @@ namespace FastNoise2.Generators
 				if (!stream.TryReadInt32(out int value))
 					return null;
 
-				var member = def.FindVariableMemberByIndex(memberIndex);
+				FN2MemberDef? member = def.FindVariableMemberByIndex(memberIndex);
 				if (member.HasValue)
 					variables[member.Value.Name] = value;
 
@@ -72,7 +72,7 @@ namespace FastNoise2.Generators
 			if (memberType == TypeLookup)
 			{
 				int count = memberIndex;
-				var lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
+				List<FN2MemberDef> lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
 
 				for (int i = 0; i < count; i++)
 				{
@@ -94,7 +94,7 @@ namespace FastNoise2.Generators
 				if (memberType == TypeHybridLookup)
 				{
 					NodeDescriptor child = DeserialiseNodeDataInternal(stream, referenceNodes);
-					var member = def.FindHybridMemberByIndex(memberIndex);
+					FN2MemberDef? member = def.FindHybridMemberByIndex(memberIndex);
 					if (member.HasValue && child != null)
 						hybrids[member.Value.Name] = new HybridValue(child);
 				}
@@ -102,7 +102,7 @@ namespace FastNoise2.Generators
 				{
 					if (!stream.TryReadInt32(out int bits))
 						return null;
-					var member = def.FindHybridMemberByIndex(memberIndex);
+					FN2MemberDef? member = def.FindHybridMemberByIndex(memberIndex);
 					if (member.HasValue)
 						hybrids[member.Value.Name] = new HybridValue(BitConverter.Int32BitsToSingle(bits));
 				}
@@ -111,7 +111,7 @@ namespace FastNoise2.Generators
 					return null;
 			}
 
-			var descriptor = new NodeDescriptor(nodeName, variables, nodeLookups, hybrids);
+			NodeDescriptor descriptor = new(nodeName, variables, nodeLookups, hybrids);
 			referenceNodes.Add(descriptor);
 			return descriptor;
 		}

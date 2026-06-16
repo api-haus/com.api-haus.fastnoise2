@@ -29,7 +29,7 @@ namespace FastNoise2.Generators
 			if (inLen == 0) return "";
 
 			// Use a list for flexible @ compression
-			var ret = new List<char>();
+			List<char> ret = new();
 			int consecutiveAs = 0;
 
 			void AppendChar(char c)

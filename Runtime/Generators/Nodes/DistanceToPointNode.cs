@@ -27,12 +27,12 @@ namespace FastNoise2.Generators
 		static NodeDescriptor MakeDescriptor(DistanceFunction distFunc,
 			float px, float py, float pz, float pw, float minkowskiP)
 		{
-			var vars = new Dictionary<string, int>
+			Dictionary<string, int> vars = new()
 			{
 				{ "DistanceFunction", EnumIndex("DistanceToPoint",
 					"DistanceFunction", distFunc.ToMetadataString()) }
 			};
-			var hybrids = new Dictionary<string, HybridValue>
+			Dictionary<string, HybridValue> hybrids = new()
 			{
 				{ "PointX", new HybridValue(px) },
 				{ "PointY", new HybridValue(py) },

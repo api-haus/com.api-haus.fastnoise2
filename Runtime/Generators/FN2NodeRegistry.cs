@@ -20,7 +20,7 @@ namespace FastNoise2.Generators
 		{
 #if FN2_USER_SIGNED
 			int count = FastNoise.fnGetMetadataCount();
-			var defs = new List<FN2NodeDef>(count);
+			List<FN2NodeDef> defs = new(count);
 
 			for (int id = 0; id < count; id++)
 			{
@@ -30,7 +30,7 @@ namespace FastNoise2.Generators
 				// Node-level rich metadata
 				string nodeDesc = Marshal.PtrToStringAnsi(FastNoise.fnGetMetadataDescription(id));
 				int groupCount = FastNoise.fnGetMetadataGroupCount(id);
-				var groups = new string[groupCount];
+				string[] groups = new string[groupCount];
 				for (int gi = 0; gi < groupCount; gi++)
 					groups[gi] = Marshal.PtrToStringAnsi(FastNoise.fnGetMetadataGroupName(id, gi));
 
@@ -38,7 +38,7 @@ namespace FastNoise2.Generators
 				int nodeLookupCount = FastNoise.fnGetMetadataNodeLookupCount(id);
 				int hybridCount = FastNoise.fnGetMetadataHybridCount(id);
 
-				var members = new List<FN2MemberDef>(variableCount + nodeLookupCount + hybridCount);
+				List<FN2MemberDef> members = new(variableCount + nodeLookupCount + hybridCount);
 
 				// Variables (Float, Int, Enum)
 				for (int vi = 0; vi < variableCount; vi++)
@@ -136,7 +136,7 @@ namespace FastNoise2.Generators
 
 		public static FN2NodeDef GetNodeDef(string nodeTypeName)
 		{
-			if (s_ByName.TryGetValue(nodeTypeName, out var def))
+			if (s_ByName.TryGetValue(nodeTypeName, out FN2NodeDef def))
 				return def;
 			throw new ArgumentException($"Unknown FN2 node type: {nodeTypeName}");
 		}

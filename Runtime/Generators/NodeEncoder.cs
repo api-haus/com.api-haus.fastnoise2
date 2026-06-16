@@ -18,9 +18,9 @@ namespace FastNoise2.Generators
 
 		public static string Encode(NodeDescriptor descriptor)
 		{
-			var stream = new List<byte>();
+			List<byte> stream = new();
 			int nodeEndStack = 0;
-			var referenceIds = new Dictionary<NodeDescriptor, ushort>(
+			Dictionary<NodeDescriptor, ushort> referenceIds = new(
 				ReferenceEqualityComparer.Instance);
 
 			if (!SerialiseNodeDataInternal(descriptor, stream, ref nodeEndStack, referenceIds))
@@ -50,10 +50,10 @@ namespace FastNoise2.Generators
 			stream.Add((byte)def.Id);
 
 			// Resolve member indices and emit variables
-			foreach (var kv in descriptor.Variables)
+			foreach (KeyValuePair<string, int> kv in descriptor.Variables)
 			{
 				string key = FormatLookup(kv.Key);
-				if (!def.TryGetMember(key, out var member))
+				if (!def.TryGetMember(key, out FN2MemberDef member))
 					throw new ArgumentException(
 						$"Unknown variable '{kv.Key}' on '{descriptor.NodeName}'");
 
@@ -68,12 +68,12 @@ namespace FastNoise2.Generators
 				AddMemberLookup(stream, ref nodeEndStack, TypeLookup, (byte)nodeLookupCount);
 
 				// Emit children in metadata order
-				var lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
-				foreach (var member in lookupMembers)
+				List<FN2MemberDef> lookupMembers = def.GetMembersOfType(FN2MemberType.NodeLookup);
+				foreach (FN2MemberDef member in lookupMembers)
 				{
 					string originalName = FindOriginalName(descriptor.NodeLookups, member.LookupKey);
 					if (originalName != null && descriptor.NodeLookups.TryGetValue(originalName,
-							out var child))
+							out NodeDescriptor child))
 					{
 						if (!SerialiseNodeDataInternal(child, stream, ref nodeEndStack,
 								referenceIds))
@@ -91,14 +91,14 @@ namespace FastNoise2.Generators
 			}
 
 			// Emit hybrids in metadata order
-			var hybridMembers = def.GetMembersOfType(FN2MemberType.Hybrid);
-			foreach (var member in hybridMembers)
+			List<FN2MemberDef> hybridMembers = def.GetMembersOfType(FN2MemberType.Hybrid);
+			foreach (FN2MemberDef member in hybridMembers)
 			{
 				string originalName = FindOriginalName(descriptor.Hybrids, member.LookupKey);
 				if (originalName == null)
 					continue; // hybrid not specified, use default
 
-				var hv = descriptor.Hybrids[originalName];
+				HybridValue hv = descriptor.Hybrids[originalName];
 				if (hv.IsNode)
 				{
 					AddMemberLookup(stream, ref nodeEndStack, TypeHybridLookup,
@@ -174,7 +174,7 @@ namespace FastNoise2.Generators
 		/// </summary>
 		static string FindOriginalName<T>(IReadOnlyDictionary<string, T> dict, string metaKey)
 		{
-			foreach (var key in dict.Keys)
+			foreach (string key in dict.Keys)
 			{
 				if (FormatLookup(key) == metaKey)
 					return key;
